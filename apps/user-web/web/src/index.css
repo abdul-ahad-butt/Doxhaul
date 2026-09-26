@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-navy-950: #0A1830;
+    --color-blue-600: #3D5AFE;
+    --color-blue-700: #2A3FD6;
+    --color-amber-500: #FF9F43;
+    --color-slate-50: #F7F9FC;
+    --color-slate-600: #475569;
+    --color-slate-200: #E2E8F0;
+  }
+  
+  html, body {
+    @apply h-full;
+  }
+  #root {
+    @apply h-full;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-blue text-white px-4 py-2 rounded-md font-medium hover:bg-brand-blueHover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-secondary {
+    @apply bg-white text-navy-700 border border-slate-200 px-4 py-2 rounded-md font-medium hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-danger {
+    @apply bg-brand-red text-white px-4 py-2 rounded-md font-medium hover:bg-brand-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .input-field {
+    @apply w-full px-3 py-2 border border-slate-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue bg-white text-slate-900 transition-all duration-200 hover:border-slate-300;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 transition-shadow duration-300;
+  }
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-1 hover:border-brand-blue/30 transition-all duration-300 ease-out cursor-pointer;
+  }
+  .nav-link {
+    @apply flex items-center px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-navy-900 hover:bg-slate-50;
+  }
+  .nav-link-active {
+    @apply flex items-center px-3 py-2 rounded-md text-sm font-medium text-brand-blue bg-slate-50;
+  }
+}
+
+@layer utilities {
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 20s ease infinite;
+  }
+  
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+  }
+  .reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

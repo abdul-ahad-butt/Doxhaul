@@ -1,0 +1,46 @@
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+import { Env } from './types/env';
+
+// Import routes (to be created)
+import authRoutes from './routes/auth';
+import profileRoutes from './routes/profile';
+import documentsRoutes from './routes/documents';
+import loadsRoutes from './routes/loads';
+import bookingsRoutes from './routes/bookings';
+import adminRoutes from './routes/admin';
+import { errorHandler } from './middleware/error-handler';
+
+const app = new Hono<{ Bindings: Env }>();
+
+// Middleware
+app.use('*', logger());
+app.use('*', cors({
+  origin: '*', // For development. Adjust for production
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
+  exposeHeaders: ['Content-Length'],
+  maxAge: 600,
+}));
+
+// Error handling
+app.onError(errorHandler);
+
+// Health check
+app.get('/api/health', (c) => c.json({ success: true, status: 'ok', timestamp: new Date().toISOString() }));
+
+// Mount routes
+app.route('/api/auth', authRoutes);
+app.route('/api/profile', profileRoutes);
+app.route('/api/documents', documentsRoutes);
+app.route('/api/loads', loadsRoutes);
+app.route('/api/bookings', bookingsRoutes);
+app.route('/api/admin', adminRoutes);
+
+// 404 handler
+app.notFound((c) => {
+  return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Not found' } }, 404);
+});
+
+export default app;

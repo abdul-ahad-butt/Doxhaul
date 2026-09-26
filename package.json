@@ -1,0 +1,26 @@
+{
+  "name": "freightlink-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FreightLink Marketplace - Full-stack logistics marketplace connecting shippers, brokers, carriers, and admins",
+  "workspaces": [
+    "apps/user-web",
+    "apps/admin-panel",
+    "apps/backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:user-web\" \"npm run dev:admin-panel\"",
+    "dev:user-web": "npm run dev --workspace=user-web",
+    "dev:admin-panel": "npm run dev --workspace=admin-panel",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build": "npm run build --workspace=user-web && npm run build --workspace=admin-panel",
+    "test": "npm run test --workspace=backend",
+    "lint": "npm run lint --workspace=user-web && npm run lint --workspace=admin-panel && npm run lint --workspace=backend",
+    "typecheck": "npm run typecheck --workspace=user-web && npm run typecheck --workspace=admin-panel && npm run typecheck --workspace=backend",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

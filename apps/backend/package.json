@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'No lint for api yet'",
+    "test": "vitest run",
+    "db:migrate": "wrangler d1 migrations apply freightlink-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply freightlink-db --remote",
+    "db:seed": "wrangler d1 execute freightlink-db --local --file=../../database/seed.sql",
+    "db:seed:prod": "wrangler d1 execute freightlink-db --remote --file=../../database/seed.sql"
+  },
+  "dependencies": {
+    "hono": "^4.2.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240405.0",
+    "typescript": "^5.4.5",
+    "vitest": "^5.0.2",
+    "wrangler": "^3.48.0"
+  }
+}

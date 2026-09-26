@@ -1,0 +1,46 @@
+[2026-09-26T09:34:08.390Z] Project profile: Throwaway / scripts — No git repository — treated as a scratch workspace. Scratch or non-git layout — minimal extension overhead.
+[2026-09-26T09:34:09.692Z] Attribution v2 hooks installed (claude/cursor/kiro/copilot as enabled).
+[2026-09-26T09:34:10.423Z] Task proposals refreshed locally (1 skills).
+[2026-09-26T09:34:10.567Z] Task skill focus: 6 active, 0 ignored for this task.
+[2026-09-26T09:34:16.119Z] 
+=== Task proposals auto-apply (local workspace) ===
++6 installed, 0 enabled locally: self-learning, file-style-conventions, skill-creator, skill-usage-insights, skill-feedback-adaptation, skill-official-updater
+[2026-09-26T09:34:16.681Z] Official skills SessionStart hook installed.
+[2026-09-26T09:34:16.777Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T09:34:17.335Z] Propagated workspace skills to 18 other agent path(s) (cursor/kiro/copilot).
+[2026-09-26T09:34:17.352Z] Task proposals auto-applied (6 installed, 0 enabled).
+[2026-09-26T09:34:18.627Z] Filesystem MCP server: active — all agents already configured.
+[2026-09-26T09:34:18.671Z] CLI MCP server: workspace log path refreshed (1 dir(s)).
+[2026-09-26T09:34:18.680Z] CLI loop-guard hook installed.
+[2026-09-26T09:34:18.681Z] CLI MCP server: already configured — agents can connect.
+[2026-09-26T09:34:18.739Z] Dir cache guard hook installed.
+[2026-09-26T09:34:19.639Z] Attribution v2 hooks updated (claude/cursor/kiro/copilot as enabled).
+[2026-09-26T09:34:25.108Z] Mirrored cost-discipline artifacts: cursor:cli-config.json, cursor:runs.snapshot.json, cursor:task-active-skills.json, cursor:task-proposals-apply-state.json, cursor:task-skill-proposals.json, kiro:cli-config.json, kiro:runs.snapshot.json, kiro:task-active-skills.json, kiro:task-proposals-apply-state.json, kiro:task-skill-proposals.json.
+[2026-09-26T09:34:25.109Z] Propagated focused skill set to 18 Cursor/Kiro/Copilot path(s).
+[2026-09-26T09:34:40.010Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:18:52.993Z] Project profile: Throwaway / scripts — No git repository — treated as a scratch workspace. Scratch or non-git layout — minimal extension overhead.
+[2026-09-26T15:18:53.425Z] Cost control hooks updated (session-size + budget warnings enabled).
+[2026-09-26T15:18:58.898Z] Mirrored cost-discipline artifacts: cursor:adoption-funnel-summary.json, cursor:attribution-trust.json, cursor:daily-stats.json, cursor:dashboard-snapshot.json, cursor:pipeline-cycle.json, cursor:project-profile.json, cursor:runs.snapshot.json, cursor:skill-stats.json, cursor:skills-catalog.json, cursor:system-state.json, cursor:team-economics-cache.json, cursor:today-cost.json, kiro:adoption-funnel-summary.json, kiro:attribution-trust.json, kiro:daily-stats.json, kiro:dashboard-snapshot.json, kiro:pipeline-cycle.json, kiro:project-profile.json, kiro:runs.snapshot.json, kiro:skill-stats.json, kiro:skills-catalog.json, kiro:system-state.json, kiro:team-economics-cache.json, kiro:today-cost.json.
+[2026-09-26T15:18:58.899Z] Propagated focused skill set to 18 Cursor/Kiro/Copilot path(s).
+[2026-09-26T15:19:00.416Z] Filesystem MCP server: active — all agents already configured.
+[2026-09-26T15:19:00.423Z] CLI MCP server: workspace log path refreshed (1 dir(s)).
+[2026-09-26T15:19:00.428Z] CLI loop-guard hook updated.
+[2026-09-26T15:19:00.429Z] CLI MCP server: already configured — agents can connect.
+[2026-09-26T15:19:00.463Z] Dir cache guard hook updated.
+[2026-09-26T15:19:01.126Z] Attribution v2 hooks updated (claude/cursor/kiro/copilot as enabled).
+[2026-09-26T15:20:48.172Z] Branch bootstrap (general): 10 focused skill(s) — installed self-learning, file-style-conventions, skill-creator, skill-usage-insights, skill-feedback-adaptation, skill-official-updater, deployment-practical, doc-coauthoring, extension-value-audit, github-actions-ci.
+[2026-09-26T15:20:55.778Z] Project profile: Multi-agent team — Git analysis: 0 tracked files, 0 branches (0 local, 0 remote), 0 commits (0 last 30d), 0 authors (30d), none activity, ~5 KB git objects. New project with multiple AI tool folders — full multi-agent sync from day one.
+[2026-09-26T15:20:55.780Z] Host-only mirror cleanup skipped (multi-agent tier or profile not host-only).
+[2026-09-26T15:20:55.784Z] Project type: TEAM MULTI-AGENT. Tier presets ON — full feature stack for multi-agent teams.
+[2026-09-26T15:20:57.804Z] Mirrored cost-discipline artifacts: cursor:adoption-funnel-summary.json, cursor:attribution-trust.json, cursor:project-profile.json, cursor:runs.snapshot.json, cursor:skills-catalog.json, cursor:team-economics-cache.json, cursor:today-cost.json, kiro:adoption-funnel-summary.json, kiro:attribution-trust.json, kiro:project-profile.json, kiro:runs.snapshot.json, kiro:skills-catalog.json, kiro:team-economics-cache.json, kiro:today-cost.json.
+[2026-09-26T15:20:57.805Z] Propagated focused skill set to 30 Cursor/Kiro/Copilot path(s).
+[2026-09-26T15:21:09.278Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:21:09.287Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:09.332Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:09.333Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:38.398Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:21:38.405Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:38.469Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:38.482Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:21:39.779Z] Git branch changed: `master` -> `main` (leaving-branch profile was saved on last skill edit).
+[2026-09-26T15:21:40.291Z] No saved skill profile for `main` — offering profile init.
