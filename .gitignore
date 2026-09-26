@@ -1,1 +1,7 @@
 node_modules
+.claude/
+.cursor/
+.kiro/
+.github/instructions/
+.github/copilot-instructions.md
+kayorama-debug.log
