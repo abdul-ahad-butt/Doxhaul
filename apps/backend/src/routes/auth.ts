@@ -151,6 +151,131 @@ router.post('/login', async (c) => {
   });
 });
 
+router.post('/google', async (c) => {
+  const body = await c.req.json();
+  const token = body.token;
+  if (!token) return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing token' } }, 400);
+
+  // Fetch Google user profile
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    if (!response.ok) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid Google token' } }, 401);
+    }
+
+    const googleUser = await response.json() as any;
+    const { sub: googleId, email, name } = googleUser;
+
+    // Check if user exists by email or google_id
+    const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status FROM users WHERE email = ? OR google_id = ?')
+      .bind(email.toLowerCase(), googleId)
+      .first<{ id: string, email: string, password_hash: string, role: string, status: string }>();
+
+    if (user) {
+      if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
+        return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Account is suspended' } }, 403);
+      }
+
+      // Update google_id if it's not set
+      await c.env.DB.prepare('UPDATE users SET google_id = ?, auth_provider = ? WHERE id = ?')
+        .bind(googleId, 'google', user.id).run();
+
+      const payload: JwtPayload = {
+        id: user.id,
+        email: user.email,
+        role: user.role as any,
+        status: user.status,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+      };
+      
+      const jwtToken = await sign(payload, c.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod');
+      
+      await c.env.DB.prepare(`
+        INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), user.id, user.role, 'USER_LOGIN_GOOGLE', 'USER', user.id).run();
+
+      return c.json({
+        success: true,
+        data: {
+          token: jwtToken,
+          user: { id: user.id, email: user.email, role: user.role, status: user.status }
+        }
+      });
+    } else {
+      return c.json({
+        success: true,
+        data: {
+          status: 'PROFILE_INCOMPLETE',
+          email: email.toLowerCase(),
+          googleId,
+          name,
+          googleToken: token
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Google Auth Failed' } }, 500);
+  }
+});
+
+router.post('/google-complete', async (c) => {
+  const body = await c.req.json();
+  const { email, googleId, googleToken, role, firstName, lastName, companyName, phone, dotNumber, mcNumber } = body;
+  
+  if (!email || !googleId) {
+    return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing google info' } }, 400);
+  }
+
+  const userId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
+  const profileId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
+  const status = role === 'SHIPPER' || role === 'CARRIER' ? 'PENDING_VERIFICATION' : 'ACTIVE';
+  
+  const userStmt = c.env.DB.prepare(`
+    INSERT INTO users (id, email, password_hash, auth_provider, google_id, role, status, email_verified)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(userId, email.toLowerCase(), '', 'google', googleId, role, status, 1);
+
+  const profileStmt = c.env.DB.prepare(`
+    INSERT INTO profiles (id, user_id, first_name, last_name, company_name, phone, dot_number, mc_number, verification_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(profileId, userId, firstName, lastName, companyName, phone, dotNumber || null, mcNumber || null, 'PENDING');
+
+  const auditStmt = c.env.DB.prepare(`
+    INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), userId, role, 'USER_REGISTERED_GOOGLE', 'USER', userId);
+
+  try {
+    await c.env.DB.batch([userStmt, profileStmt, auditStmt]);
+    
+    const payload: JwtPayload = {
+      id: userId,
+      email: email.toLowerCase(),
+      role: role as any,
+      status,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+    };
+    
+    const token = await sign(payload, c.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod');
+    
+    return c.json({
+      success: true,
+      data: {
+        token,
+        user: { id: userId, email: email.toLowerCase(), role, status }
+      }
+    }, 201);
+  } catch (error) {
+    console.error('Google registration complete error:', error);
+    return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create user' } }, 500);
+  }
+});
+
 router.post('/logout', authMiddleware, async (c) => {
   // Since we are using stateless JWT, we can't truly invalidate it server-side without a denylist.
   // We'll just return success and let the client delete the token.

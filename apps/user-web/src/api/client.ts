@@ -5,6 +5,7 @@ export class ApiError extends Error {
   }
 }
 
+// @ts-ignore
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
 
 export const apiClient = {
