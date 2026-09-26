@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 
 // Fallback for development if not provided in .env
 // @ts-ignore
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '123456789-abcdefg.apps.googleusercontent.com'
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '280420756458-59qn7n8qkme1pri81vpu3j6j61jtrqr7.apps.googleusercontent.com'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
