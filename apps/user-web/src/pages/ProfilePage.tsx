@@ -11,7 +11,7 @@ const ProfilePage = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedDocType, setSelectedDocType] = useState('INSURANCE');
+  const [selectedDocType, setSelectedDocType] = useState('INSURANCE_CERTIFICATE');
   const [uploadError, setUploadError] = useState('');
 
   const { data: documents, isLoading } = useQuery({
@@ -22,8 +22,8 @@ const ProfilePage = () => {
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('document', file);
-      formData.append('document_type', selectedDocType);
+      formData.append('file', file);
+      formData.append('documentType', selectedDocType);
       
       return apiClient.post('/documents', formData);
     },
@@ -112,10 +112,12 @@ const ProfilePage = () => {
                   value={selectedDocType}
                   onChange={(e) => setSelectedDocType(e.target.value)}
                 >
-                  <option value="INSURANCE">Certificate of Insurance</option>
+                  <option value="INSURANCE_CERTIFICATE">Certificate of Insurance</option>
                   <option value="W9">W-9 Form</option>
-                  <option value="MC_AUTHORITY">MC Operating Authority</option>
-                  <option value="CDL">Driver's License (CDL)</option>
+                  <option value="MC_CERTIFICATE">MC Operating Authority</option>
+                  <option value="DOT_CERTIFICATE">DOT Certificate</option>
+                  <option value="DRIVER_LICENSE">Driver's License (CDL)</option>
+                  <option value="BUSINESS_LICENSE">Business License</option>
                 </select>
               </div>
               <input 

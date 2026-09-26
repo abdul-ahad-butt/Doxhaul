@@ -1,12 +1,17 @@
-import { Outlet, Navigate, Link } from 'react-router-dom';
+import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LogOut, Package, Users, Truck, LayoutDashboard, FileText } from 'lucide-react';
 
 export const AppLayout = () => {
   const { user, profile, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (user?.status === 'PENDING_VERIFICATION' && location.pathname !== '/profile') {
+    return <Navigate to="/profile" replace />;
   }
 
   const navItems = [];
