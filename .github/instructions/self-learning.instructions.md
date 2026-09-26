@@ -2,7 +2,7 @@
 name: "self-learning"
 description: "Maintain a project-local self-learning base of task/command outcomes — record successes and failures with timestamps, durations, and fixes; generate a patterns report (pass rates, recurring errors, known fixes); and surface a learned hint before retrying something that failed before. Use at the start of a session to check learned hints, after running a non-trivial command/skill to record the outcome, when asked \"what failed before\" or \"what did we learn\", or to record a manual decision/learning."
 applyTo: "**/*"
-deployedAt: "2026-09-26T15:37:59.516Z"
+deployedAt: "2026-09-26T15:38:14.862Z"
 ---
 
 # self-learning
