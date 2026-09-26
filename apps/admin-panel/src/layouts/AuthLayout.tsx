@@ -2,12 +2,10 @@ import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const AuthLayout = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
-    if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
-    if (user?.role === 'CARRIER') return <Navigate to="/loads" replace />;
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   return (
@@ -16,9 +14,6 @@ export const AuthLayout = () => {
         <Link to="/" className="flex justify-center text-3xl font-bold text-navy-950 tracking-tight">
           Doxhaul<span className="text-brand-blue">.</span>
         </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-navy-950">
-          Welcome to the Marketplace
-        </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md animate-fade-in-up">

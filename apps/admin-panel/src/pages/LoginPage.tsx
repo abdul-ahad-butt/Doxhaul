@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, ApiError } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
@@ -18,13 +18,11 @@ const LoginPage = () => {
 
   const loginMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.post<{token: string, user: any}>('/auth/login', { email, password });
+      return apiClient.post<{token: string, user: any}>('/auth/admin-login', { email, password });
     },
     onSuccess: (data) => {
       login(data.token, data.user);
-      if (data.user.role === 'ADMIN') navigate('/admin');
-      else if (data.user.role === 'CARRIER') navigate('/loads');
-      else navigate('/dashboard');
+      navigate('/admin');
     },
     onError: (err: ApiError) => {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -81,6 +79,11 @@ const LoginPage = () => {
 
   return (
     <div>
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl font-bold text-navy-900">Admin Login</h2>
+        <p className="text-sm text-slate-500 mt-2">Sign in to the Doxhaul Admin Panel</p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <div className="bg-brand-red/10 border border-brand-red/30 text-brand-red px-4 py-3 rounded text-sm">
@@ -91,14 +94,14 @@ const LoginPage = () => {
         <Input
           id="email"
           name="email"
-          label="Email Address"
+          label="Admin Email Address"
           type="email"
           required
           value={email}
           onChange={handleEmailChange}
           onBlur={handleEmailBlur}
           error={emailError}
-          placeholder="you@company.com"
+          placeholder="admin@doxhaul.com"
         />
         
         <Input
@@ -118,51 +121,9 @@ const LoginPage = () => {
           className="w-full" 
           isLoading={loginMutation.isPending}
         >
-          Sign In
+          Sign In to Admin Panel
         </Button>
       </form>
-      
-      <div className="mt-6 text-center text-sm text-slate-700">
-        Don't have an account?{' '}
-        <Link to="/register" className="font-medium text-brand-blue hover:text-brand-blue/80">
-          Create an account
-        </Link>
-      </div>
-      
-      {/* Demo Credentials Alert */}
-      <div className="mt-8 bg-brand-blue/5 border border-brand-blue/20 rounded-xl p-5">
-        <h3 className="text-sm font-bold text-navy-900 mb-3 flex items-center">
-          <svg className="w-4 h-4 mr-2 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          Quick Demo Access
-        </h3>
-        <p className="text-xs text-slate-600 mb-4">Click a role below to auto-fill credentials.</p>
-        <div className="space-y-2">
-          <button 
-            type="button" 
-            onClick={() => { setEmail('sarah@acmecorp.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
-          >
-            <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Shipper</span> &middot; sarah@acmecorp.dev</div>
-            <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
-          </button>
-          <button 
-            type="button" 
-            onClick={() => { setEmail('carlos@swiftlogistics.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
-          >
-            <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Carrier</span> &middot; carlos@swiftlogistics.dev</div>
-            <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
-          </button>
-          <button 
-            type="button" 
-            onClick={() => { setEmail('tom@apexbrokerage.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
-          >
-            <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Broker</span> &middot; tom@apexbrokerage.dev</div>
-            <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

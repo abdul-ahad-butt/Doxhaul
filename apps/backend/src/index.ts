@@ -17,7 +17,13 @@ const app = new Hono<{ Bindings: Env }>();
 // Middleware
 app.use('*', logger());
 app.use('*', cors({
-  origin: '*', // For development. Adjust for production
+  origin: (origin) => {
+    if (!origin) return '*';
+    if (origin.includes('localhost') || origin.endsWith('.pages.dev')) {
+      return origin;
+    }
+    return null;
+  },
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
   exposeHeaders: ['Content-Length'],

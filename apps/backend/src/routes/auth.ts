@@ -151,6 +151,66 @@ router.post('/login', async (c) => {
   });
 });
 
+router.post('/admin-login', async (c) => {
+  const body = await c.req.json();
+  
+  const parseResult = loginSchema.safeParse(body);
+  if (!parseResult.success) {
+    return c.json({ 
+      success: false, 
+      error: { code: 'VALIDATION_ERROR', message: 'Invalid credentials' } 
+    }, 400);
+  }
+
+  const { email, password } = parseResult.data;
+
+  const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status FROM users WHERE email = ?')
+    .bind(email.toLowerCase())
+    .first<{ id: string, email: string, password_hash: string, role: string, status: string }>();
+
+  if (!user) {
+    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, 401);
+  }
+
+  const isValid = await CryptoService.verifyPassword(password, user.password_hash);
+  
+  if (!isValid) {
+    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, 401);
+  }
+
+  if (user.role !== 'ADMIN') {
+    return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied. Admin privileges required.' } }, 403);
+  }
+
+  if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
+    return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Account is suspended' } }, 403);
+  }
+
+  const payload: JwtPayload = {
+    id: user.id,
+    email: user.email,
+    role: user.role as any,
+    status: user.status,
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days
+  };
+  
+  const token = await sign(payload, c.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod');
+  
+  // Log login
+  await c.env.DB.prepare(`
+    INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), user.id, user.role, 'ADMIN_LOGIN', 'USER', user.id).run();
+
+  return c.json({
+    success: true,
+    data: {
+      token,
+      user: { id: user.id, email: user.email, role: user.role, status: user.status }
+    }
+  });
+});
+
 router.post('/google', async (c) => {
   const body = await c.req.json();
   const token = body.token;
