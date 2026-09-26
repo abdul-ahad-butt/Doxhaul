@@ -33,7 +33,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['auth', 'me'],
-    queryFn: () => apiClient.get<{user: User, profile: Profile}>('/auth/me'),
+    queryFn: async () => {
+      try {
+        return await apiClient.get<{user: User, profile: Profile}>('/auth/me');
+      } catch (err) {
+        // Handle session check failures silently
+        if (token) {
+          apiClient.clearToken();
+          setToken(null);
+        }
+        return null;
+      }
+    },
     enabled: !!token,
     retry: false,
   });
