@@ -5,7 +5,7 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://backend.abdulahadbutt420.workers.dev/api';
 
 export const apiClient = {
   getToken: () => localStorage.getItem('token'),

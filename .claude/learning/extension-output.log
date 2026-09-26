@@ -857,3 +857,689 @@
 [2026-09-26T15:39:37.156Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
 [2026-09-26T15:39:42.319Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
 [2026-09-26T15:39:42.339Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:42.390Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:42.392Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:46.006Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:39:46.013Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:46.053Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:46.053Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:49.015Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:39:49.033Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:49.070Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:49.071Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:52.911Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:39:52.916Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:52.947Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:52.947Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:57.888Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:39:57.894Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:57.932Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:39:57.933Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:03.124Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:03.131Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:03.159Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:03.160Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:08.912Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:08.918Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:08.950Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:08.951Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:13.651Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:13.656Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:13.685Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:13.685Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:18.896Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:18.901Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:18.930Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:18.931Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:24.018Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:24.023Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:24.047Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:24.048Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:29.360Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:29.365Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:29.393Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:29.394Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:34.738Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:34.745Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:34.776Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:34.777Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:39.937Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:39.942Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:39.965Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:39.966Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:45.561Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:45.569Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:45.669Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:45.670Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:50.667Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:50.672Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:50.700Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:50.701Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:55.945Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:40:55.950Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:55.976Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:40:55.977Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:01.506Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:01.511Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:01.540Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:01.540Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:06.547Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:06.553Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:06.578Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:06.578Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:11.633Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:11.638Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:11.662Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:11.663Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:16.970Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:16.976Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:17.009Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:17.010Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:22.278Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:22.283Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:22.310Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:22.311Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:27.721Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:27.736Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:27.786Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:27.788Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:32.950Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:32.957Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:32.987Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:32.987Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:37.961Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:37.967Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:38.002Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:38.003Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:43.655Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:43.660Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:43.685Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:43.685Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:49.019Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:49.025Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:49.057Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:49.057Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:54.420Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:54.431Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:54.465Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:54.466Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:59.672Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:41:59.677Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:59.706Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:41:59.707Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:04.996Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:05.009Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:05.081Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:05.082Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:10.293Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:10.299Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:10.334Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:10.335Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:16.132Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:16.139Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:16.170Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:16.171Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:21.072Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:21.081Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:21.118Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:21.120Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:26.653Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:26.663Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:26.694Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:26.695Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:31.712Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:31.718Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:31.760Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:31.762Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:36.823Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:36.830Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:36.866Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:36.866Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:42.205Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:42.211Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:42.243Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:42.244Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:47.204Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:47.210Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:47.242Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:47.243Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:52.496Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:52.502Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:52.534Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:52.535Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:58.835Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:42:58.841Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:58.886Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:42:58.887Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:03.621Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:03.626Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:03.663Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:03.664Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:09.355Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:09.364Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:09.404Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:09.405Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:13.955Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:13.959Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:13.987Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:13.988Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:19.198Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:19.204Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:19.236Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:19.237Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:24.387Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:24.392Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:24.416Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:24.416Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:29.714Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:29.719Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:29.743Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:29.744Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:34.945Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:34.951Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:34.984Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:34.985Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:40.630Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:40.639Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:40.675Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:40.676Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:45.902Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:45.908Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:45.941Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:45.942Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:52.753Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:52.779Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:52.831Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:52.837Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:56.941Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:43:56.947Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:56.978Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:43:56.978Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:02.332Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:02.337Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:02.365Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:02.366Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:07.733Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:07.739Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:07.775Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:07.776Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:13.051Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:13.057Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:13.099Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:13.100Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:18.254Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:18.260Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:18.296Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:18.297Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:23.659Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:23.664Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:23.689Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:23.690Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:28.948Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:28.953Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:28.976Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:28.976Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:34.250Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:34.255Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:34.284Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:34.285Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:40.804Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:40.810Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:40.845Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:40.846Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:46.561Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:46.567Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:46.627Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:46.628Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:51.356Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:51.361Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:51.392Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:51.392Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:56.668Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:44:56.674Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:56.703Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:44:56.703Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:01.802Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:01.817Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:01.852Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:01.852Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:07.138Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:07.142Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:07.168Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:07.169Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:12.566Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:12.572Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:12.596Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:12.597Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:17.754Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:17.760Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:17.789Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:17.790Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:23.018Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:23.024Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:23.049Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:23.050Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:28.526Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:28.532Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:28.565Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:28.566Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:33.649Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:33.654Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:33.688Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:33.688Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:39.129Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:39.134Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:39.167Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:39.168Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:44.176Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:44.182Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:44.211Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:44.212Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:49.421Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:49.427Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:49.455Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:49.456Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:54.759Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:45:54.765Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:54.793Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:45:54.794Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:00.053Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:00.059Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:00.085Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:00.086Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:05.363Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:05.368Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:05.394Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:05.395Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:10.677Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:10.683Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:10.709Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:10.710Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:15.995Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:16.001Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:16.029Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:16.030Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:21.267Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:21.272Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:21.298Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:21.299Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:26.548Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:26.555Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:26.584Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:26.585Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:31.764Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:31.770Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:31.805Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:31.806Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:37.190Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:37.196Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:37.225Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:37.226Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:42.435Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:42.440Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:42.463Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:42.464Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:47.870Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:47.876Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:47.908Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:47.908Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:53.165Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:53.172Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:53.203Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:53.204Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:58.590Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:46:58.596Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:58.625Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:46:58.626Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:03.698Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:03.703Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:03.727Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:03.728Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:09.036Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:09.042Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:09.074Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:09.074Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:14.302Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:14.308Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:14.345Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:14.346Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:19.623Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:19.630Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:19.657Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:19.658Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:24.855Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:24.861Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:24.894Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:24.895Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:30.164Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:30.170Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:30.197Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:30.197Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:35.443Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:35.448Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:35.480Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:35.481Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:43.172Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:43.177Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:43.208Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:43.208Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:45.120Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:45.128Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:45.163Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:45.164Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:50.270Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:50.275Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:50.301Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:50.301Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:55.565Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:47:55.571Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:55.601Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:47:55.601Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:00.903Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:00.910Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:00.938Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:00.939Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:06.184Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:06.190Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:06.216Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:06.217Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:11.443Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:11.448Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:11.471Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:11.472Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:16.702Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:16.707Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:16.738Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:16.739Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:22.264Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:22.269Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:22.299Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:22.299Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:27.433Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:27.439Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:27.477Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:27.478Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:32.703Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:32.708Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:32.736Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:32.737Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:38.160Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:38.166Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:38.194Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:38.195Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:43.205Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:43.209Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:43.237Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:43.238Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:48.619Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:48.624Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:48.652Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:48.653Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:53.780Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:53.787Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:53.824Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:53.825Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:59.077Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:48:59.082Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:59.126Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:48:59.127Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:04.408Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:04.413Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:04.439Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:04.440Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:09.648Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:09.655Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:09.680Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:09.681Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:15.033Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:15.039Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:15.068Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:15.069Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:20.246Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:20.251Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:20.280Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:20.280Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:25.573Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:25.579Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:25.607Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:25.608Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:30.820Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:30.825Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:30.851Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:30.852Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:36.059Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:36.064Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:36.092Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:36.092Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:41.423Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:41.430Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:41.455Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:41.455Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:46.738Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:46.744Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:46.771Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:46.772Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:51.989Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:51.995Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:52.033Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:52.034Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:57.393Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:49:57.399Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:57.433Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:49:57.434Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:02.514Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:02.520Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:02.555Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:02.556Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:08.100Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:08.107Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:08.144Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:08.145Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:13.354Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:13.360Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:13.388Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:13.388Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:18.597Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:18.605Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:18.653Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:18.654Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:23.948Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:23.953Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:23.981Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:23.982Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:29.327Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:29.337Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:29.364Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:29.365Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:35.147Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:35.156Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:35.190Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:35.191Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:39.718Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:39.723Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:39.750Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:39.751Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:45.829Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:45.834Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:45.862Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:45.863Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:51.206Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:51.211Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:51.239Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:51.240Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:56.378Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:50:56.384Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:56.416Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:50:56.417Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:01.770Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:01.776Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:01.807Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:01.808Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:06.996Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:07.003Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:07.037Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:07.038Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:12.277Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:12.282Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:12.313Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:12.313Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:17.611Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:17.617Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:17.651Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:17.652Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:22.773Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:22.779Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:22.806Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:22.807Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:28.242Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:28.248Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:28.285Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:28.287Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:33.394Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:33.399Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:33.423Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:33.424Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:38.810Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:38.815Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:38.845Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:38.845Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:43.920Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:43.925Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:43.948Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:43.949Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:49.442Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:49.447Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:49.473Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:49.474Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:54.569Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:54.575Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:54.605Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:54.606Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:51:59.974Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:51:59.980Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:00.015Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:00.016Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:05.381Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:05.385Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:05.410Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:05.411Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:10.609Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:10.615Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:10.644Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:10.644Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:16.546Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:16.551Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:16.588Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:16.591Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:21.551Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:21.557Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:21.597Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:21.598Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:26.591Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:26.597Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:26.632Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:26.633Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:31.980Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:31.987Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:32.020Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:32.021Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:37.397Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:37.403Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:37.434Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:37.435Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:42.395Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:42.400Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:42.428Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:42.429Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:47.759Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:47.764Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:47.800Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:47.801Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:53.136Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:53.141Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:53.171Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:53.172Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:58.610Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:52:58.615Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:58.641Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:52:58.642Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:03.774Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:03.780Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:03.807Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:03.807Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:09.957Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:09.964Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:10.023Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:10.024Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:14.836Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:14.844Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:14.882Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:14.883Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:20.073Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:20.081Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:20.114Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:20.115Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:25.235Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:25.240Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:25.269Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:25.270Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:30.515Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:30.523Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:30.555Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:30.555Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:35.971Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:35.979Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:36.006Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:36.007Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:41.531Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:41.540Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:41.576Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:41.577Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:48.769Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:53:48.775Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:48.803Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:53:48.804Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:02.446Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:02.453Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:02.541Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:02.542Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:07.088Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:07.094Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:07.132Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:07.133Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:12.366Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:12.379Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:12.461Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:12.462Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:17.543Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:17.549Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:17.590Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:17.591Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:22.598Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:22.604Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:22.634Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:22.635Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:28.143Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:28.150Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:28.189Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:28.190Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:32.943Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:32.948Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:32.976Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:32.977Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:38.452Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:38.458Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:38.487Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:38.488Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:43.614Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:43.619Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:43.642Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:43.643Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:48.984Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:48.990Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:49.019Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:49.019Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:54.344Z] Cost control hook scripts refreshed across Claude, Cursor, Kiro, and Copilot paths.
+[2026-09-26T15:54:54.350Z] SKILL lint: [warning] extension-value-audit: Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:54.388Z] SKILL lint: [warning] extension-value-audit (cursor): Description is 788 chars (recommended max 500)
+[2026-09-26T15:54:54.389Z] SKILL lint: [warning] extension-value-audit (kiro): Description is 788 chars (recommended max 500)
