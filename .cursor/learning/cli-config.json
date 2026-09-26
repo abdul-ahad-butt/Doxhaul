@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-26T15:20:57.807Z",
+  "updatedAt": "2026-09-26T15:21:52.006Z",
   "updatedBy": "extension",
   "features": {
-    "autoOptimizer": true,
+    "autoOptimizer": false,
     "sessionSkillAdaptation": true,
     "autoApplyTaskProposals": true,
     "deterministicTaskProposals": true,

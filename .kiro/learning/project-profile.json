@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "profileType": "team-multi-agent",
+  "profileType": "solo-dev",
   "detectedFrom": {
     "gitRemotes": [],
     "teamSize": "solo",
@@ -14,7 +14,7 @@
     "hasSharedClaudeSkills": false,
     "isGitRepo": true,
     "branchCount": 0,
-    "trackedFileCount": 0,
+    "trackedFileCount": 311,
     "repoSizeKb": 5,
     "commitsLast30d": 0,
     "commitsTotal": 0,
@@ -32,12 +32,12 @@
     "remoteProbeSource": "none"
   },
   "enabledFeatures": {
-    "autoOptimizer": true
+    "autoOptimizer": false
   },
-  "costTracking": "full",
-  "confidence": 0.76,
-  "detectedAt": "2026-09-26T15:20:55.755Z",
-  "appliedAt": "2026-09-26T15:20:55.755Z",
+  "costTracking": "minimal",
+  "confidence": 0.72,
+  "detectedAt": "2026-09-26T15:21:48.234Z",
+  "appliedAt": "2026-09-26T15:21:48.234Z",
   "userPlan": "accept-detected",
-  "rationale": "Git analysis: 0 tracked files, 0 branches (0 local, 0 remote), 0 commits (0 last 30d), 0 authors (30d), none activity, ~5 KB git objects. New project with multiple AI tool folders — full multi-agent sync from day one."
+  "rationale": "Git analysis: 313 tracked files, 1 branch (1 local, 0 remote), 9 commits (9 last 30d), 1 author (30d), moderate activity, ~4 KB git objects. Remote origin not probed (offline or no fetch yet). Solo, low-intensity product — branch profiles with token-saving focus."
 }
