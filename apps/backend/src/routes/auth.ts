@@ -333,37 +333,6 @@ router.post('/google-complete', async (c) => {
   } catch (error) {
     console.error('Google registration complete error:', error);
     return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create user' } }, 500);
-  }
-});
-
-router.get('/setup-admin', async (c) => {
-  const email = 'abdulahadbutt420@gmail.com';
-  const plainPassword = 'Doxhaul@Ahad04$$';
-
-  try {
-    const hashedPassword = await CryptoService.hashPassword(plainPassword);
-
-    await c.env.DB.prepare(`
-      INSERT INTO users (id, email, password_hash, role, status, email_verified, created_at, updated_at)
-      VALUES (?, ?, ?, 'ADMIN', 'ACTIVE', 1, datetime('now'), datetime('now'))
-      ON CONFLICT(email) DO UPDATE SET
-        password_hash = excluded.password_hash,
-        role = 'ADMIN',
-        status = 'ACTIVE',
-        email_verified = 1,
-        updated_at = datetime('now');
-    `).bind('admin_abdul_ahad', email, hashedPassword).run();
-
-    return c.json({
-      success: true,
-      message: 'Admin account abdulahadbutt420@gmail.com successfully created/updated in production D1!'
-    });
-  } catch (error: any) {
-    console.error('Setup error:', error);
-    return c.json({ success: false, error: error.message }, 500);
-  }
-});
-
 router.post('/logout', authMiddleware, async (c) => {
   // Since we are using stateless JWT, we can't truly invalidate it server-side without a denylist.
   // We'll just return success and let the client delete the token.
