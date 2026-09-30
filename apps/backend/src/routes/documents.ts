@@ -61,6 +61,13 @@ router.post('/', async (c) => {
       VALUES (?, ?, ?, ?, ?, ?)
     `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), user.id, user.role, 'DOCUMENT_UPLOADED', 'DOCUMENT', docId).run();
 
+    // Reset verification status if it's a compliance document
+    if (!loadId) {
+      await c.env.DB.prepare(`
+        UPDATE profiles SET verification_status = 'PENDING', updated_at = datetime('now') WHERE user_id = ?
+      `).bind(user.id).run();
+    }
+
     return c.json({ success: true, data: result }, 201);
   } catch (err) {
     console.error('Upload error:', err);
@@ -101,8 +108,13 @@ router.get('/:id/view', async (c) => {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }, 404);
   }
 
-  c.header('Content-Type', doc.mime_type as string);
-  c.header('Content-Disposition', `inline; filename="${doc.original_filename}"`);
+  const originalFilename = (doc.original_filename as string) || '';
+  const contentType = (doc.mime_type as string) || (originalFilename.endsWith('.jpg') || originalFilename.endsWith('.jpeg') ? 'image/jpeg' : 'image/png');
+  
+  c.header('Content-Type', contentType);
+  c.header('Content-Disposition', `inline; filename="${originalFilename}"`);
+  c.header('Access-Control-Allow-Origin', '*');
+  c.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   
   return c.body(file.body);
 });

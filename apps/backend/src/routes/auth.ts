@@ -354,9 +354,9 @@ router.get('/me', authMiddleware, async (c) => {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } }, 404);
   }
   
-  const profile = await c.env.DB.prepare('SELECT first_name, last_name, company_name, verification_status FROM profiles WHERE user_id = ?')
+  const profile = await c.env.DB.prepare('SELECT first_name, last_name, company_name, verification_status, verification_notes as rejection_reason FROM profiles WHERE user_id = ?')
     .bind(user.id)
-    .first<{ first_name: string, last_name: string, company_name: string, verification_status: string }>();
+    .first<{ first_name: string, last_name: string, company_name: string, verification_status: string, rejection_reason: string }>();
 
   return c.json({ 
     success: true, 

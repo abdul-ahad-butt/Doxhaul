@@ -81,6 +81,8 @@ export const DocumentViewerModal = ({
               <img 
                 src={documentUrl} 
                 alt="Document Preview" 
+                crossOrigin="anonymous"
+                onError={(e) => console.error("Image load error:", e)}
                 className="max-w-full max-h-full object-contain transition-transform duration-200 ease-in-out shadow-sm bg-white"
                 style={{ 
                   transform: `scale(${zoom}) rotate(${rotation}deg)` 

@@ -96,14 +96,14 @@ router.post('/verifications/:id/reject', async (c) => {
   const userId = c.req.param('id');
   const adminUser = c.get('user');
   const body = await c.req.json();
-  const reason = body.reason || 'Verification rejected by administrator';
+  const reason = body.reason || "Document verification declined. Please upload a clear and valid driver's license.";
 
-  const userStmt = c.env.DB.prepare("UPDATE users SET status = 'ACTIVE', updated_at = datetime('now') WHERE id = ?").bind(userId);
   const profileStmt = c.env.DB.prepare("UPDATE profiles SET verification_status = 'REJECTED', verification_notes = ?, updated_at = datetime('now') WHERE user_id = ?").bind(reason, userId);
+  const docsStmt = c.env.DB.prepare("UPDATE documents SET status = 'REJECTED', reviewed_by = ?, reviewed_at = datetime('now') WHERE user_id = ? AND status = 'PENDING'").bind(adminUser.id, userId);
   const auditStmt = c.env.DB.prepare(`INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(crypto.randomUUID().replace(/-/g, ''), adminUser.id, 'ADMIN', 'USER_REJECTED', 'USER', userId, JSON.stringify({ reason }));
 
   try {
-    await c.env.DB.batch([userStmt, profileStmt, auditStmt]);
+    await c.env.DB.batch([profileStmt, docsStmt, auditStmt]);
     return c.json({ success: true, data: { message: 'User verification rejected' } });
   } catch (error) {
     return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to reject verification' } }, 500);

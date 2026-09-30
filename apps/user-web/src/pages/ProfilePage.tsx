@@ -78,6 +78,22 @@ const ProfilePage = () => {
         <StatusBadge status={profile?.verification_status || 'PENDING'} />
       </div>
 
+      {profile?.verification_status === 'REJECTED' && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+          <div className="flex items-start">
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-red-800">Verification Application Declined</h3>
+              <p className="mt-1 text-sm text-red-700">
+                Your document verification could not be approved. Reason: {profile?.rejection_reason || "Document illegible or invalid."}
+              </p>
+              <p className="mt-2 text-xs font-medium text-red-600">
+                Please re-upload a clear, valid copy of your documents below to re-submit your verification.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Business Information</CardTitle>

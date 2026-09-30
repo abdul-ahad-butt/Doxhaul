@@ -63,6 +63,9 @@ export const StatusBadge = ({ status }: { status: string }) => {
       variant = 'success';
       break;
     case 'REJECTED':
+      variant = 'danger';
+      label = 'Declined';
+      break;
     case 'SUSPENDED':
     case 'BANNED':
       variant = 'danger';
