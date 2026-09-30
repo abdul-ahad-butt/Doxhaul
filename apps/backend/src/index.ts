@@ -11,6 +11,7 @@ import loadsRoutes from './routes/loads';
 import bookingsRoutes from './routes/bookings';
 import bidsRoutes from './routes/bids';
 import adminRoutes from './routes/admin';
+import ticketsRoutes from './routes/tickets';
 import { errorHandler } from './middleware/error-handler';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -45,6 +46,7 @@ app.route('/api/loads', loadsRoutes);
 app.route('/api/bookings', bookingsRoutes);
 app.route('/api/bids', bidsRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/tickets', ticketsRoutes);
 
 // 404 handler
 app.notFound((c) => {

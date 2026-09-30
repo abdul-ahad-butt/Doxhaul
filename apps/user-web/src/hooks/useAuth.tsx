@@ -14,6 +14,7 @@ export type Profile = {
   last_name: string;
   company_name: string;
   verification_status: string;
+  rejection_reason?: string;
 };
 
 type AuthContextType = {

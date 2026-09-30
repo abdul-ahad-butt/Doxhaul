@@ -54,17 +54,18 @@ export const StatusBadge = ({ status }: { status: string }) => {
     case 'PENDING_VERIFICATION':
     case 'PENDING':
       variant = 'warning';
-      label = 'Pending Verification';
+      label = '⏳ Pending Verification';
       break;
     case 'VERIFIED':
     case 'ACTIVE':
     case 'APPROVED':
     case 'COMPLETED':
       variant = 'success';
+      label = '✓ Verified & Approved';
       break;
     case 'REJECTED':
       variant = 'danger';
-      label = 'Declined';
+      label = '✕ Declined';
       break;
     case 'SUSPENDED':
     case 'BANNED':

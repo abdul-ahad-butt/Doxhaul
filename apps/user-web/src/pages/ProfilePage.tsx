@@ -84,11 +84,13 @@ const ProfilePage = () => {
             <div className="flex-1">
               <h3 className="text-sm font-bold text-red-800">Verification Application Declined</h3>
               <p className="mt-1 text-sm text-red-700">
-                Your document verification could not be approved. Reason: {profile?.rejection_reason || "Document illegible or invalid."}
+                Your document verification was not approved by Admin. Please wait 3 days before re-applying, or click the support assistant in the bottom-right corner to speak with our support team.
               </p>
-              <p className="mt-2 text-xs font-medium text-red-600">
-                Please re-upload a clear, valid copy of your documents below to re-submit your verification.
-              </p>
+              {profile?.rejection_reason && (
+                <p className="mt-2 text-xs font-medium text-red-600">
+                  Reason: {profile.rejection_reason}
+                </p>
+              )}
             </div>
           </div>
         </div>

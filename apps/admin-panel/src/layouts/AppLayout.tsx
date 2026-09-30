@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Package, Users, Truck, LayoutDashboard, FileText } from 'lucide-react';
+import { LogOut, Package, Users, Truck, LayoutDashboard, FileText, Contact, LifeBuoy } from 'lucide-react';
 
 export const AppLayout = () => {
   const { user, profile, isAuthenticated, logout } = useAuth();
@@ -15,7 +15,9 @@ export const AppLayout = () => {
     navItems.push(
       { label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
       { label: 'Users & Verification', icon: Users, href: '/admin/verifications' },
-      { label: 'Platform Loads', icon: Package, href: '/admin/loads' }
+      { label: 'Users Directory', icon: Contact, href: '/admin/users' },
+      { label: 'Platform Loads', icon: Package, href: '/admin/loads' },
+      { label: 'User Issues', icon: LifeBuoy, href: '/admin/tickets' }
     );
   } else if (user?.role === 'SHIPPER' || user?.role === 'BROKER') {
     navItems.push(

@@ -5,6 +5,8 @@ import { AppLayout } from './layouts/AppLayout';
 
 import LoginPage from './pages/LoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import { UsersDirectoryPage } from './pages/UsersDirectoryPage';
+import { SupportTicketsPage } from './pages/SupportTicketsPage';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/verifications" element={<div className="p-8">Verifications</div>} />
             <Route path="/admin/loads" element={<div className="p-8">Admin Loads</div>} />
+            <Route path="/admin/users" element={<UsersDirectoryPage />} />
+            <Route path="/admin/tickets" element={<SupportTicketsPage />} />
           </Route>
           
           <Route path="*" element={<Navigate to="/admin" replace />} />

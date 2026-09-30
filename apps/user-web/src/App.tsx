@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import BookingsPage from './pages/BookingsPage';
 import TripsPage from './pages/TripsPage';
+import { SupportChatWidget } from './components/support/SupportChatWidget';
 
 // Placeholder Pages (will be replaced)
 // Unused placeholder removed
@@ -46,6 +47,7 @@ function App() {
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <SupportChatWidget />
       </AuthProvider>
     </BrowserRouter>
   );

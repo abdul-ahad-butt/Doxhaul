@@ -44,6 +44,12 @@ router.get('/users', async (c) => {
   return c.json({ success: true, data: users.results });
 });
 
+router.get('/users/:id/documents', async (c) => {
+  const userId = c.req.param('id');
+  const documents = await c.env.DB.prepare('SELECT * FROM documents WHERE user_id = ? ORDER BY uploaded_at DESC').bind(userId).all();
+  return c.json({ success: true, data: documents.results });
+});
+
 router.get('/verifications', async (c) => {
   const verifications = await c.env.DB.prepare(`
     SELECT u.id, u.email, u.role, u.status, p.first_name, p.last_name, p.company_name, p.verification_status, p.updated_at

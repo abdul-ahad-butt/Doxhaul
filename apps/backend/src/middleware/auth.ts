@@ -47,6 +47,28 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
   }
 };
 
+export const optionalAuthMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) => {
+  const authHeader = c.req.header('Authorization');
+  let token = '';
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  }
+  
+  if (token) {
+    try {
+      const secret = c.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod';
+      const payload = await verify(token, secret, 'HS256') as unknown as JwtPayload;
+      if (payload.exp && payload.exp >= Math.floor(Date.now() / 1000)) {
+        c.set('user', payload);
+      }
+    } catch (error) {
+      // ignore
+    }
+  }
+  await next();
+};
+
 export const requireRole = (roles: ('SHIPPER' | 'BROKER' | 'CARRIER' | 'ADMIN')[]) => {
   return async (c: Context<{ Bindings: Env }>, next: Next) => {
     const user = c.get('user');
