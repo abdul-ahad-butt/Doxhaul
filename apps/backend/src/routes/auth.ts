@@ -346,22 +346,33 @@ router.get('/me', authMiddleware, async (c) => {
   const user = c.get('user');
   
   // Fetch fresh user data
-  const dbUser = await c.env.DB.prepare('SELECT id, email, role, status FROM users WHERE id = ?')
+  const dbUser = (await c.env.DB.prepare('SELECT id, email, role, status FROM users WHERE id = ?')
     .bind(user.id)
-    .first<{ id: string, email: string, role: string, status: string }>();
+    .first()) as { id: string, email: string, role: string, status: string } | null;
     
   if (!dbUser) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } }, 404);
   }
   
-  const profile = await c.env.DB.prepare('SELECT first_name, last_name, company_name, verification_status, verification_notes as rejection_reason FROM profiles WHERE user_id = ?')
+  const profile = (await c.env.DB.prepare('SELECT first_name, last_name, company_name, verification_status, verification_notes as rejection_reason FROM profiles WHERE user_id = ?')
     .bind(user.id)
-    .first<{ first_name: string, last_name: string, company_name: string, verification_status: string, rejection_reason: string }>();
+    .first()) as { first_name: string, last_name: string, company_name: string, verification_status: string, rejection_reason: string } | null;
+
+  const docCount = (await c.env.DB.prepare('SELECT COUNT(*) as c FROM documents WHERE user_id = ?')
+    .bind(user.id)
+    .first()) as { c: number } | null;
+
+  const vStatus = profile?.verification_status || 'PENDING';
+  const docsUploaded = Number(docCount?.c || 0) > 0;
 
   return c.json({ 
     success: true, 
     data: { 
-      user: dbUser,
+      user: {
+        ...dbUser,
+        verification_status: vStatus,
+        documents_uploaded: docsUploaded
+      },
       profile
     } 
   });

@@ -25,14 +25,18 @@ const AdminDashboardPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-docs'] });
     }
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (id: string) => apiClient.post(`/admin/verifications/${id}/reject`, { reason: 'Failed compliance review' }),
+    mutationFn: (id: string) => apiClient.post(`/admin/verifications/${id}/reject`, { reason: 'Document verification rejected by admin.' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'verifications'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-docs'] });
     }
   });
 

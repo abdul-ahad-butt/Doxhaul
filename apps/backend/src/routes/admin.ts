@@ -98,8 +98,24 @@ router.get('/users', async (c) => {
 });
 
 router.get('/users/:id/documents', async (c) => {
-  const userId = c.req.param('id');
-  const documents = await c.env.DB.prepare('SELECT * FROM documents WHERE user_id = ? ORDER BY uploaded_at DESC').bind(userId).all();
+  const userId = c.req.param('id') || c.req.param('userId');
+  const documents = await c.env.DB.prepare(`
+    SELECT id, user_id, document_type, original_filename, original_filename as file_name, mime_type, file_size, status, rejection_reason, uploaded_at, created_at
+    FROM documents 
+    WHERE user_id = ? 
+    ORDER BY uploaded_at DESC
+  `).bind(userId).all();
+  return c.json({ success: true, data: documents.results });
+});
+
+router.get('/users/:userId/documents', async (c) => {
+  const userId = c.req.param('userId') || c.req.param('id');
+  const documents = await c.env.DB.prepare(`
+    SELECT id, user_id, document_type, original_filename, original_filename as file_name, mime_type, file_size, status, rejection_reason, uploaded_at, created_at
+    FROM documents 
+    WHERE user_id = ? 
+    ORDER BY uploaded_at DESC
+  `).bind(userId).all();
   return c.json({ success: true, data: documents.results });
 });
 
@@ -116,7 +132,7 @@ router.get('/verifications', async (c) => {
 });
 
 router.get('/verifications/:id', async (c) => {
-  const userId = c.req.param('id');
+  const userId = c.req.param('id') || c.req.param('userId');
 
   const user = await c.env.DB.prepare(`
     SELECT u.id, u.email, u.role, u.status, p.*
@@ -136,7 +152,7 @@ router.get('/verifications/:id', async (c) => {
 
 // Helper for approving user & documents
 async function handleApprove(c: any) {
-  const paramId = c.req.param('id');
+  const paramId = c.req.param('id') || c.req.param('userId');
   const adminUser = c.get('user');
 
   // Check if paramId is a document ID or user ID
@@ -150,7 +166,10 @@ async function handleApprove(c: any) {
 
   try {
     await c.env.DB.batch([userStmt, profileStmt, docsStmt, auditStmt]);
-    return c.json({ success: true, data: { message: 'User and documents verified successfully' } });
+    try {
+      await c.env.DB.prepare("UPDATE users SET verification_status = 'APPROVED', updated_at = datetime('now') WHERE id = ?").bind(userId).run();
+    } catch (_) {}
+    return c.json({ success: true, data: { message: 'User and documents verified successfully' }, message: 'User and documents verified successfully' });
   } catch (error) {
     console.error('Approve verification error:', error);
     return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to approve verification' } }, 500);
@@ -159,10 +178,10 @@ async function handleApprove(c: any) {
 
 // Helper for rejecting user & documents
 async function handleReject(c: any) {
-  const paramId = c.req.param('id');
+  const paramId = c.req.param('id') || c.req.param('userId');
   const adminUser = c.get('user');
   const body = await c.req.json().catch(() => ({}));
-  const reason = body.reason || "Document verification declined. Please upload a clear and valid driver's license.";
+  const reason = body.reason || "Document verification rejected by admin.";
 
   // Check if paramId is a document ID or user ID
   const doc = (await c.env.DB.prepare('SELECT id, user_id FROM documents WHERE id = ?').bind(paramId).first()) as { id: string; user_id: string } | null;
@@ -175,7 +194,10 @@ async function handleReject(c: any) {
 
   try {
     await c.env.DB.batch([profileStmt, docsStmt, userStmt, auditStmt]);
-    return c.json({ success: true, data: { message: 'Verification rejected successfully' } });
+    try {
+      await c.env.DB.prepare("UPDATE users SET verification_status = 'REJECTED', updated_at = datetime('now') WHERE id = ?").bind(userId).run();
+    } catch (_) {}
+    return c.json({ success: true, data: { message: 'User and documents rejected successfully.' }, message: 'User and documents rejected successfully.' });
   } catch (error) {
     console.error('Reject verification error:', error);
     return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to reject verification' } }, 500);
@@ -183,10 +205,14 @@ async function handleReject(c: any) {
 }
 
 router.post('/verifications/:id/approve', handleApprove);
+router.post('/verifications/:userId/approve', handleApprove);
 router.post('/documents/:id/approve', handleApprove);
+router.post('/documents/:userId/approve', handleApprove);
 
 router.post('/verifications/:id/reject', handleReject);
+router.post('/verifications/:userId/reject', handleReject);
 router.post('/documents/:id/reject', handleReject);
+router.post('/documents/:userId/reject', handleReject);
 
 // Admin streaming endpoint for documents
 router.get('/documents/:id/view', async (c) => {
