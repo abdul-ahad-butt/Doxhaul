@@ -10,16 +10,9 @@ import CompleteProfilePage from './pages/CompleteProfilePage';
 import DashboardPage from './pages/DashboardPage';
 import LoadBoardPage from './pages/LoadBoardPage';
 import ProfilePage from './pages/ProfilePage';
-
 import BookingsPage from './pages/BookingsPage';
 import TripsPage from './pages/TripsPage';
-import { SupportChatWidget } from './components/support/SupportChatWidget';
-
-// Placeholder Pages (will be replaced)
-// Unused placeholder removed
-// Unused placeholder removed
-// Unused placeholder removed
-// Unused placeholder removed
+import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
   return (
@@ -32,6 +25,7 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/signup" element={<RegisterPage />} />
             <Route path="/complete-profile" element={<CompleteProfilePage />} />
           </Route>
 
@@ -42,12 +36,11 @@ function App() {
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/trips" element={<TripsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            
           </Route>
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <SupportChatWidget />
+        <SupportAssistantWidget />
       </AuthProvider>
     </BrowserRouter>
   );

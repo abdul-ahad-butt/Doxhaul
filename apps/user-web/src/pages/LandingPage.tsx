@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Truck, ShieldCheck, BarChart3, Clock, UserPlus, FileSearch, Banknote, Star, MapPin } from 'lucide-react';
-import { Button } from '../components/ui/Button';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useCountUp } from '../hooks/useCountUp';
 
@@ -28,14 +27,12 @@ const RevealCard = ({ children, delay }: { children: React.ReactNode, delay: num
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll);
-    // Call once to set initial state if page is already scrolled
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -46,8 +43,18 @@ const LandingPage = () => {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${isScrolled ? 'bg-navy-950/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
         <div className="text-2xl font-bold tracking-tight">Doxhaul<span className="text-brand-blue">.</span></div>
         <div className="space-x-4 flex items-center">
-          <button onClick={() => navigate('/login')} className="text-white hover:text-navy-100 font-medium transition-colors cursor-pointer bg-transparent border-none">Log In</button>
-          <Button variant="primary" onClick={() => navigate('/register')}>Get Started</Button>
+          <Link
+            to="/login"
+            className="text-white hover:text-navy-100 font-medium transition-colors cursor-pointer"
+          >
+            Log In
+          </Link>
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm"
+          >
+            Get Started
+          </Link>
         </div>
       </nav>
 
@@ -61,8 +68,18 @@ const LandingPage = () => {
             The verified marketplace connecting trusted shippers, brokers, and carriers. Real-time tracking, seamless compliance, and total operational visibility.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button variant="primary" size="lg" className="text-lg px-8" onClick={() => navigate('/register')}>Join the Network</Button>
-            <Button variant="outline-white" size="lg" className="text-lg px-8" onClick={() => navigate('/login')}>Sign In</Button>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-12 px-8 text-lg"
+            >
+              Join the Network
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 text-lg"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </section>
@@ -247,7 +264,12 @@ const LandingPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg border border-slate-200 text-center max-w-md mx-4">
               <h3 className="text-xl font-bold text-navy-900 mb-3">See 10,000+ Active Loads</h3>
               <p className="text-slate-700 mb-6">Create a free account to view full load details, broker information, and book instantly.</p>
-              <Button variant="primary" className="w-full" onClick={() => navigate('/register')}>Create Free Account</Button>
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm w-full"
+              >
+                Create Free Account
+              </Link>
             </div>
           </div>
         </div>
@@ -311,7 +333,12 @@ const LandingPage = () => {
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Next-day quickpay access</li>
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Document management</li>
               </ul>
-              <Button variant="outline" className="w-full border-slate-300 text-slate-700 hover:bg-slate-50" onClick={() => navigate('/register')}>Create Carrier Account</Button>
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-navy-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-200 h-10 px-4 py-2 text-sm w-full"
+              >
+                Create Carrier Account
+              </Link>
             </div>
           </RevealCard>
 
@@ -326,7 +353,12 @@ const LandingPage = () => {
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Real-time GPS tracking</li>
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Automated compliance checks</li>
               </ul>
-              <Button variant="primary" className="w-full" onClick={() => navigate('/register')}>Start Posting Loads</Button>
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm w-full"
+              >
+                Start Posting Loads
+              </Link>
             </div>
           </RevealCard>
         </div>
@@ -339,43 +371,36 @@ const LandingPage = () => {
             <h2 className="text-3xl font-bold text-navy-900 mb-4">Frequently Asked Questions</h2>
             <p className="text-lg text-slate-700">Everything you need to know about the Doxhaul platform.</p>
           </div>
-          
           <div className="space-y-4">
             <RevealCard delay={0}>
-              <details className="group bg-white rounded-lg shadow-sm border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
-                <summary className="flex items-center justify-between cursor-pointer p-6 font-bold text-navy-900">
-                  How does the carrier verification process work?
-                  <span className="transition duration-300 group-open:-rotate-180 text-brand-blue">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-                  </span>
+              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
+                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
+                  <span>How quickly can I get onboarded and verified?</span>
+                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
                 </summary>
                 <div className="px-6 pb-6 text-slate-700">
-                  We integrate directly with FMCSA databases to verify active operating authority, safety ratings, and insurance coverage. New carriers must also upload their W-9 and an active certificate of insurance before they can book loads.
+                  Most accounts are verified within 1-2 hours during business hours. Once you submit your MC/DOT number, Certificate of Insurance, and W-9, our automated system validates with FMCSA immediately.
                 </div>
               </details>
             </RevealCard>
-            
+
             <RevealCard delay={100}>
-              <details className="group bg-white rounded-lg shadow-sm border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
-                <summary className="flex items-center justify-between cursor-pointer p-6 font-bold text-navy-900">
-                  How fast do carriers get paid?
-                  <span className="transition duration-300 group-open:-rotate-180 text-brand-blue">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-                  </span>
+              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
+                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
+                  <span>How does Carrier QuickPay work?</span>
+                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
                 </summary>
                 <div className="px-6 pb-6 text-slate-700">
-                  Standard payment terms are Net 30 from the delivery date. However, we offer an optional QuickPay feature that pays out within 24 hours of POD approval for a small 2% processing fee.
+                  Upon uploading a signed Proof of Delivery (POD) and rate confirmation, carriers can select standard 30-day pay or 1-day QuickPay for a small 2% fee. Funds are deposited directly to your bank account.
                 </div>
               </details>
             </RevealCard>
 
             <RevealCard delay={200}>
-              <details className="group bg-white rounded-lg shadow-sm border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
-                <summary className="flex items-center justify-between cursor-pointer p-6 font-bold text-navy-900">
-                  Can I track my loads in real-time?
-                  <span className="transition duration-300 group-open:-rotate-180 text-brand-blue">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-                  </span>
+              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
+                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
+                  <span>Do you support ELD tracking integrations?</span>
+                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
                 </summary>
                 <div className="px-6 pb-6 text-slate-700">
                   Yes! We integrate with major ELD providers (like Samsara and KeepTruckin) and also offer a lightweight mobile driver app that provides location updates without draining the driver's battery.
@@ -393,8 +418,18 @@ const LandingPage = () => {
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Ready to streamline your logistics?</h2>
           <p className="text-xl text-white/80 mb-10">Join thousands of shippers, brokers, and carriers moving freight efficiently on the Doxhaul network today.</p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Button variant="secondary" size="lg" className="text-brand-blue font-bold text-lg px-8 py-4 w-full sm:w-auto hover:bg-white transition-transform hover:scale-105" onClick={() => navigate('/register')}>Get Started for Free</Button>
-            <Button variant="outline-white" size="lg" className="text-lg px-8 py-4 w-full sm:w-auto hover:bg-white/10" onClick={() => navigate('/login')}>Sign In to Dashboard</Button>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center rounded-md font-bold transition-all duration-150 ease-out hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white text-brand-blue hover:bg-white/90 h-12 px-8 py-4 text-lg w-full sm:w-auto"
+            >
+              Get Started for Free
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 py-4 text-lg w-full sm:w-auto"
+            >
+              Sign In to Dashboard
+            </Link>
           </div>
         </div>
       </section>
