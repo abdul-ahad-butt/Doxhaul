@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { Env } from '../types/env';
 import { authMiddleware, JwtPayload, requireRole, requireVerified } from '../middleware/auth';
 import { createLoadSchema } from '../validators/loads';
+import { calculateDistance } from '../services/distance';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
 
@@ -29,20 +30,30 @@ router.post('/', requireRole(['SHIPPER', 'BROKER']), requireVerified, async (c) 
   const profile = await c.env.DB.prepare('SELECT company_name FROM profiles WHERE user_id = ?').bind(user.id).first<{company_name: string}>();
   const companyName = profile?.company_name || 'Unknown Company';
 
+  // Calculate distance
+  let mileage = null;
+  let ratePerMile = null;
+  if (data.originZip && data.destinationZip) {
+    mileage = await calculateDistance(data.originZip, data.destinationZip);
+    if (mileage > 0) {
+      ratePerMile = data.rate / mileage;
+    }
+  }
+
   try {
     const result = await c.env.DB.prepare(`
       INSERT INTO loads (
         id, owner_user_id, owner_company_name, reference_number, title, description,
         origin_city, origin_state, origin_zip, origin_country,
         destination_city, destination_state, destination_zip, destination_country,
-        pickup_date, delivery_date, equipment_type, weight, weight_unit,
+        pickup_date, delivery_date, mileage, rate_per_mile, equipment_type, weight, weight_unit,
         length, width, height, commodity, rate, currency, rate_type,
         special_instructions, status
       ) VALUES (
         ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?,
         ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?,
         ?, ?
       ) RETURNING *
@@ -50,7 +61,7 @@ router.post('/', requireRole(['SHIPPER', 'BROKER']), requireVerified, async (c) 
       loadId, user.id, companyName, referenceNumber, data.title, data.description || null,
       data.originCity, data.originState, data.originZip || null, data.originCountry,
       data.destinationCity, data.destinationState, data.destinationZip || null, data.destinationCountry,
-      data.pickupDate, data.deliveryDate, data.equipmentType, data.weight, data.weightUnit,
+      data.pickupDate, data.deliveryDate, mileage, ratePerMile, data.equipmentType, data.weight, data.weightUnit,
       data.length || null, data.width || null, data.height || null, data.commodity || null, data.rate, data.currency, data.rateType,
       data.specialInstructions || null, 'OPEN'
     ).first();

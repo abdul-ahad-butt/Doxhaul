@@ -14,15 +14,16 @@ router.post('/', async (c) => {
   const formData = await c.req.parseBody();
   const file = formData['file'] as File;
   const documentType = formData['documentType'] as string;
+  const loadId = formData['loadId'] as string;
 
   if (!file) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'No file provided' } }, 400);
   }
 
   // Validate type
-  const parseResult = documentUploadSchema.safeParse({ documentType });
+  const parseResult = documentUploadSchema.safeParse({ documentType, loadId });
   if (!parseResult.success) {
-    return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid document type' } }, 400);
+    return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid document input' } }, 400);
   }
 
   // Validate size (e.g., max 10MB)
@@ -37,7 +38,10 @@ router.post('/', async (c) => {
   }
 
   const storage = new StorageService(c.env.DOCUMENTS);
-  const objectKey = storage.generateKey(user.id, file.name);
+  let objectKey = storage.generateKey(user.id, file.name);
+  if (loadId && (documentType === 'POD' || documentType === 'BOL' || documentType === 'RATE_CONFIRMATION')) {
+    objectKey = `pod/${loadId}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+  }
 
   try {
     await storage.uploadFile(objectKey, file);

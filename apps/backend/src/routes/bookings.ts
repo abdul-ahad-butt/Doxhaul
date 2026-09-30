@@ -99,7 +99,8 @@ router.get('/', async (c) => {
 });
 
 const statusSchema = z.object({
-  status: z.enum(['HEADING_TO_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'])
+  status: z.enum(['HEADING_TO_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED']),
+  pod_document_id: z.string().optional()
 });
 
 // Update load status (Trip management)
@@ -125,6 +126,17 @@ router.post('/loads/:id/status', requireRole(['CARRIER']), requireVerified, asyn
     return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Not authorized for this load' } }, 403);
   }
 
+  if (newStatus === 'DELIVERED') {
+    if (!parseResult.data.pod_document_id) {
+      return c.json({ success: false, error: { code: 'UNPROCESSABLE_ENTITY', message: 'POD document is required to mark load as delivered' } }, 422);
+    }
+    // Verify POD document exists
+    const doc = await c.env.DB.prepare('SELECT id FROM documents WHERE id = ? AND document_type = ?').bind(parseResult.data.pod_document_id, 'POD').first();
+    if (!doc) {
+      return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'POD document not found' } }, 404);
+    }
+  }
+
   // Validate state transitions
   const validTransitions: Record<string, string[]> = {
     'ASSIGNED': ['HEADING_TO_PICKUP', 'CANCELLED'],
@@ -144,9 +156,16 @@ router.post('/loads/:id/status', requireRole(['CARRIER']), requireVerified, asyn
   }
 
   // Update load
-  const loadStmt = c.env.DB.prepare(`
-    UPDATE loads SET status = ?, updated_at = datetime('now') WHERE id = ?
-  `).bind(newStatus, loadId);
+  let loadStmt;
+  if (newStatus === 'DELIVERED') {
+    loadStmt = c.env.DB.prepare(`
+      UPDATE loads SET status = ?, pod_document_id = ?, updated_at = datetime('now') WHERE id = ?
+    `).bind(newStatus, parseResult.data.pod_document_id, loadId);
+  } else {
+    loadStmt = c.env.DB.prepare(`
+      UPDATE loads SET status = ?, updated_at = datetime('now') WHERE id = ?
+    `).bind(newStatus, loadId);
+  }
 
   // Update booking if completed
   let bookingStmt = null;

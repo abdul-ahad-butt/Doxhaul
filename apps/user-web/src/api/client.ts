@@ -5,8 +5,7 @@ export class ApiError extends Error {
   }
 }
 
-// @ts-ignore
-let BASE_URL = import.meta.env.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+let BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 if (!isLocal && BASE_URL.includes('localhost')) {
   BASE_URL = 'https://doxhaul.abdulahadbutt420.workers.dev/api';

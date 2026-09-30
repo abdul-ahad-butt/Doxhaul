@@ -9,6 +9,7 @@ import profileRoutes from './routes/profile';
 import documentsRoutes from './routes/documents';
 import loadsRoutes from './routes/loads';
 import bookingsRoutes from './routes/bookings';
+import bidsRoutes from './routes/bids';
 import adminRoutes from './routes/admin';
 import { errorHandler } from './middleware/error-handler';
 
@@ -42,6 +43,7 @@ app.route('/api/profile', profileRoutes);
 app.route('/api/documents', documentsRoutes);
 app.route('/api/loads', loadsRoutes);
 app.route('/api/bookings', bookingsRoutes);
+app.route('/api/bids', bidsRoutes);
 app.route('/api/admin', adminRoutes);
 
 // 404 handler

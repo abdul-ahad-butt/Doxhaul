@@ -61,7 +61,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_company_name ON profiles(company_name);
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  document_type TEXT NOT NULL CHECK (document_type IN ('DOT_CERTIFICATE', 'MC_CERTIFICATE', 'INSURANCE_CERTIFICATE', 'DRIVER_LICENSE', 'W9', 'BUSINESS_LICENSE', 'OTHER')),
+  document_type TEXT NOT NULL CHECK (document_type IN ('DOT_CERTIFICATE', 'MC_CERTIFICATE', 'INSURANCE_CERTIFICATE', 'DRIVER_LICENSE', 'W9', 'BUSINESS_LICENSE', 'POD', 'BOL', 'RATE_CONFIRMATION', 'OTHER')),
   object_key TEXT NOT NULL UNIQUE,
   original_filename TEXT NOT NULL,
   mime_type TEXT NOT NULL,
@@ -100,6 +100,8 @@ CREATE TABLE IF NOT EXISTS loads (
   destination_country TEXT NOT NULL DEFAULT 'US',
   pickup_date TEXT NOT NULL,
   delivery_date TEXT NOT NULL,
+  mileage INTEGER,
+  rate_per_mile REAL,
   equipment_type TEXT NOT NULL CHECK (equipment_type IN ('DRY_VAN', 'REEFER', 'FLATBED', 'STEP_DECK', 'BOX_TRUCK', 'TANKER', 'LOWBOY', 'OTHER')),
   weight REAL NOT NULL,
   weight_unit TEXT NOT NULL DEFAULT 'LBS',
@@ -114,6 +116,8 @@ CREATE TABLE IF NOT EXISTS loads (
   status TEXT NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'ASSIGNED', 'HEADING_TO_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED')),
   assigned_carrier_id TEXT REFERENCES users(id),
   assigned_booking_id TEXT,
+  pod_document_id TEXT REFERENCES documents(id),
+  delivery_notes TEXT,
   is_deleted INTEGER NOT NULL DEFAULT 0,
   deleted_at TEXT,
   deleted_by TEXT REFERENCES users(id),
@@ -131,6 +135,26 @@ CREATE INDEX IF NOT EXISTS idx_loads_rate ON loads(rate);
 CREATE INDEX IF NOT EXISTS idx_loads_reference_number ON loads(reference_number);
 CREATE INDEX IF NOT EXISTS idx_loads_assigned_carrier_id ON loads(assigned_carrier_id);
 CREATE INDEX IF NOT EXISTS idx_loads_is_deleted ON loads(is_deleted);
+CREATE INDEX IF NOT EXISTS idx_loads_status_pickup ON loads(status, pickup_date);
+CREATE INDEX IF NOT EXISTS idx_loads_equipment ON loads(equipment_type);
+
+-- ============================================================
+-- BIDS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS bids (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  load_id TEXT NOT NULL REFERENCES loads(id) ON DELETE RESTRICT,
+  carrier_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  amount REAL NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'COUNTERED')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_bids_load_id_status ON bids(load_id, status);
+CREATE INDEX IF NOT EXISTS idx_bids_carrier_id ON bids(carrier_id);
 
 -- ============================================================
 -- BOOKINGS TABLE
@@ -258,4 +282,10 @@ CREATE TRIGGER IF NOT EXISTS update_bookings_updated_at
   AFTER UPDATE ON bookings FOR EACH ROW
   BEGIN
     UPDATE bookings SET updated_at = datetime('now') WHERE id = NEW.id;
+  END;
+
+CREATE TRIGGER IF NOT EXISTS update_bids_updated_at
+  AFTER UPDATE ON bids FOR EACH ROW
+  BEGIN
+    UPDATE bids SET updated_at = datetime('now') WHERE id = NEW.id;
   END;
