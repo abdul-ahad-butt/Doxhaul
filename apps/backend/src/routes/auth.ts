@@ -333,6 +333,9 @@ router.post('/google-complete', async (c) => {
   } catch (error) {
     console.error('Google registration complete error:', error);
     return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create user' } }, 500);
+  }
+});
+
 router.post('/logout', authMiddleware, async (c) => {
   // Since we are using stateless JWT, we can't truly invalidate it server-side without a denylist.
   // We'll just return success and let the client delete the token.
