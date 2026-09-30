@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageSquare, X, Send, Paperclip } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -8,6 +9,7 @@ export const SupportChatWidget = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   
   const { user, profile } = useAuth();
+  const location = useLocation();
   
   const [formData, setFormData] = useState({
     firstName: profile?.first_name || '',
@@ -19,6 +21,21 @@ export const SupportChatWidget = () => {
   
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
+
+  // 1. Hide completely on the public landing page ('/')
+  if (location.pathname === '/') {
+    return null;
+  }
+
+  // 2. Hide on public auth pages
+  if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/signup') {
+    return null;
+  }
+
+  // 3. Only show when user is logged in
+  if (!user) {
+    return null;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

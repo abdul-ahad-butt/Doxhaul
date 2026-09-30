@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Truck, ShieldCheck, BarChart3, Clock, UserPlus, FileSearch, Banknote, Star, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useScrollReveal } from '../hooks/useScrollReveal';
@@ -28,6 +28,7 @@ const RevealCard = ({ children, delay }: { children: React.ReactNode, delay: num
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,10 +46,8 @@ const LandingPage = () => {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${isScrolled ? 'bg-navy-950/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
         <div className="text-2xl font-bold tracking-tight">Doxhaul<span className="text-brand-blue">.</span></div>
         <div className="space-x-4 flex items-center">
-          <Link to="/login" className="text-white hover:text-navy-100 font-medium transition-colors">Log In</Link>
-          <Link to="/register">
-            <Button variant="primary">Get Started</Button>
-          </Link>
+          <button onClick={() => navigate('/login')} className="text-white hover:text-navy-100 font-medium transition-colors cursor-pointer bg-transparent border-none">Log In</button>
+          <Button variant="primary" onClick={() => navigate('/register')}>Get Started</Button>
         </div>
       </nav>
 
@@ -62,12 +61,8 @@ const LandingPage = () => {
             The verified marketplace connecting trusted shippers, brokers, and carriers. Real-time tracking, seamless compliance, and total operational visibility.
           </p>
           <div className="flex justify-center space-x-4">
-            <Link to="/register">
-              <Button variant="primary" size="lg" className="text-lg px-8">Join the Network</Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="outline-white" size="lg" className="text-lg px-8">Sign In</Button>
-            </Link>
+            <Button variant="primary" size="lg" className="text-lg px-8" onClick={() => navigate('/register')}>Join the Network</Button>
+            <Button variant="outline-white" size="lg" className="text-lg px-8" onClick={() => navigate('/login')}>Sign In</Button>
           </div>
         </div>
       </section>
@@ -252,9 +247,7 @@ const LandingPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg border border-slate-200 text-center max-w-md mx-4">
               <h3 className="text-xl font-bold text-navy-900 mb-3">See 10,000+ Active Loads</h3>
               <p className="text-slate-700 mb-6">Create a free account to view full load details, broker information, and book instantly.</p>
-              <Link to="/register">
-                <Button variant="primary" className="w-full">Create Free Account</Button>
-              </Link>
+              <Button variant="primary" className="w-full" onClick={() => navigate('/register')}>Create Free Account</Button>
             </div>
           </div>
         </div>
@@ -318,9 +311,7 @@ const LandingPage = () => {
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Next-day quickpay access</li>
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Document management</li>
               </ul>
-              <Link to="/register">
-                <Button variant="outline" className="w-full border-slate-300 text-slate-700 hover:bg-slate-50">Create Carrier Account</Button>
-              </Link>
+              <Button variant="outline" className="w-full border-slate-300 text-slate-700 hover:bg-slate-50" onClick={() => navigate('/register')}>Create Carrier Account</Button>
             </div>
           </RevealCard>
 
@@ -335,9 +326,7 @@ const LandingPage = () => {
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Real-time GPS tracking</li>
                 <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Automated compliance checks</li>
               </ul>
-              <Link to="/register">
-                <Button variant="primary" className="w-full">Start Posting Loads</Button>
-              </Link>
+              <Button variant="primary" className="w-full" onClick={() => navigate('/register')}>Start Posting Loads</Button>
             </div>
           </RevealCard>
         </div>
@@ -404,12 +393,8 @@ const LandingPage = () => {
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Ready to streamline your logistics?</h2>
           <p className="text-xl text-white/80 mb-10">Join thousands of shippers, brokers, and carriers moving freight efficiently on the Doxhaul network today.</p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link to="/register">
-              <Button variant="secondary" size="lg" className="text-brand-blue font-bold text-lg px-8 py-4 w-full sm:w-auto hover:bg-white transition-transform hover:scale-105">Get Started for Free</Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="outline-white" size="lg" className="text-lg px-8 py-4 w-full sm:w-auto hover:bg-white/10">Sign In to Dashboard</Button>
-            </Link>
+            <Button variant="secondary" size="lg" className="text-brand-blue font-bold text-lg px-8 py-4 w-full sm:w-auto hover:bg-white transition-transform hover:scale-105" onClick={() => navigate('/register')}>Get Started for Free</Button>
+            <Button variant="outline-white" size="lg" className="text-lg px-8 py-4 w-full sm:w-auto hover:bg-white/10" onClick={() => navigate('/login')}>Sign In to Dashboard</Button>
           </div>
         </div>
       </section>
