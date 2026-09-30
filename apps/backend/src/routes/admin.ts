@@ -87,7 +87,7 @@ router.post('/verifications/:id/approve', async (c) => {
 
   const userStmt = c.env.DB.prepare("UPDATE users SET status = 'ACTIVE', updated_at = datetime('now') WHERE id = ?").bind(userId);
   const profileStmt = c.env.DB.prepare("UPDATE profiles SET verification_status = 'VERIFIED', updated_at = datetime('now') WHERE user_id = ?").bind(userId);
-  const docsStmt = c.env.DB.prepare("UPDATE documents SET status = 'APPROVED', reviewed_by = ?, reviewed_at = datetime('now') WHERE user_id = ? AND status = 'PENDING'").bind(adminUser.id, userId);
+  const docsStmt = c.env.DB.prepare("UPDATE documents SET status = 'APPROVED', reviewed_by = ?, reviewed_at = datetime('now') WHERE user_id = ?").bind(adminUser.id, userId);
   const auditStmt = c.env.DB.prepare(`INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id) VALUES (?, ?, ?, ?, ?, ?)`).bind(crypto.randomUUID().replace(/-/g, ''), adminUser.id, 'ADMIN', 'USER_VERIFIED', 'USER', userId);
 
   try {
@@ -105,7 +105,7 @@ router.post('/verifications/:id/reject', async (c) => {
   const reason = body.reason || "Document verification declined. Please upload a clear and valid driver's license.";
 
   const profileStmt = c.env.DB.prepare("UPDATE profiles SET verification_status = 'REJECTED', verification_notes = ?, updated_at = datetime('now') WHERE user_id = ?").bind(reason, userId);
-  const docsStmt = c.env.DB.prepare("UPDATE documents SET status = 'REJECTED', reviewed_by = ?, reviewed_at = datetime('now') WHERE user_id = ? AND status = 'PENDING'").bind(adminUser.id, userId);
+  const docsStmt = c.env.DB.prepare("UPDATE documents SET status = 'REJECTED', reviewed_by = ?, reviewed_at = datetime('now') WHERE user_id = ?").bind(adminUser.id, userId);
   const auditStmt = c.env.DB.prepare(`INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(crypto.randomUUID().replace(/-/g, ''), adminUser.id, 'ADMIN', 'USER_REJECTED', 'USER', userId, JSON.stringify({ reason }));
 
   try {

@@ -76,10 +76,11 @@ export const SupportChatWidget = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-brand-navy hover:bg-brand-navy/90 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-105 flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
         title="Need Help? Chat with Admin"
       >
-        <MessageSquare size={24} />
+        <MessageSquare size={20} />
+        <span className="font-medium text-sm">Need Help? Chat with Admin</span>
       </button>
     );
   }

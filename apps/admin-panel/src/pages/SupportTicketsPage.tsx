@@ -14,12 +14,12 @@ export const SupportTicketsPage = () => {
 
   const { data: ticketsData, isLoading } = useQuery({
     queryKey: ['admin-tickets', filter, statusFilter],
-    queryFn: () => apiClient.get(`/admin/tickets?category=${filter}&status=${statusFilter}`)
+    queryFn: () => apiClient.get(`/tickets?category=${filter}&status=${statusFilter}`)
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string, status: string }) => 
-      apiClient.patch(`/admin/tickets/${id}/status`, { status }),
+      apiClient.patch(`/tickets/${id}/status`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
     }

@@ -180,7 +180,7 @@ const ProfilePage = () => {
               documents?.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-navy-200 rounded-lg shadow-sm">
                   <div className="flex items-center">
-                    {getDocTypeIcon(doc.status)}
+                    {getDocTypeIcon(doc.status || profile?.verification_status || 'PENDING')}
                     <div className="ml-4">
                       <p className="text-sm font-medium text-navy-900">
                         {doc.document_type.replace('_', ' ')}
@@ -191,7 +191,7 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <StatusBadge status={doc.status} />
+                    <StatusBadge status={doc.status || profile?.verification_status || 'PENDING'} />
                     <Button variant="ghost" size="sm" onClick={() => handleViewDocument(doc)}>
                       View
                     </Button>
