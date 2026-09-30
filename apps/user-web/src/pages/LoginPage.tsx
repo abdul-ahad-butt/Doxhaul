@@ -26,8 +26,7 @@ const LoginPage = () => {
         navigate('/complete-profile', { state: { email: data.email, googleToken: data.googleToken, googleId: data.googleId } });
       } else {
         login(data.token, data.user);
-        if (data.user.role === 'ADMIN') navigate('/admin');
-        else if (data.user.role === 'CARRIER') navigate('/loads');
+        if (data.user.role === 'CARRIER') navigate('/loads');
         else navigate('/dashboard');
       }
     },
@@ -47,8 +46,7 @@ const LoginPage = () => {
     },
     onSuccess: (data) => {
       login(data.token, data.user);
-      if (data.user.role === 'ADMIN') navigate('/admin');
-      else if (data.user.role === 'CARRIER') navigate('/loads');
+      if (data.user.role === 'CARRIER') navigate('/loads');
       else navigate('/dashboard');
     },
     onError: (err: ApiError) => {

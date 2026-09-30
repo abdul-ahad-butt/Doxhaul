@@ -89,34 +89,41 @@ router.get('/:id/view', async (c) => {
   const docId = c.req.param('id');
 
   // Verify ownership or admin
-  let doc;
-  if (user.role === 'ADMIN') {
+  let doc: any;
+  if (user && user.role === 'ADMIN') {
     doc = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ?').bind(docId).first();
-  } else {
+  } else if (user) {
     doc = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?').bind(docId, user.id).first();
   }
 
   if (!doc) {
-    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } }, 404);
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Content-Type', 'application/json');
+    return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } }), { status: 404, headers });
   }
 
-  // To view/download, we will proxy it through the worker
+  // To view/download, proxy through worker using StorageService
   const storage = new StorageService(c.env.DOCUMENTS);
   const file = await storage.getFile(doc.object_key as string);
   
   if (!file) {
-    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }, 404);
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Content-Type', 'application/json');
+    return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }), { status: 404, headers });
   }
 
-  const originalFilename = (doc.original_filename as string) || '';
-  const contentType = (doc.mime_type as string) || (originalFilename.endsWith('.jpg') || originalFilename.endsWith('.jpeg') ? 'image/jpeg' : 'image/png');
+  const originalFilename = (doc.original_filename as string) || 'document';
+  const contentType = (doc.mime_type as string) || (originalFilename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : originalFilename.match(/\.png$/i) ? 'image/png' : 'application/octet-stream');
   
-  c.header('Content-Type', contentType);
-  c.header('Content-Disposition', `inline; filename="${originalFilename}"`);
-  c.header('Access-Control-Allow-Origin', '*');
-  c.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  headers.set('Content-Type', contentType);
+  headers.set('Content-Disposition', `inline; filename="${originalFilename}"`);
   
-  return c.body(file.body);
+  return new Response(file.body, { headers });
 });
 
 router.delete('/:id', async (c) => {

@@ -38,6 +38,10 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           
+          {/* Admin Redirects in User Web */}
+          <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/admin/*" element={<Navigate to="/dashboard" replace />} />
+          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <SupportAssistantWidget />

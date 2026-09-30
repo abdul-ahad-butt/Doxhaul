@@ -9,20 +9,34 @@ interface BadgeProps {
 export const Badge = ({ children, variant = 'default', className = '' }: BadgeProps) => {
   const variants = {
     default: 'bg-navy-100 text-navy-800',
-    success: 'bg-brand-green/10 text-brand-green',
-    warning: 'bg-brand-amber/10 text-brand-amber',
-    danger: 'bg-brand-red/10 text-brand-red',
-    info: 'bg-brand-blue/10 text-brand-blue',
+    success: 'bg-green-100 text-green-700 font-medium',
+    warning: 'bg-yellow-100 text-yellow-700 font-medium',
+    danger: 'bg-red-100 text-red-700 font-medium',
+    info: 'bg-brand-blue/10 text-brand-blue font-medium',
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs ${variants[variant]} ${className}`}>
       {children}
     </span>
   );
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {
+  const s = (status || '').toUpperCase();
+
+  if (s === 'REJECTED' || s === 'SUSPENDED' || s === 'BANNED') {
+    return <Badge variant="danger">Declined / Rejected</Badge>;
+  }
+
+  if (s === 'VERIFIED' || s === 'APPROVED' || s === 'ACTIVE' || s === 'COMPLETED') {
+    return <Badge variant="success">Verified</Badge>;
+  }
+
+  if (s === 'PENDING' || s === 'PENDING_VERIFICATION') {
+    return <Badge variant="warning">Pending Verification</Badge>;
+  }
+
   let variant: BadgeProps['variant'] = 'default';
   let label = status;
 
@@ -49,22 +63,6 @@ export const StatusBadge = ({ status }: { status: string }) => {
       variant = 'success';
       break;
     case 'CANCELLED':
-      variant = 'danger';
-      break;
-    case 'PENDING_VERIFICATION':
-    case 'PENDING':
-      variant = 'warning';
-      label = 'Pending Verification';
-      break;
-    case 'VERIFIED':
-    case 'ACTIVE':
-    case 'APPROVED':
-    case 'COMPLETED':
-      variant = 'success';
-      break;
-    case 'REJECTED':
-    case 'SUSPENDED':
-    case 'BANNED':
       variant = 'danger';
       break;
   }

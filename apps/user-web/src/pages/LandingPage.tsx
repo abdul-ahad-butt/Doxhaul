@@ -42,16 +42,18 @@ const LandingPage = () => {
       {/* Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${isScrolled ? 'bg-navy-950/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
         <div className="text-2xl font-bold tracking-tight">Doxhaul<span className="text-brand-blue">.</span></div>
-        <div className="space-x-4 flex items-center">
+        <div className="space-x-4 flex items-center relative z-20 pointer-events-auto">
           <Link
             to="/login"
+            id="nav-login-btn"
             className="text-white hover:text-navy-100 font-medium transition-colors cursor-pointer"
           >
             Log In
           </Link>
           <Link
             to="/register"
-            className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm"
+            id="nav-get-started-btn"
+            className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm cursor-pointer"
           >
             Get Started
           </Link>
@@ -67,16 +69,18 @@ const LandingPage = () => {
           <p className="text-xl text-slate-50 mb-10 max-w-3xl mx-auto">
             The verified marketplace connecting trusted shippers, brokers, and carriers. Real-time tracking, seamless compliance, and total operational visibility.
           </p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-4 relative z-20 pointer-events-auto">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-12 px-8 text-lg"
+              id="hero-join-network-btn"
+              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-12 px-8 text-lg cursor-pointer"
             >
               Join the Network
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 text-lg"
+              id="hero-sign-in-btn"
+              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 text-lg cursor-pointer"
             >
               Sign In
             </Link>

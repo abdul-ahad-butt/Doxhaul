@@ -170,8 +170,8 @@ const UserReviewDetails = ({ userId }: { userId: string }) => {
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
 
   const handleViewDocument = (doc: any) => {
-    const token = localStorage.getItem('admin_token');
-    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+    const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || '';
+    const baseUrl = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
     setSelectedDocUrl(`${baseUrl}/documents/${doc.id}/view?token=${token}`);
     setSelectedDoc(doc);
     setIsModalOpen(true);

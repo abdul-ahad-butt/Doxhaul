@@ -3,23 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '../components/ui/Card';
 import { StatusBadge } from '../components/ui/Badge';
 import { apiClient } from '../api/client';
-import { Search, Eye, X } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
+import { DocumentHistoryModal } from '../components/modals/DocumentHistoryModal';
 import { DocumentViewerModal } from '../components/common/DocumentViewerModal';
 
 export const UsersDirectoryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [viewDoc, setViewDoc] = useState<{ id: string, name: string } | null>(null);
+  const [viewDoc, setViewDoc] = useState<{ id: string, name: string, mimeType?: string } | null>(null);
 
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: () => apiClient.get('/admin/users')
-  });
-
-  const { data: userDocsData, isLoading: docsLoading } = useQuery({
-    queryKey: ['admin-user-docs', selectedUser?.id],
-    queryFn: () => apiClient.get(`/admin/users/${selectedUser?.id}/documents`),
-    enabled: !!selectedUser
   });
 
   const users = (usersData as any[]) || [];
@@ -29,6 +24,9 @@ export const UsersDirectoryPage = () => {
     (u.last_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (u.company_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || '';
+  const apiBase = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
 
   return (
     <div className="space-y-6">
@@ -62,7 +60,7 @@ export const UsersDirectoryPage = () => {
               </thead>
               <tbody>
                 {usersLoading ? (
-                  <tr><td colSpan={5} className="text-center py-8">Loading users...</td></tr>
+                  <tr><td colSpan={5} className="text-center py-8 text-gray-500">Loading users...</td></tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr><td colSpan={5} className="text-center py-8 text-gray-500">No users found.</td></tr>
                 ) : (
@@ -79,7 +77,7 @@ export const UsersDirectoryPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <StatusBadge status={user.status === 'ACTIVE' ? 'VERIFIED' : user.status} />
+                        <StatusBadge status={user.status} />
                       </td>
                       <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
                         {new Date(user.created_at).toLocaleDateString()}
@@ -87,7 +85,7 @@ export const UsersDirectoryPage = () => {
                       <td className="px-6 py-4 text-right">
                         <button 
                           onClick={() => setSelectedUser(user)}
-                          className="text-brand-blue hover:text-brand-blue/80 font-medium text-sm flex items-center justify-end gap-1 ml-auto"
+                          className="text-brand-blue hover:text-brand-blue/80 font-medium text-sm flex items-center justify-end gap-1 ml-auto cursor-pointer"
                         >
                           <Eye size={16} /> View History
                         </button>
@@ -102,65 +100,22 @@ export const UsersDirectoryPage = () => {
       </Card>
 
       {/* History Modal */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div>
-                <h2 className="text-lg font-bold text-navy-900">Document History: {selectedUser.first_name} {selectedUser.last_name}</h2>
-                <p className="text-sm text-gray-500">{selectedUser.email}</p>
-              </div>
-              <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-6">
-              {docsLoading ? (
-                <div className="text-center py-8">Loading document history...</div>
-              ) : !(userDocsData as any[])?.length ? (
-                <div className="text-center py-8 text-gray-500">No documents found for this user.</div>
-              ) : (
-                <div className="space-y-4">
-                  {(userDocsData as any[]).map((doc: any) => (
-                    <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{doc.document_type.replace(/_/g, ' ')}</p>
-                        <p className="text-xs text-gray-500 mt-1">Uploaded: {new Date(doc.uploaded_at).toLocaleString()}</p>
-                        {doc.rejection_reason && (
-                          <p className="text-xs text-red-600 mt-1">Reason: {doc.rejection_reason}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <StatusBadge status={doc.status} />
-                        <button
-                          onClick={() => setViewDoc({ id: doc.id, name: doc.original_filename })}
-                          className="text-brand-blue text-sm hover:underline"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-              <button 
-                onClick={() => setSelectedUser(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DocumentHistoryModal
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        user={selectedUser}
+        onViewDocument={(doc) => setViewDoc({ 
+          id: doc.id, 
+          name: doc.original_filename, 
+          mimeType: doc.mime_type 
+        })}
+      />
 
       {viewDoc && (
         <DocumentViewerModal
           isOpen={true}
-          documentUrl={`${(import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev'}/api/admin/documents/${viewDoc.id}/view`}
+          documentUrl={`${apiBase}/documents/${viewDoc.id}/view?token=${token}`}
+          documentType={viewDoc.mimeType}
           filename={viewDoc.name}
           onClose={() => setViewDoc(null)}
         />
@@ -168,3 +123,4 @@ export const UsersDirectoryPage = () => {
     </div>
   );
 };
+

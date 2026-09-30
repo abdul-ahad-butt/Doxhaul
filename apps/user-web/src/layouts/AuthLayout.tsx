@@ -5,7 +5,6 @@ export const AuthLayout = () => {
   const { isAuthenticated, user } = useAuth();
 
   if (isAuthenticated) {
-    if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
     if (user?.role === 'CARRIER') return <Navigate to="/loads" replace />;
     return <Navigate to="/dashboard" replace />;
   }
