@@ -162,7 +162,21 @@ const AdminDashboardPage = () => {
   );
 };
 
+import { DocumentViewerModal } from '../components/common/DocumentViewerModal';
+
 const UserReviewDetails = ({ userId }: { userId: string }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDocUrl, setSelectedDocUrl] = useState('');
+  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+
+  const handleViewDocument = (doc: any) => {
+    const token = localStorage.getItem('admin_token');
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+    setSelectedDocUrl(`${baseUrl}/documents/${doc.id}/view?token=${token}`);
+    setSelectedDoc(doc);
+    setIsModalOpen(true);
+  };
+
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'verifications', userId],
     queryFn: () => apiClient.get<any>(`/admin/verifications/${userId}`)
@@ -196,12 +210,20 @@ const UserReviewDetails = ({ userId }: { userId: string }) => {
                   <FileText className="h-4 w-4 text-navy-400 mr-2" />
                   <span className="text-sm text-navy-700">{doc.document_type}</span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => window.open(`/api/documents/${doc.id}?token=${localStorage.getItem('token')}`)}>View</Button>
+                <Button variant="ghost" size="sm" onClick={() => handleViewDocument(doc)}>View</Button>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <DocumentViewerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        documentUrl={selectedDocUrl}
+        documentType={selectedDoc?.mime_type}
+        filename={selectedDoc?.original_filename}
+      />
     </div>
   );
 };

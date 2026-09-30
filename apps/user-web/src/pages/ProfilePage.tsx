@@ -7,12 +7,26 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/Badge';
 
+import { DocumentViewerModal } from '../components/common/DocumentViewerModal';
+
 const ProfilePage = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedDocType, setSelectedDocType] = useState('INSURANCE_CERTIFICATE');
   const [uploadError, setUploadError] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDocUrl, setSelectedDocUrl] = useState('');
+  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+
+  const handleViewDocument = (doc: any) => {
+    const token = localStorage.getItem('token');
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+    setSelectedDocUrl(`${baseUrl}/documents/${doc.id}/view?token=${token}`);
+    setSelectedDoc(doc);
+    setIsModalOpen(true);
+  };
 
   const { data: documents, isLoading } = useQuery({
     queryKey: ['documents'],
@@ -160,7 +174,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="flex items-center space-x-4">
                     <StatusBadge status={doc.status} />
-                    <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url)}>
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDocument(doc)}>
                       View
                     </Button>
                   </div>
@@ -170,6 +184,14 @@ const ProfilePage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <DocumentViewerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        documentUrl={selectedDocUrl}
+        documentType={selectedDoc?.mime_type}
+        filename={selectedDoc?.original_filename}
+      />
     </div>
   );
 };

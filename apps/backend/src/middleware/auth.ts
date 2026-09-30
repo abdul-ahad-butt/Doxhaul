@@ -19,11 +19,18 @@ declare module 'hono' {
 
 export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) => {
   const authHeader = c.req.header('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing or invalid token' } }, 401);
+  const queryToken = c.req.query('token');
+  
+  let token = '';
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (queryToken) {
+    token = queryToken;
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing or invalid token' } }, 401);
+  }
   try {
     const secret = c.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod';
     const payload = await verify(token, secret, 'HS256') as unknown as JwtPayload;

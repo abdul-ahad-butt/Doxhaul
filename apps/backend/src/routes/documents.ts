@@ -77,7 +77,7 @@ router.get('/', async (c) => {
   return c.json({ success: true, data: documents.results });
 });
 
-router.get('/:id', async (c) => {
+router.get('/:id/view', async (c) => {
   const user = c.get('user');
   const docId = c.req.param('id');
 
