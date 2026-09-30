@@ -12,9 +12,9 @@ if (!isLocal && BASE_URL.includes('localhost')) {
 }
 
 export const apiClient = {
-  getToken: () => localStorage.getItem('token'),
-  setToken: (token: string) => localStorage.setItem('token', token),
-  clearToken: () => localStorage.removeItem('token'),
+  getToken: () => localStorage.getItem('admin_token'),
+  setToken: (token: string) => localStorage.setItem('admin_token', token),
+  clearToken: () => localStorage.removeItem('admin_token'),
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();

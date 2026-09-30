@@ -179,7 +179,7 @@ router.post('/admin-login', async (c) => {
   }
 
   if (user.role !== 'ADMIN') {
-    return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied. Admin privileges required.' } }, 403);
+    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, 401);
   }
 
   if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
