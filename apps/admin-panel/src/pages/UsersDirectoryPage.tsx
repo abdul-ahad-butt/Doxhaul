@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '../components/ui/Card';
 import { StatusBadge } from '../components/ui/Badge';
@@ -21,7 +22,7 @@ export const UsersDirectoryPage = () => {
     enabled: !!selectedUser
   });
 
-  const users = usersData?.data || [];
+  const users = (usersData as any[]) || [];
   const filteredUsers = users.filter((u: any) => 
     (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (u.first_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,11 +118,11 @@ export const UsersDirectoryPage = () => {
             <div className="flex-1 overflow-y-auto p-6">
               {docsLoading ? (
                 <div className="text-center py-8">Loading document history...</div>
-              ) : !userDocsData?.data?.length ? (
+              ) : !(userDocsData as any[])?.length ? (
                 <div className="text-center py-8 text-gray-500">No documents found for this user.</div>
               ) : (
                 <div className="space-y-4">
-                  {userDocsData.data.map((doc: any) => (
+                  {(userDocsData as any[]).map((doc: any) => (
                     <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900">{doc.document_type.replace(/_/g, ' ')}</p>

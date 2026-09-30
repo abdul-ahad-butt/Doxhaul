@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '../components/ui/Card';
 import { apiClient } from '../api/client';
@@ -24,7 +25,7 @@ export const SupportTicketsPage = () => {
     }
   });
 
-  const tickets = ticketsData?.data || [];
+  const tickets = (ticketsData as any[]) || [];
   
   const openCount = tickets.filter((t: any) => t.status === 'OPEN').length;
   const inProgressCount = tickets.filter((t: any) => t.status === 'IN_PROGRESS').length;
