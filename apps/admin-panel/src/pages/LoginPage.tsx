@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
 import { apiClient, ApiError } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
@@ -9,6 +10,7 @@ import { Input } from '../components/ui/Input';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState('');
@@ -104,17 +106,32 @@ const LoginPage = () => {
           placeholder="admin@doxhaul.com"
         />
         
-        <Input
-          id="password"
-          name="password"
-          label="Password"
-          type="password"
-          required
-          value={password}
-          onChange={handlePasswordChange}
-          onBlur={handlePasswordBlur}
-          error={passwordError}
-        />
+        <div className="w-full">
+          <label htmlFor="password" className="block text-sm font-medium text-navy-700 mb-1">
+            Password
+          </label>
+          <div className="relative flex items-center">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={handlePasswordChange}
+              onBlur={handlePasswordBlur}
+              className={`input-field pr-10 w-full ${passwordError ? 'border-brand-red focus:ring-brand-red focus:border-brand-red' : ''}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          {passwordError && <p className="mt-1 text-sm text-brand-red">{passwordError}</p>}
+        </div>
         
         <Button 
           type="submit" 
