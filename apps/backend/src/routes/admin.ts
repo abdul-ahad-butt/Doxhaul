@@ -12,28 +12,59 @@ router.use('*', authMiddleware, requireRole(['ADMIN']));
 router.route('/tickets', ticketsRoutes);
 
 router.get('/metrics', async (c) => {
-  const [
-    usersCount, 
-    pendingVerifications,
-    activeLoads,
-    totalBookings
-  ] = await c.env.DB.batch([
-    c.env.DB.prepare('SELECT COUNT(*) as c FROM users'),
-    c.env.DB.prepare("SELECT COUNT(*) as c FROM users WHERE verification_status = 'PENDING_VERIFICATION' OR status = 'PENDING_VERIFICATION'"),
-    c.env.DB.prepare("SELECT COUNT(*) as c FROM loads WHERE is_deleted = 0 AND status != 'DELIVERED' AND status != 'CANCELLED'"),
-    c.env.DB.prepare('SELECT COUNT(*) as c FROM bookings')
-  ]);
+  const stats = await c.env.DB.prepare(`
+    SELECT 
+      (SELECT COUNT(*) FROM users) AS total_users,
+      (SELECT COUNT(*) FROM documents WHERE status = 'PENDING') AS pending_verifications,
+      (SELECT COUNT(*) FROM loads WHERE is_deleted = 0 AND status IN ('OPEN', 'ASSIGNED', 'IN_TRANSIT')) AS active_loads,
+      (SELECT COUNT(*) FROM loads WHERE is_deleted = 0 AND status IN ('ASSIGNED', 'IN_TRANSIT', 'DELIVERED')) AS total_bookings
+  `).first<any>();
 
-  // @ts-ignore - D1 batch returns results in order
-  const getCount = (res) => (res.results && res.results.length > 0 ? res.results[0].c : 0);
+  const totalUsers = Number(stats?.total_users ?? 0);
+  const pendingVerifications = Number(stats?.pending_verifications ?? 0);
+  const activeLoads = Number(stats?.active_loads ?? 0);
+  const totalBookings = Number(stats?.total_bookings ?? 0);
 
   return c.json({
     success: true,
     data: {
-      totalUsers: getCount(usersCount),
-      pendingVerifications: getCount(pendingVerifications),
-      activeLoads: getCount(activeLoads),
-      totalBookings: getCount(totalBookings)
+      totalUsers,
+      total_users: totalUsers,
+      pendingVerifications,
+      pending_verifications: pendingVerifications,
+      activeLoads,
+      active_loads: activeLoads,
+      totalBookings,
+      total_bookings: totalBookings
+    }
+  });
+});
+
+router.get('/stats', async (c) => {
+  const stats = await c.env.DB.prepare(`
+    SELECT 
+      (SELECT COUNT(*) FROM users) AS total_users,
+      (SELECT COUNT(*) FROM documents WHERE status = 'PENDING') AS pending_verifications,
+      (SELECT COUNT(*) FROM loads WHERE is_deleted = 0 AND status IN ('OPEN', 'ASSIGNED', 'IN_TRANSIT')) AS active_loads,
+      (SELECT COUNT(*) FROM loads WHERE is_deleted = 0 AND status IN ('ASSIGNED', 'IN_TRANSIT', 'DELIVERED')) AS total_bookings
+  `).first<any>();
+
+  const totalUsers = Number(stats?.total_users ?? 0);
+  const pendingVerifications = Number(stats?.pending_verifications ?? 0);
+  const activeLoads = Number(stats?.active_loads ?? 0);
+  const totalBookings = Number(stats?.total_bookings ?? 0);
+
+  return c.json({
+    success: true,
+    data: {
+      totalUsers,
+      total_users: totalUsers,
+      pendingVerifications,
+      pending_verifications: pendingVerifications,
+      activeLoads,
+      active_loads: activeLoads,
+      totalBookings,
+      total_bookings: totalBookings
     }
   });
 });
@@ -167,18 +198,21 @@ router.get('/verifications', async (c) => {
       u.role, 
       u.status, 
       u.verification_status, 
-      p.first_name, 
-      p.last_name, 
-      p.company_name, 
+      COALESCE(p.first_name, '') as first_name, 
+      COALESCE(p.last_name, '') as last_name, 
+      COALESCE(NULLIF(p.company_name, ''), u.email) as company_name, 
       p.verification_status as profile_verification_status, 
-      p.updated_at
+      COALESCE(p.updated_at, u.updated_at) as updated_at,
+      (SELECT COUNT(*) FROM documents d WHERE d.user_id = u.id AND d.status = 'PENDING') as pending_docs_count
     FROM users u
-    JOIN profiles p ON u.id = p.user_id
-    WHERE (u.verification_status = 'PENDING_VERIFICATION' OR u.verification_status = 'PENDING' OR p.verification_status = 'PENDING' OR u.status = 'PENDING_VERIFICATION')
-      AND u.verification_status != 'APPROVED' 
-      AND u.verification_status != 'REJECTED'
-      AND p.verification_status != 'REJECTED'
-    ORDER BY p.updated_at ASC
+    LEFT JOIN profiles p ON u.id = p.user_id
+    WHERE (
+      u.verification_status IN ('PENDING_VERIFICATION', 'PENDING')
+      OR p.verification_status IN ('PENDING')
+      OR u.status = 'PENDING_VERIFICATION'
+      OR EXISTS (SELECT 1 FROM documents d WHERE d.user_id = u.id AND d.status = 'PENDING')
+    )
+    ORDER BY u.created_at DESC
   `).all();
 
   return c.json({ success: true, data: verifications.results });
@@ -188,9 +222,14 @@ router.get('/verifications/:id', async (c) => {
   const userId = c.req.param('id') || c.req.param('userId');
 
   const user = await c.env.DB.prepare(`
-    SELECT u.id, u.email, u.role, u.status, u.verification_status, u.rejection_reason, p.*
+    SELECT 
+      u.id, u.email, u.role, u.status, u.verification_status, u.rejection_reason,
+      COALESCE(p.first_name, '') as first_name,
+      COALESCE(p.last_name, '') as last_name,
+      COALESCE(NULLIF(p.company_name, ''), u.email) as company_name,
+      p.phone, p.dot_number, p.mc_number, p.address, p.city, p.state, p.zip, p.bio
     FROM users u
-    JOIN profiles p ON u.id = p.user_id
+    LEFT JOIN profiles p ON u.id = p.user_id
     WHERE u.id = ?
   `).bind(userId).first();
 
@@ -198,7 +237,7 @@ router.get('/verifications/:id', async (c) => {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } }, 404);
   }
 
-  const documents = await c.env.DB.prepare('SELECT * FROM documents WHERE user_id = ?').bind(userId).all();
+  const documents = await c.env.DB.prepare('SELECT * FROM documents WHERE user_id = ? ORDER BY uploaded_at DESC').bind(userId).all();
 
   return c.json({ success: true, data: { user, documents: documents.results } });
 });

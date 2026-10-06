@@ -13,6 +13,8 @@ import ProfilePage from './pages/ProfilePage';
 import BookingsPage from './pages/BookingsPage';
 import TripsPage from './pages/TripsPage';
 import InvoicesPage from './pages/InvoicesPage';
+import CreateLoadPage from './pages/shipper/CreateLoadPage';
+import MyShipmentsPage from './pages/shipper/MyShipmentsPage';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
@@ -33,14 +35,24 @@ function App() {
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            
+            {/* Shipper Core Routes */}
+            <Route path="/loads/create" element={<CreateLoadPage />} />
+            <Route path="/my-loads" element={<MyShipmentsPage />} />
+            <Route path="/bids" element={<BookingsPage />} />
+
+            {/* Carrier / Shared Routes */}
+            <Route path="/load-board" element={<LoadBoardPage />} />
             <Route path="/loads" element={<LoadBoardPage />} />
-            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/active-hauls" element={<TripsPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/earnings" element={<InvoicesPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           
-          {/* Admin Redirects in User Web */}
+          {/* Admin Redirects in User Marketplace: Strict Separation */}
           <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
           <Route path="/admin/*" element={<Navigate to="/dashboard" replace />} />
           

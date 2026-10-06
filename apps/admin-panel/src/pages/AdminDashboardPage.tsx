@@ -48,52 +48,61 @@ const AdminDashboardPage = () => {
         <h2 className="text-2xl font-bold text-navy-900 tracking-tight">Admin Overview</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6 flex items-center">
-            <div className="p-3 rounded-lg bg-brand-blue/10 text-brand-blue">
-              <Users className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-navy-500">Total Users</p>
-              <p className="text-2xl font-semibold text-navy-900">{metrics?.totalUsers || 0}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 flex items-center">
-            <div className="p-3 rounded-lg bg-brand-amber/10 text-brand-amber">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-navy-500">Pending Verifications</p>
-              <p className="text-2xl font-semibold text-navy-900">{metrics?.pendingVerifications || 0}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 flex items-center">
-            <div className="p-3 rounded-lg bg-brand-green/10 text-brand-green">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-navy-500">Active Loads</p>
-              <p className="text-2xl font-semibold text-navy-900">{metrics?.activeLoads || 0}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 flex items-center">
-            <div className="p-3 rounded-lg bg-brand-purple/10 text-brand-purple">
-              <FileText className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-navy-500">Total Bookings</p>
-              <p className="text-2xl font-semibold text-navy-900">{metrics?.totalBookings || 0}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {(() => {
+        const totalUsers = metrics?.totalUsers ?? metrics?.total_users ?? metrics?.data?.totalUsers ?? metrics?.data?.total_users ?? 0;
+        const pendingVerifications = metrics?.pendingVerifications ?? metrics?.pending_verifications ?? metrics?.data?.pendingVerifications ?? metrics?.data?.pending_verifications ?? 0;
+        const activeLoads = metrics?.activeLoads ?? metrics?.active_loads ?? metrics?.data?.activeLoads ?? metrics?.data?.active_loads ?? 0;
+        const totalBookings = metrics?.totalBookings ?? metrics?.total_bookings ?? metrics?.data?.totalBookings ?? metrics?.data?.total_bookings ?? 0;
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-6 flex items-center">
+                <div className="p-3 rounded-lg bg-brand-blue/10 text-brand-blue">
+                  <Users className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-navy-500">Total Users</p>
+                  <p className="text-2xl font-semibold text-navy-900">{totalUsers}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 flex items-center">
+                <div className="p-3 rounded-lg bg-brand-amber/10 text-brand-amber">
+                  <AlertTriangle className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-navy-500">Pending Verifications</p>
+                  <p className="text-2xl font-semibold text-navy-900">{pendingVerifications}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 flex items-center">
+                <div className="p-3 rounded-lg bg-brand-green/10 text-brand-green">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-navy-500">Active Loads</p>
+                  <p className="text-2xl font-semibold text-navy-900">{activeLoads}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 flex items-center">
+                <div className="p-3 rounded-lg bg-brand-purple/10 text-brand-purple">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-navy-500">Total Bookings</p>
+                  <p className="text-2xl font-semibold text-navy-900">{totalBookings}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">

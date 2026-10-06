@@ -5,16 +5,29 @@ export class ApiError extends Error {
   }
 }
 
-let BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-if (!isLocal && BASE_URL.includes('localhost')) {
-  BASE_URL = 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+const LIVE_API_URL = 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+let envUrl = (import.meta as any).env?.VITE_API_URL;
+let BASE_URL = LIVE_API_URL;
+
+if (typeof window !== 'undefined') {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isLocal && envUrl && envUrl.includes('localhost')) {
+    BASE_URL = envUrl;
+  } else {
+    BASE_URL = LIVE_API_URL;
+  }
 }
 
 export const apiClient = {
-  getToken: () => localStorage.getItem('admin_token'),
-  setToken: (token: string) => localStorage.setItem('admin_token', token),
-  clearToken: () => localStorage.removeItem('admin_token'),
+  getToken: () => localStorage.getItem('admin_token') || localStorage.getItem('token'),
+  setToken: (token: string) => {
+    localStorage.setItem('admin_token', token);
+    localStorage.setItem('token', token);
+  },
+  clearToken: () => {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('token');
+  },
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();

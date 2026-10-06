@@ -9,10 +9,8 @@ import {
   Search, 
   Truck, 
   Tag, 
-  ShieldCheck, 
   FileText, 
   Users, 
-  LifeBuoy, 
   LogOut 
 } from 'lucide-react';
 
@@ -25,54 +23,46 @@ export interface NavItem {
 }
 
 export const Sidebar = () => {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, activeRole, logout } = useAuth();
   const location = useLocation();
 
-  const role = (user?.role || 'CARRIER').toUpperCase();
-
   const getNavItems = (): NavItem[] => {
-    switch (role) {
+    switch (activeRole) {
       case 'SHIPPER':
         return [
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Post a Load', icon: PackagePlus, href: '/loads?action=post' },
-          { label: 'My Shipments', icon: Package, href: '/loads' },
-          { label: 'Invoices & Spend', icon: CreditCard, href: '/invoices' },
-          { label: 'Company Profile', icon: Building2, href: '/profile' },
+          { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
+          { label: 'My Shipments', icon: Package, href: '/my-loads' },
+          { label: 'Bids & Quotes', icon: Tag, href: '/bids' },
+          { label: 'Billing & Invoices', icon: CreditCard, href: '/invoices' },
+          { label: 'Company & Profile', icon: Building2, href: '/profile' },
         ];
 
       case 'CARRIER':
         return [
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Find Loads (Load Board)', icon: Search, href: '/loads' },
-          { label: 'My Active Hauls', icon: Truck, href: '/trips' },
-          { label: 'Bids & Offers', icon: Tag, href: '/bookings' },
-          { label: 'Compliance & Documents', icon: FileText, href: '/profile' },
+          { label: 'Load Board (Find Loads)', icon: Search, href: '/load-board' },
+          { label: 'My Active Hauls', icon: Truck, href: '/active-hauls' },
+          { label: 'Earnings & Payouts', icon: CreditCard, href: '/earnings' },
+          { label: 'Documents & Compliance', icon: FileText, href: '/profile' },
         ];
 
       case 'BROKER':
         return [
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Manage Loads', icon: Package, href: '/loads' },
-          { label: 'Bids & Dispatch', icon: Truck, href: '/bookings' },
-          { label: 'Carrier Network', icon: Users, href: '/trips' },
-          { label: 'Billing', icon: CreditCard, href: '/invoices' },
-        ];
-
-      case 'ADMIN':
-        return [
-          { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Users Directory', icon: Users, href: '/admin/users' },
-          { label: 'Verifications Queue', icon: ShieldCheck, href: '/admin/verifications' },
-          { label: 'Platform Loads', icon: Package, href: '/admin/loads' },
-          { label: 'User Issues', icon: LifeBuoy, href: '/admin/tickets' },
+          { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
+          { label: 'Manage Loads', icon: Package, href: '/my-loads' },
+          { label: 'Carrier Network', icon: Users, href: '/load-board' },
+          { label: 'Billing & Invoices', icon: CreditCard, href: '/invoices' },
+          { label: 'Company Profile', icon: Building2, href: '/profile' },
         ];
 
       default:
         return [
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Load Board', icon: Search, href: '/loads' },
-          { label: 'My Profile', icon: Building2, href: '/profile' },
+          { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
+          { label: 'My Shipments', icon: Package, href: '/my-loads' },
+          { label: 'Profile', icon: Building2, href: '/profile' },
         ];
     }
   };
@@ -93,14 +83,14 @@ export const Sidebar = () => {
           Doxhaul<span className="text-brand-blue">.</span>
         </Link>
         <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-brand-blue border border-blue-200 uppercase tracking-wider">
-          {role}
+          {activeRole}
         </span>
       </div>
 
       {/* Nav Items */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <div className="text-[11px] font-semibold text-navy-400 uppercase tracking-wider px-3 mb-2">
-          {role === 'ADMIN' ? 'Administration' : 'Marketplace Menu'}
+          Marketplace Menu
         </div>
         {navItems.map((item) => {
           const active = isActive(item.href);
@@ -133,7 +123,7 @@ export const Sidebar = () => {
             <p className="text-sm font-semibold text-navy-900 truncate">
               {profile?.company_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'My Account'}
             </p>
-            <p className="text-xs text-navy-500 capitalize">{role.toLowerCase()}</p>
+            <p className="text-xs text-navy-500 capitalize">{activeRole.toLowerCase()}</p>
           </div>
         </div>
         <button

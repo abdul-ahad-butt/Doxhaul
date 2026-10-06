@@ -3,18 +3,20 @@ import { useAuth } from '../hooks/useAuth';
 import { Sidebar } from '../components/layout/Sidebar';
 
 export const AppLayout = () => {
-  const { user, profile, isAuthenticated } = useAuth();
+  const { user, profile, isAuthenticated, activeRole, switchRole } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.status === 'PENDING_VERIFICATION' && location.pathname !== '/profile') {
+  // Admin users are never blocked by pending verification
+  if (user?.role !== 'ADMIN' && user?.status === 'PENDING_VERIFICATION' && location.pathname !== '/profile') {
     return <Navigate to="/profile" replace />;
   }
 
-  const isVerified = profile?.verification_status === 'VERIFIED' || 
+  const isVerified = user?.role === 'ADMIN' || 
+    profile?.verification_status === 'VERIFIED' || 
     profile?.verification_status === 'APPROVED' || 
     (user as any)?.verification_status === 'APPROVED' || 
     (user as any)?.verification_status === 'VERIFIED';
@@ -26,6 +28,29 @@ export const AppLayout = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Subtle Admin Testing Banner */}
+        {user?.role === 'ADMIN' && (
+          <div className="bg-slate-900 text-slate-300 px-4 py-1.5 text-xs flex justify-between items-center z-20 border-b border-slate-800 flex-shrink-0">
+            <span>Logged in with Admin Account — Testing as <strong className="text-white uppercase font-bold">{activeRole}</strong></span>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => switchRole(activeRole === 'SHIPPER' ? 'CARRIER' : 'SHIPPER')} 
+                className="hover:text-white underline cursor-pointer text-slate-300"
+              >
+                Switch to {activeRole === 'SHIPPER' ? 'Carrier' : 'Shipper'} View
+              </button>
+              <a 
+                href="https://doxhaul-adminpanel.pages.dev" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Open Admin Panel ↗
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Top Header */}
         <header className="h-16 bg-navy-900 text-white flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
           <div className="flex items-center">

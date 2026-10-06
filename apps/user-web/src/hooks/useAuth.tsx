@@ -20,11 +20,15 @@ export type Profile = {
   verification_notes?: string;
 };
 
+export type ActiveRole = 'SHIPPER' | 'CARRIER' | 'BROKER';
+
 type AuthContextType = {
   user: User | null;
   profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeRole: ActiveRole;
+  switchRole: (role: ActiveRole) => void;
   login: (token: string, user: User) => void;
   logout: () => void;
 };
@@ -33,6 +37,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(apiClient.getToken());
+  const [testedRole, setTestedRole] = useState<ActiveRole>(() => {
+    const saved = sessionStorage.getItem('doxhaul_active_role');
+    return (saved as ActiveRole) || 'SHIPPER';
+  });
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -75,6 +83,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryClient.clear();
   };
 
+  const user = data?.user || null;
+  const userRole = user?.role;
+  
+  // When user is ADMIN on the marketplace, default to testedRole (SHIPPER/CARRIER/BROKER)
+  const activeRole: ActiveRole = userRole === 'ADMIN' 
+    ? testedRole 
+    : ((userRole as ActiveRole) || 'SHIPPER');
+
+  const switchRole = (newRole: ActiveRole) => {
+    setTestedRole(newRole);
+    sessionStorage.setItem('doxhaul_active_role', newRole);
+  };
+
   const isAuthReady = !token || (!isLoading && (!!data || !!error));
 
   if (!isAuthReady) {
@@ -84,10 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider
       value={{
-        user: data?.user || null,
+        user,
         profile: data?.profile || null,
-        isAuthenticated: !!data?.user,
+        isAuthenticated: !!user,
         isLoading,
+        activeRole,
+        switchRole,
         login,
         logout,
       }}

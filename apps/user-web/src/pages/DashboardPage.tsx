@@ -1,30 +1,44 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Package, 
   Truck, 
-  Activity, 
   CheckCircle, 
   TrendingUp, 
   Lock, 
   PlusCircle, 
   Search, 
   ShieldCheck, 
-  Users, 
-  ArrowRight 
+  ArrowRight, 
+  MapPin, 
+  Clock 
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../api/client';
 import { Card, CardContent } from '../components/ui/Card';
 import { VerificationAlertBanner } from '../components/dashboard/VerificationAlertBanner';
 
-export const DashboardPage = () => {
-  const { user, profile } = useAuth();
-  const navigate = useNavigate();
-  
-  const role = (user?.role || 'CARRIER').toUpperCase();
+interface ShipmentItem {
+  id: string;
+  reference_number: string;
+  title: string;
+  origin_city: string;
+  origin_state: string;
+  destination_city: string;
+  destination_state: string;
+  pickup_date: string;
+  delivery_date: string;
+  equipment_type: string;
+  weight: number;
+  rate: number;
+  status: 'OPEN' | 'BIDDING' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED';
+  created_at: string;
+}
 
-  // Real live queries to Cloudflare D1
+export const DashboardPage = () => {
+  const { user, profile, activeRole } = useAuth();
+
+  // Live queries to Cloudflare D1
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: () => apiClient.get<{
@@ -37,25 +51,29 @@ export const DashboardPage = () => {
     }>('/dashboard/stats')
   });
 
-  const { data: activityData, isLoading: activityLoading } = useQuery({
-    queryKey: ['dashboard', 'activity'],
-    queryFn: () => apiClient.get<Array<{
-      id: string;
-      title: string;
-      description: string;
-      timestamp: string;
-    }>>('/dashboard/activity')
+  // For shipper, fetch their live active shipments
+  const { data: shipmentsData, isLoading: shipmentsLoading } = useQuery({
+    queryKey: ['dashboard', 'shipments', activeRole],
+    queryFn: async () => {
+      if (activeRole === 'SHIPPER') {
+        const res = await apiClient.get<{ loads: ShipmentItem[], total: number }>('/loads?ownerOnly=true&pageSize=5');
+        return (res as any)?.loads || (Array.isArray(res) ? res : []);
+      }
+      return [];
+    },
+    enabled: activeRole === 'SHIPPER'
   });
 
+  const isAdmin = user?.role === 'ADMIN';
   const currentStatus = (statsData?.verificationStatus || profile?.verification_status || (user as any)?.verification_status || user?.status || 'PENDING_VERIFICATION').toUpperCase();
   const rejectionReason = statsData?.rejectionReason || profile?.rejection_reason || (user as any)?.rejection_reason || null;
-  const activities = activityData || [];
+  const isVerified = isAdmin || currentStatus === 'APPROVED' || currentStatus === 'VERIFIED';
 
-  const isVerified = currentStatus === 'APPROVED' || currentStatus === 'VERIFIED';
+  const shipments: ShipmentItem[] = shipmentsData || [];
 
-  // Role-customized stat labels
+  // Metrics based on active role
   const getStats = () => {
-    if (role === 'SHIPPER') {
+    if (activeRole === 'SHIPPER') {
       return [
         { 
           label: 'Active Shipments', 
@@ -72,21 +90,21 @@ export const DashboardPage = () => {
           bg: 'bg-brand-purple/10' 
         },
         { 
-          label: 'Delivered', 
+          label: 'Delivered Loads', 
           value: statsLoading ? '...' : (statsData?.delivered ?? 0).toString(), 
           icon: CheckCircle, 
           color: 'text-brand-green', 
           bg: 'bg-brand-green/10' 
         },
         { 
-          label: 'Freight Spend', 
+          label: 'Total Freight Spend', 
           value: statsLoading ? '...' : `$${Number(statsData?.totalSpendRevenue ?? 0).toLocaleString()}`, 
           icon: TrendingUp, 
           color: 'text-brand-amber', 
           bg: 'bg-yellow-50' 
         },
       ];
-    } else if (role === 'CARRIER') {
+    } else {
       return [
         { 
           label: 'Available Loads', 
@@ -117,75 +135,68 @@ export const DashboardPage = () => {
           bg: 'bg-yellow-50' 
         },
       ];
-    } else {
-      return [
-        { 
-          label: 'Active Loads', 
-          value: statsLoading ? '...' : (statsData?.activeLoads ?? 0).toString(), 
-          icon: Package, 
-          color: 'text-brand-blue', 
-          bg: 'bg-brand-blue/10' 
-        },
-        { 
-          label: 'In Transit', 
-          value: statsLoading ? '...' : (statsData?.inTransit ?? 0).toString(), 
-          icon: Truck, 
-          color: 'text-brand-purple', 
-          bg: 'bg-brand-purple/10' 
-        },
-        { 
-          label: 'Delivered', 
-          value: statsLoading ? '...' : (statsData?.delivered ?? 0).toString(), 
-          icon: CheckCircle, 
-          color: 'text-brand-green', 
-          bg: 'bg-brand-green/10' 
-        },
-        { 
-          label: 'Spend / Revenue', 
-          value: statsLoading ? '...' : `$${Number(statsData?.totalSpendRevenue ?? 0).toLocaleString()}`, 
-          icon: TrendingUp, 
-          color: 'text-brand-amber', 
-          bg: 'bg-yellow-50' 
-        },
-      ];
     }
   };
 
   const stats = getStats();
 
-  const handlePostLoadClick = () => {
-    if (!isVerified) {
-      navigate('/profile');
-      return;
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'OPEN':
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Open</span>;
+      case 'BIDDING':
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Bidding</span>;
+      case 'ASSIGNED':
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">Assigned</span>;
+      case 'IN_TRANSIT':
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 animate-pulse">In Transit</span>;
+      case 'DELIVERED':
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Delivered</span>;
+      default:
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-50 text-gray-700 border border-gray-200">{status}</span>;
     }
-    navigate('/loads?action=post');
-  };
-
-  const handleBookLoadClick = () => {
-    navigate('/loads');
   };
 
   return (
     <div className="space-y-6">
-      {/* Verification Gate / Alert Banner */}
-      <VerificationAlertBanner 
-        status={currentStatus}
-        rejectionReason={rejectionReason}
-        role={role} 
-      />
+      {/* Verification Gate / Alert Banner (only for non-admin accounts pending verification) */}
+      {!isAdmin && (
+        <VerificationAlertBanner 
+          status={currentStatus}
+          rejectionReason={rejectionReason}
+          role={activeRole} 
+        />
+      )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* Top Banner & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-navy-900 tracking-tight">
             Welcome back, {profile?.first_name || user?.email.split('@')[0]}
           </h2>
           <p className="text-sm text-navy-500 capitalize">
-            {role.toLowerCase()} portal • {isVerified ? 'Fully verified' : 'Pending verification'}
+            {activeRole.toLowerCase()} portal • {isVerified ? 'Fully verified' : 'Pending verification'}
           </p>
         </div>
-        <div className="text-sm text-navy-500 font-medium">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </div>
+
+        {/* Primary Call to Action for Shipper: Large Post a New Load Button */}
+        {activeRole === 'SHIPPER' ? (
+          <Link
+            to="/loads/create"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span>➕ Post a New Load</span>
+          </Link>
+        ) : (
+          <Link
+            to="/load-board"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
+          >
+            <Search className="w-5 h-5" />
+            <span>Find Loads on Board</span>
+          </Link>
+        )}
       </div>
 
       {/* Primary KPI Stats */}
@@ -207,183 +218,182 @@ export const DashboardPage = () => {
         ))}
       </div>
 
-      {/* Main Grid: Role Views & Quick Actions */}
+      {/* Main Grid: Active Shipments Table & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <div className="px-6 py-4 border-b border-navy-100 flex justify-between items-center">
             <h3 className="text-lg font-medium text-navy-900">
-              {role === 'SHIPPER' ? 'Recent Shipment Activity' : role === 'CARRIER' ? 'Recent Dispatch & Loads' : 'Recent Platform Activity'}
+              {activeRole === 'SHIPPER' ? 'Active Shipments' : 'Available Load Board Freight'}
             </h3>
-            <button 
-              onClick={() => navigate('/loads')} 
+            <Link 
+              to={activeRole === 'SHIPPER' ? '/my-loads' : '/load-board'} 
               className="text-sm text-brand-blue hover:text-brand-blue/80 font-medium cursor-pointer inline-flex items-center gap-1"
             >
               View All <ArrowRight size={14} />
-            </button>
+            </Link>
           </div>
           <CardContent className="p-0">
-            {activityLoading ? (
-              <div className="p-8 text-center text-navy-500 text-sm">Loading activity...</div>
-            ) : activities.length === 0 ? (
-              <div className="p-8 text-center text-navy-500 text-sm flex flex-col items-center justify-center">
-                <Package className="w-10 h-10 text-navy-300 mb-2 stroke-1" />
-                <p className="font-semibold text-navy-800">No active shipments yet.</p>
-                <p className="text-navy-500 text-xs mt-1">
-                  {role === 'SHIPPER' 
-                    ? 'Post your first freight load to receive competitive bids from certified carriers.'
-                    : 'Search our real-time load board to bid on available freight.'}
-                </p>
-                {role === 'SHIPPER' ? (
-                  <button 
-                    onClick={handlePostLoadClick} 
+            {activeRole === 'SHIPPER' ? (
+              shipmentsLoading ? (
+                <div className="p-8 text-center text-navy-500 text-sm">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-blue mx-auto mb-2"></div>
+                  Loading shipments from database...
+                </div>
+              ) : shipments.length === 0 ? (
+                <div className="p-8 text-center text-navy-500 text-sm flex flex-col items-center justify-center">
+                  <Package className="w-12 h-12 text-navy-300 mb-2 stroke-1" />
+                  <p className="font-semibold text-navy-800">No active shipments yet.</p>
+                  <p className="text-navy-500 text-xs mt-1 max-w-sm">
+                    Post your first freight shipment to receive competitive bids from certified carriers.
+                  </p>
+                  <Link 
+                    to="/loads/create" 
                     className="mt-4 px-4 py-2 bg-brand-blue text-white rounded-lg text-xs font-semibold hover:bg-brand-blueHover cursor-pointer transition-colors shadow-sm inline-flex items-center gap-1.5"
                   >
-                    {!isVerified && <Lock size={12} />} Post a New Load
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => navigate('/loads')} 
-                    className="mt-4 px-4 py-2 bg-brand-blue text-white rounded-lg text-xs font-semibold hover:bg-brand-blueHover cursor-pointer transition-colors shadow-sm inline-flex items-center gap-1.5"
-                  >
-                    Explore Load Board
-                  </button>
-                )}
-              </div>
+                    <PlusCircle size={14} /> Post a New Load
+                  </Link>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-navy-50/50 border-b border-navy-100 text-navy-600 font-semibold uppercase tracking-wider">
+                        <th className="py-2.5 px-4">Ref & Title</th>
+                        <th className="py-2.5 px-4">Route</th>
+                        <th className="py-2.5 px-4">Equipment</th>
+                        <th className="py-2.5 px-4">Rate</th>
+                        <th className="py-2.5 px-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-navy-100 text-navy-800">
+                      {shipments.map((load) => (
+                        <tr key={load.id} className="hover:bg-navy-50/40 transition-colors">
+                          <td className="py-2.5 px-4">
+                            <span className="font-mono font-bold text-brand-blue block">
+                              {load.reference_number || load.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <span className="text-navy-900 truncate max-w-xs block">
+                              {load.title}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-1 text-navy-700">
+                              <MapPin className="w-3 h-3 text-navy-400" />
+                              <span>{load.origin_city}, {load.origin_state} → {load.destination_city}, {load.destination_state}</span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-4">
+                            {load.equipment_type?.replace('_', ' ')} • {Number(load.weight || 0).toLocaleString()} lbs
+                          </td>
+                          <td className="py-2.5 px-4 font-bold text-navy-900">
+                            ${Number(load.rate || 0).toLocaleString()}
+                          </td>
+                          <td className="py-2.5 px-4">
+                            {getStatusBadge(load.status)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
             ) : (
-              <div className="divide-y divide-navy-100">
-                {activities.map((item) => (
-                  <div key={item.id} className="px-6 py-4 flex items-center hover:bg-navy-50 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center">
-                      <Activity className="h-5 w-5 text-brand-blue" />
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <p className="text-sm font-medium text-navy-900">{item.title}</p>
-                      <p className="text-sm text-navy-500">{item.description}</p>
-                    </div>
-                    <div className="text-xs text-navy-400">
-                      {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                ))}
+              <div className="p-8 text-center text-navy-500 text-sm flex flex-col items-center justify-center">
+                <Truck className="w-12 h-12 text-navy-300 mb-2 stroke-1" />
+                <p className="font-semibold text-navy-800">Ready to haul?</p>
+                <p className="text-navy-500 text-xs mt-1 max-w-sm">
+                  Search live loads available on the Doxhaul freight network and submit instant bids.
+                </p>
+                <Link 
+                  to="/load-board" 
+                  className="mt-4 px-4 py-2 bg-brand-blue text-white rounded-lg text-xs font-semibold hover:bg-brand-blueHover cursor-pointer transition-colors shadow-sm inline-flex items-center gap-1.5"
+                >
+                  <Search size={14} /> Search Load Board
+                </Link>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions Panel customized by Role */}
+        {/* Quick Actions Panel customized strictly by Active Role */}
         <Card>
           <div className="px-6 py-4 border-b border-navy-100">
             <h3 className="text-lg font-medium text-navy-900">Role Tools & Actions</h3>
           </div>
           <CardContent className="p-6 space-y-4">
-            {role === 'SHIPPER' && (
+            {activeRole === 'SHIPPER' && (
               <>
-                <button 
-                  onClick={handlePostLoadClick} 
-                  className={`w-full flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-                    isVerified 
-                      ? 'bg-brand-blue hover:bg-brand-blueHover text-white cursor-pointer' 
-                      : 'bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 cursor-pointer'
-                  }`}
+                <Link 
+                  to="/loads/create" 
+                  className="w-full flex items-center justify-center px-4 py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer"
                 >
-                  {isVerified ? (
-                    <>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Post a New Load
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="mr-2 h-4 w-4 text-amber-600" />
-                      Post Load (Unlock with Verification)
-                    </>
-                  )}
-                </button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Post a New Load
+                </Link>
 
-                <button 
-                  onClick={() => navigate('/loads')} 
+                <Link 
+                  to="/my-loads" 
                   className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
                 >
                   <Package className="mr-2 h-4 w-4 text-navy-500" />
                   My Shipments
-                </button>
+                </Link>
 
-                <button 
-                  onClick={() => navigate('/invoices')} 
+                <Link 
+                  to="/bids" 
+                  className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
+                >
+                  <Clock className="mr-2 h-4 w-4 text-navy-500" />
+                  Bids & Quotes
+                </Link>
+
+                <Link 
+                  to="/invoices" 
                   className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
                 >
                   <TrendingUp className="mr-2 h-4 w-4 text-navy-500" />
                   Invoices & Spend
-                </button>
+                </Link>
               </>
             )}
 
-            {role === 'CARRIER' && (
+            {activeRole === 'CARRIER' && (
               <>
-                <button 
-                  onClick={handleBookLoadClick} 
+                <Link 
+                  to="/load-board" 
                   className="w-full flex items-center justify-center px-4 py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer"
                 >
                   <Search className="mr-2 h-4 w-4" />
                   Find Loads (Load Board)
-                </button>
+                </Link>
 
-                <button 
-                  onClick={() => navigate('/trips')} 
+                <Link 
+                  to="/active-hauls" 
                   className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
                 >
                   <Truck className="mr-2 h-4 w-4 text-navy-500" />
                   My Active Hauls
-                </button>
+                </Link>
 
-                <button 
-                  onClick={() => navigate('/profile')} 
+                <Link 
+                  to="/earnings" 
+                  className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4 text-navy-500" />
+                  Earnings & Payouts
+                </Link>
+
+                <Link 
+                  to="/profile" 
                   className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
                 >
                   <ShieldCheck className="mr-2 h-4 w-4 text-navy-500" />
                   Compliance & Documents
-                </button>
+                </Link>
               </>
             )}
 
-            {role === 'BROKER' && (
-              <>
-                <button 
-                  onClick={() => navigate('/loads?action=post')} 
-                  className="w-full flex items-center justify-center px-4 py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer"
-                >
-                  <Package className="mr-2 h-4 w-4" />
-                  Manage & Dispatch Loads
-                </button>
-                <button 
-                  onClick={() => navigate('/loads')} 
-                  className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
-                >
-                  <Users className="mr-2 h-4 w-4 text-navy-500" />
-                  Carrier Network
-                </button>
-              </>
-            )}
-
-            {role === 'ADMIN' && (
-              <>
-                <button 
-                  onClick={() => navigate('/admin/verifications')} 
-                  className="w-full flex items-center justify-center px-4 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer"
-                >
-                  <ShieldCheck className="mr-2 h-4 w-4" />
-                  Verifications Queue
-                </button>
-                <button 
-                  onClick={() => navigate('/admin/users')} 
-                  className="w-full flex items-center justify-center px-4 py-2.5 border border-navy-200 rounded-lg text-sm font-medium text-navy-700 bg-white hover:bg-navy-50 cursor-pointer transition-colors"
-                >
-                  <Users className="mr-2 h-4 w-4 text-navy-500" />
-                  Users Directory
-                </button>
-              </>
-            )}
-
-            {!isVerified && role !== 'ADMIN' && (
+            {!isVerified && !isAdmin && (
               <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-800">
                 <p className="font-semibold flex items-center gap-1">
                   <Lock size={12} /> Marketplace Access Locked

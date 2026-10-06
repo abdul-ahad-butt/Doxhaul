@@ -8,7 +8,7 @@ const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
 
 router.use('*', authMiddleware);
 
-router.post('/', requireRole(['SHIPPER', 'BROKER']), requireVerified, async (c) => {
+router.post('/', requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
   
@@ -96,7 +96,7 @@ router.get('/', async (c) => {
   let query = 'SELECT * FROM loads WHERE is_deleted = 0';
   const values: any[] = [];
 
-  if (ownerOnly && (user.role === 'SHIPPER' || user.role === 'BROKER')) {
+  if (ownerOnly && (user.role === 'SHIPPER' || user.role === 'BROKER' || user.role === 'ADMIN')) {
     query += ' AND owner_user_id = ?';
     values.push(user.id);
   } else if (user.role === 'CARRIER') {

@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import { UsersDirectoryPage } from './pages/UsersDirectoryPage';
 import { SupportTicketsPage } from './pages/SupportTicketsPage';
+import { PlatformLoadsPage } from './pages/PlatformLoadsPage';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/verifications" element={<AdminDashboardPage />} />
-            <Route path="/admin/loads" element={<div className="p-8">Admin Loads</div>} />
+            <Route path="/admin/loads" element={<PlatformLoadsPage />} />
             <Route path="/admin/users" element={<UsersDirectoryPage />} />
             <Route path="/admin/tickets" element={<SupportTicketsPage />} />
           </Route>

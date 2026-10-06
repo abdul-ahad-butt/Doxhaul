@@ -5,10 +5,13 @@ export class ApiError extends Error {
   }
 }
 
-let BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-if (!isLocal && BASE_URL.includes('localhost')) {
-  BASE_URL = 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+const LIVE_API_URL = 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+let BASE_URL = (import.meta as any).env?.VITE_API_URL || LIVE_API_URL;
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+if (!isLocal) {
+  if (!BASE_URL || BASE_URL.includes('localhost') || BASE_URL.startsWith('/')) {
+    BASE_URL = LIVE_API_URL;
+  }
 }
 
 export const apiClient = {

@@ -91,14 +91,21 @@ export const requireVerified = async (c: Context<{ Bindings: Env }>, next: Next)
     return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, 401);
   }
 
+  // Admins always pass verification check
+  if (user.role === 'ADMIN') {
+    return await next();
+  }
+
   // Fetch current user status from DB to ensure it's up to date
-  const dbUser = await c.env.DB.prepare('SELECT status FROM users WHERE id = ?').bind(user.id).first<{ status: string }>();
+  const dbUser = await c.env.DB.prepare('SELECT status, verification_status FROM users WHERE id = ?').bind(user.id).first<{ status: string, verification_status?: string }>();
   
   if (!dbUser) {
     return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'User not found' } }, 401);
   }
 
-  if (dbUser.status !== 'ACTIVE') {
+  const isApproved = dbUser.status === 'ACTIVE' || dbUser.verification_status === 'APPROVED' || dbUser.verification_status === 'VERIFIED';
+
+  if (!isApproved) {
     return c.json({ 
       success: false, 
       error: { 
