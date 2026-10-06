@@ -120,6 +120,9 @@ router.get('/users/:id/documents', async (c) => {
       file_size, 
       status, 
       rejection_reason, 
+      ai_verified,
+      ai_confidence,
+      ai_summary,
       uploaded_at, 
       created_at
     FROM documents 
@@ -144,6 +147,9 @@ router.get('/users/:userId/documents', async (c) => {
       file_size, 
       status, 
       rejection_reason, 
+      ai_verified,
+      ai_confidence,
+      ai_summary,
       uploaded_at, 
       created_at
     FROM documents 

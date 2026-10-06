@@ -24,7 +24,7 @@ function App() {
           {/* Protected Routes (Admin) */}
           <Route element={<AppLayout />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/verifications" element={<div className="p-8">Verifications</div>} />
+            <Route path="/admin/verifications" element={<AdminDashboardPage />} />
             <Route path="/admin/loads" element={<div className="p-8">Admin Loads</div>} />
             <Route path="/admin/users" element={<UsersDirectoryPage />} />
             <Route path="/admin/tickets" element={<SupportTicketsPage />} />

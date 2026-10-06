@@ -19,3 +19,7 @@ migrations_dir = "../../database/migrations"
 [[r2_buckets]]
 binding = "DOCUMENTS"
 bucket_name = "freightlink-documents"
+
+# Cloudflare Workers AI Binding (Free Tier)
+[ai]
+binding = "AI"

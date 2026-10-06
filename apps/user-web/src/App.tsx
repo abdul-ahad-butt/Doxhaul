@@ -12,6 +12,7 @@ import LoadBoardPage from './pages/LoadBoardPage';
 import ProfilePage from './pages/ProfilePage';
 import BookingsPage from './pages/BookingsPage';
 import TripsPage from './pages/TripsPage';
+import InvoicesPage from './pages/InvoicesPage';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="/loads" element={<LoadBoardPage />} />
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           

@@ -62,7 +62,7 @@ export const VerificationAlertBanner = ({
             <span>⚠️</span> Profile Pending Verification
           </h3>
           <p className="text-xs text-amber-700 mt-1">
-            Upload your required compliance documents to activate booking.
+            Your profile is pending verification. Please complete document submission to unlock full marketplace features.
           </p>
         </div>
         <button 

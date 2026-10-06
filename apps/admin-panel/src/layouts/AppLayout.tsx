@@ -14,8 +14,8 @@ export const AppLayout = () => {
   if (user?.role === 'ADMIN') {
     navItems.push(
       { label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
-      { label: 'Users & Verification', icon: Users, href: '/admin/verifications' },
       { label: 'Users Directory', icon: Contact, href: '/admin/users' },
+      { label: 'Verifications Queue', icon: Users, href: '/admin/verifications' },
       { label: 'Platform Loads', icon: Package, href: '/admin/loads' },
       { label: 'User Issues', icon: LifeBuoy, href: '/admin/tickets' }
     );

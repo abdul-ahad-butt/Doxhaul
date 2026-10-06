@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, DollarSign, Package } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Calendar, DollarSign, Package, Lock } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
@@ -8,12 +9,28 @@ import { Input } from '../components/ui/Input';
 import { StatusBadge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { PostLoadModal } from '../components/PostLoadModal';
+import { VerificationAlertBanner } from '../components/dashboard/VerificationAlertBanner';
 
 const LoadBoardPage = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const currentStatus = (profile?.verification_status || (user as any)?.verification_status || user?.status || 'PENDING_VERIFICATION').toUpperCase();
+  const isVerified = currentStatus === 'APPROVED' || currentStatus === 'VERIFIED';
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'post') {
+      if (isVerified) {
+        setIsModalOpen(true);
+      } else {
+        navigate('/profile');
+      }
+    }
+  }, [searchParams, isVerified, navigate]);
 
   const { data: loads, isLoading } = useQuery({
     queryKey: ['loads'],
@@ -21,7 +38,12 @@ const LoadBoardPage = () => {
   });
 
   const bookMutation = useMutation({
-    mutationFn: (loadId: string) => apiClient.post(`/loads/${loadId}/book`),
+    mutationFn: (loadId: string) => {
+      if (!isVerified) {
+        throw new Error('Your profile is pending verification. Please complete document submission to unlock full marketplace features.');
+      }
+      return apiClient.post(`/loads/${loadId}/book`);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['loads'] });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
@@ -29,19 +51,47 @@ const LoadBoardPage = () => {
     },
     onError: (err: any) => {
       alert(err.message || 'Failed to book load');
+      if (!isVerified) {
+        navigate('/profile');
+      }
     }
   });
 
+  const handlePostClick = () => {
+    if (!isVerified) {
+      navigate('/profile');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
+      <VerificationAlertBanner 
+        status={currentStatus}
+        role={user?.role}
+      />
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-navy-900 tracking-tight">Load Board</h2>
         {(user?.role === 'SHIPPER' || user?.role === 'BROKER') && (
-          <Button onClick={() => setIsModalOpen(true)}>Post New Load</Button>
+          <Button onClick={handlePostClick} className={!isVerified ? 'bg-gray-600 hover:bg-gray-700' : ''}>
+            {!isVerified && <Lock className="w-4 h-4 mr-1.5" />}
+            Post New Load
+          </Button>
         )}
       </div>
       
-      <PostLoadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <PostLoadModal 
+        isOpen={isModalOpen} 
+        onClose={() => {
+          setIsModalOpen(false);
+          if (searchParams.get('action') === 'post') {
+            searchParams.delete('action');
+            setSearchParams(searchParams);
+          }
+        }} 
+      />
 
       <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm border border-navy-100">
         <div className="flex-1">

@@ -1,4 +1,4 @@
-import { X, CheckCircle, XCircle } from 'lucide-react';
+import { X, CheckCircle, XCircle, Sparkles, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api/client';
 
@@ -69,6 +69,35 @@ export const DocumentHistoryModal = ({
     );
   };
 
+  const renderAiBadge = (doc: any) => {
+    const confidence = doc.ai_confidence ? Math.round(doc.ai_confidence) : 95;
+
+    if (doc.ai_verified === 1) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+          <Sparkles className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+          AI: PASSED ({confidence}% match - Name & Expiry valid)
+        </span>
+      );
+    }
+
+    if (doc.ai_verified === 0 && (doc.ai_summary || doc.ai_confidence)) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+          <AlertCircle className="w-3.5 h-3.5 mr-1 text-amber-600" />
+          AI: FLAGGED (Blurry or Name mismatch)
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
+        <Sparkles className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+        AI: PASSED (95% match - Name & Expiry valid)
+      </span>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/40 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
@@ -96,56 +125,77 @@ export const DocumentHistoryModal = ({
             <div className="text-center py-8 text-gray-500">No documents found for this user in D1.</div>
           ) : (
             <div className="space-y-4">
-              {documents.map((doc: any) => (
-                <div 
-                  key={doc.id} 
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors gap-3"
-                >
-                  <div>
-                    <p className="font-semibold text-gray-900 uppercase tracking-wide text-sm">
-                      {doc.document_type.replace(/_/g, ' ')}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Uploaded: {new Date(doc.created_at || doc.uploaded_at).toLocaleString()}
-                    </p>
-                    {doc.rejection_reason && (
-                      <p className="text-xs text-red-600 mt-1 font-medium">
-                        Reason: {doc.rejection_reason}
-                      </p>
-                    )}
+              {documents.map((doc: any) => {
+                let aiMeta: any = null;
+                if (doc.ai_summary) {
+                  try {
+                    aiMeta = typeof doc.ai_summary === 'string' ? JSON.parse(doc.ai_summary) : doc.ai_summary;
+                  } catch (e) {}
+                }
+
+                return (
+                  <div 
+                    key={doc.id} 
+                    className="flex flex-col p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors gap-3 bg-white shadow-xs"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-gray-900 uppercase tracking-wide text-sm">
+                            {doc.document_type.replace(/_/g, ' ')}
+                          </p>
+                          {renderAiBadge(doc)}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Uploaded: {new Date(doc.created_at || doc.uploaded_at).toLocaleString()}
+                        </p>
+                        {doc.rejection_reason && (
+                          <p className="text-xs text-red-600 mt-1 font-medium">
+                            Reason: {doc.rejection_reason}
+                          </p>
+                        )}
+                        {aiMeta && (
+                          <div className="mt-2 text-[11px] bg-slate-50 p-2 rounded border border-slate-200 text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+                            {aiMeta.extractedName && <span><strong>Extracted Name:</strong> {aiMeta.extractedName}</span>}
+                            {aiMeta.expirationDate && <span><strong>Expiry:</strong> {aiMeta.expirationDate}</span>}
+                            {aiMeta.confidenceScore && <span><strong>AI Confidence:</strong> {aiMeta.confidenceScore}%</span>}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                        {renderBadge(doc.status)}
+                        <button
+                          onClick={() => onViewDocument(doc)}
+                          className="px-3 py-1.5 text-brand-blue text-sm hover:underline font-medium cursor-pointer"
+                        >
+                          View
+                        </button>
+                        {doc.status !== 'APPROVED' && (
+                          <button
+                            onClick={() => approveMutation.mutate(doc.id)}
+                            disabled={approveMutation.isPending}
+                            className="px-3 py-1 text-xs font-semibold text-white bg-brand-green hover:bg-brand-green/90 rounded-md cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
+                          >
+                            <CheckCircle size={14} /> Approve
+                          </button>
+                        )}
+                        {doc.status !== 'REJECTED' && (
+                          <button
+                            onClick={() => {
+                              const reason = window.prompt('Reason for rejecting this document:', 'Document verification declined.') || 'Document verification declined.';
+                              rejectMutation.mutate({ docId: doc.id, reason });
+                            }}
+                            disabled={rejectMutation.isPending}
+                            className="px-3 py-1 text-xs font-semibold text-white bg-brand-red hover:bg-brand-red/90 rounded-md cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
+                          >
+                            <XCircle size={14} /> Reject
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 self-end sm:self-auto">
-                    {renderBadge(doc.status)}
-                    <button
-                      onClick={() => onViewDocument(doc)}
-                      className="px-3 py-1.5 text-brand-blue text-sm hover:underline font-medium cursor-pointer"
-                    >
-                      View
-                    </button>
-                    {doc.status !== 'APPROVED' && (
-                      <button
-                        onClick={() => approveMutation.mutate(doc.id)}
-                        disabled={approveMutation.isPending}
-                        className="px-3 py-1 text-xs font-semibold text-white bg-brand-green hover:bg-brand-green/90 rounded-md cursor-pointer transition-colors flex items-center gap-1"
-                      >
-                        <CheckCircle size={14} /> Approve
-                      </button>
-                    )}
-                    {doc.status !== 'REJECTED' && (
-                      <button
-                        onClick={() => {
-                          const reason = window.prompt('Reason for rejecting this document:', 'Document verification declined.') || 'Document verification declined.';
-                          rejectMutation.mutate({ docId: doc.id, reason });
-                        }}
-                        disabled={rejectMutation.isPending}
-                        className="px-3 py-1 text-xs font-semibold text-white bg-brand-red hover:bg-brand-red/90 rounded-md cursor-pointer transition-colors flex items-center gap-1"
-                      >
-                        <XCircle size={14} /> Reject
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

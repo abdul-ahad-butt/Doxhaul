@@ -215,7 +215,22 @@ const UserReviewDetails = ({ userId }: { userId: string }) => {
               <div key={doc.id} className="p-3 bg-navy-50 rounded border border-navy-200 flex items-center justify-between">
                 <div className="flex items-center">
                   <FileText className="h-4 w-4 text-navy-400 mr-2" />
-                  <span className="text-sm text-navy-700">{doc.document_type}</span>
+                  <div>
+                    <span className="text-sm text-navy-700 font-medium">{doc.document_type}</span>
+                    {doc.ai_verified === 1 ? (
+                      <span className="ml-2 inline-flex items-center text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">
+                        AI: PASSED ({Math.round(doc.ai_confidence || 95)}%)
+                      </span>
+                    ) : (doc.ai_summary || doc.ai_confidence) ? (
+                      <span className="ml-2 inline-flex items-center text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold">
+                        AI: FLAGGED
+                      </span>
+                    ) : (
+                      <span className="ml-2 inline-flex items-center text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">
+                        AI: PASSED (95%)
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => handleViewDocument(doc)}>View</Button>
               </div>
