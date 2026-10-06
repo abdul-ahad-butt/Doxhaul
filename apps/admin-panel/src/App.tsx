@@ -8,6 +8,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import { UsersDirectoryPage } from './pages/UsersDirectoryPage';
 import { SupportTicketsPage } from './pages/SupportTicketsPage';
 import { PlatformLoadsPage } from './pages/PlatformLoadsPage';
+import { IntegrationsSettingsPage } from './pages/IntegrationsSettingsPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/admin/loads" element={<PlatformLoadsPage />} />
             <Route path="/admin/users" element={<UsersDirectoryPage />} />
             <Route path="/admin/tickets" element={<SupportTicketsPage />} />
+            <Route path="/admin/integrations" element={<IntegrationsSettingsPage />} />
           </Route>
           
           <Route path="*" element={<Navigate to="/admin" replace />} />

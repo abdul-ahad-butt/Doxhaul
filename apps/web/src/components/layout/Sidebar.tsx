@@ -11,6 +11,7 @@ import {
   Tag, 
   FileText, 
   Users, 
+  Wallet,
   LogOut 
 } from 'lucide-react';
 
@@ -34,6 +35,7 @@ export const Sidebar = () => {
           { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
           { label: 'My Shipments', icon: Package, href: '/my-loads' },
           { label: 'Bids & Quotes', icon: Tag, href: '/bids' },
+          { label: 'Wallet & Escrow', icon: Wallet, href: '/wallet' },
           { label: 'Billing & Invoices', icon: CreditCard, href: '/invoices' },
           { label: 'Company & Profile', icon: Building2, href: '/profile' },
         ];
@@ -43,6 +45,7 @@ export const Sidebar = () => {
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
           { label: 'Load Board (Find Loads)', icon: Search, href: '/load-board' },
           { label: 'My Active Hauls', icon: Truck, href: '/active-hauls' },
+          { label: 'Wallet & Payouts', icon: Wallet, href: '/wallet' },
           { label: 'Earnings & Payouts', icon: CreditCard, href: '/earnings' },
           { label: 'Documents & Compliance', icon: FileText, href: '/profile' },
         ];
@@ -53,6 +56,7 @@ export const Sidebar = () => {
           { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
           { label: 'Manage Loads', icon: Package, href: '/my-loads' },
           { label: 'Carrier Network', icon: Users, href: '/load-board' },
+          { label: 'Wallet & Escrow', icon: Wallet, href: '/wallet' },
           { label: 'Billing & Invoices', icon: CreditCard, href: '/invoices' },
           { label: 'Company Profile', icon: Building2, href: '/profile' },
         ];
@@ -62,6 +66,7 @@ export const Sidebar = () => {
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
           { label: 'Post a Load', icon: PackagePlus, href: '/loads/create' },
           { label: 'My Shipments', icon: Package, href: '/my-loads' },
+          { label: 'Wallet & Escrow', icon: Wallet, href: '/wallet' },
           { label: 'Profile', icon: Building2, href: '/profile' },
         ];
     }

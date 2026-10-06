@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { Env } from '../types/env';
 import { authMiddleware, JwtPayload, requireRole, requireVerified } from '../middleware/auth';
+import { SettingsService } from '../services/settings';
 import { z } from 'zod';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
@@ -116,7 +117,7 @@ router.post('/loads/:id/status', requireRole(['CARRIER']), requireVerified, asyn
 
   const { status: newStatus } = parseResult.data;
 
-  const load = await c.env.DB.prepare('SELECT id, status, assigned_carrier_id FROM loads WHERE id = ?').bind(loadId).first();
+  const load = await c.env.DB.prepare('SELECT id, status, assigned_carrier_id, owner_user_id, rate, reference_number FROM loads WHERE id = ?').bind(loadId).first<any>();
   
   if (!load) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
@@ -186,6 +187,59 @@ router.post('/loads/:id/status', requireRole(['CARRIER']), requireVerified, asyn
     if (bookingStmt) batch.push(bookingStmt);
     
     await c.env.DB.batch(batch);
+
+    // If marked DELIVERED, automatically trigger Platform Escrow settlement and payout
+    if (newStatus === 'DELIVERED' && load.owner_user_id) {
+      try {
+        const loadAmount = Number(load.rate || 0);
+        if (loadAmount > 0) {
+          const settings = await SettingsService.getPlatformSettings(c.env.DB);
+          const feePercent = settings.platform_fee_percent || 7.5;
+          const platformFee = Math.round((loadAmount * (feePercent / 100)) * 100) / 100;
+          const netPayout = Math.round((loadAmount - platformFee) * 100) / 100;
+
+          // Deduct from Shipper escrow
+          await c.env.DB.prepare(`
+            UPDATE wallets SET escrow_balance = MAX(0, escrow_balance - ?), updated_at = datetime('now') WHERE user_id = ?
+          `).bind(loadAmount, load.owner_user_id).run().catch(() => {});
+
+          // Credit Carrier balance
+          await c.env.DB.prepare(`
+            UPDATE wallets SET balance = balance + ?, updated_at = datetime('now') WHERE user_id = ?
+          `).bind(netPayout, user.id).run().catch(() => {});
+
+          // Fetch or initialize carrier wallet ID for ledger
+          const carrierWallet = await c.env.DB.prepare('SELECT id FROM wallets WHERE user_id = ?').bind(user.id).first<any>();
+          if (carrierWallet) {
+            await c.env.DB.prepare(`
+              INSERT INTO wallet_transactions (id, wallet_id, load_id, amount, fee_deducted, type, status, payment_provider, notes)
+              VALUES (?, ?, ?, ?, ?, 'ESCROW_RELEASE', 'COMPLETED', 'PLATFORM', ?)
+            `).bind(
+              crypto.randomUUID().replace(/-/g, '').toLowerCase(),
+              carrierWallet.id,
+              loadId,
+              netPayout,
+              platformFee,
+              `Carrier freight payout for load ${load.reference_number || loadId} (${feePercent}% platform fee deducted)`
+            ).run().catch(() => {});
+
+            await c.env.DB.prepare(`
+              INSERT INTO wallet_transactions (id, wallet_id, load_id, amount, fee_deducted, type, status, payment_provider, notes)
+              VALUES (?, ?, ?, ?, ?, 'PLATFORM_FEE', 'COMPLETED', 'PLATFORM', ?)
+            `).bind(
+              crypto.randomUUID().replace(/-/g, '').toLowerCase(),
+              carrierWallet.id,
+              loadId,
+              platformFee,
+              platformFee,
+              `Platform commission fee (${feePercent}%) for load ${load.reference_number || loadId}`
+            ).run().catch(() => {});
+          }
+        }
+      } catch (escrowErr) {
+        console.error('Escrow automatic settlement error:', escrowErr);
+      }
+    }
     
     return c.json({ success: true, data: { loadId, status: newStatus } });
   } catch (error) {

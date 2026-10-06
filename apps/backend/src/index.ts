@@ -14,6 +14,8 @@ import adminRoutes from './routes/admin';
 import ticketsRoutes from './routes/tickets';
 import dashboardRoutes from './routes/dashboard';
 import aiRoutes from './routes/ai';
+import walletRoutes from './routes/wallet';
+import webhookRoutes from './routes/webhooks';
 import { errorHandler } from './middleware/error-handler';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -52,6 +54,8 @@ app.route('/api/tickets', ticketsRoutes);
 app.route('/api/dashboard', dashboardRoutes);
 app.route('/api/support', aiRoutes);
 app.route('/api/ai', aiRoutes);
+app.route('/api/wallet', walletRoutes);
+app.route('/api/webhooks', webhookRoutes);
 
 // 404 handler
 app.notFound((c) => {

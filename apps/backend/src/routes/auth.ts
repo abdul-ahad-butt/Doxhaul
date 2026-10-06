@@ -108,9 +108,9 @@ router.post('/login', async (c) => {
 
   const { email, password } = parseResult.data;
 
-  const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status FROM users WHERE email = ?')
+  const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status, COALESCE(onboarding_paid, 0) as onboarding_paid FROM users WHERE email = ?')
     .bind(email.toLowerCase())
-    .first<{ id: string, email: string, password_hash: string, role: string, status: string }>();
+    .first<{ id: string, email: string, password_hash: string, role: string, status: string, onboarding_paid: number }>();
 
   if (!user) {
     return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, 401);
@@ -146,7 +146,13 @@ router.post('/login', async (c) => {
     success: true,
     data: {
       token,
-      user: { id: user.id, email: user.email, role: user.role, status: user.status }
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role, 
+        status: user.status,
+        onboarding_paid: Number(user.onboarding_paid || 0)
+      }
     }
   });
 });
@@ -206,7 +212,13 @@ router.post('/admin-login', async (c) => {
     success: true,
     data: {
       token,
-      user: { id: user.id, email: user.email, role: user.role, status: user.status }
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role, 
+        status: user.status,
+        onboarding_paid: 1
+      }
     }
   });
 });
@@ -346,9 +358,9 @@ router.get('/me', authMiddleware, async (c) => {
   const user = c.get('user');
   
   // Fetch fresh user data
-  const dbUser = (await c.env.DB.prepare('SELECT id, email, role, status FROM users WHERE id = ?')
+  const dbUser = (await c.env.DB.prepare('SELECT * FROM users WHERE id = ?')
     .bind(user.id)
-    .first()) as { id: string, email: string, role: string, status: string } | null;
+    .first()) as any;
     
   if (!dbUser) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } }, 404);
@@ -369,7 +381,11 @@ router.get('/me', authMiddleware, async (c) => {
     success: true, 
     data: { 
       user: {
-        ...dbUser,
+        id: dbUser.id,
+        email: dbUser.email,
+        role: dbUser.role,
+        status: dbUser.status,
+        onboarding_paid: Number(dbUser.onboarding_paid || 0),
         verification_status: vStatus,
         documents_uploaded: docsUploaded
       },

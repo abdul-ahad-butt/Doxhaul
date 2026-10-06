@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileUp, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileUp, CheckCircle, Clock, AlertCircle, ShieldCheck, ExternalLink, Zap } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -17,6 +17,39 @@ const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDocUrl, setSelectedDocUrl] = useState('');
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
+
+  const [startingPersona, setStartingPersona] = useState(false);
+  const [personaMsg, setPersonaMsg] = useState<string | null>(null);
+
+  const handleStartPersona = async () => {
+    setStartingPersona(true);
+    setPersonaMsg(null);
+    try {
+      const res = await apiClient.post<any>('/profile/persona-inquiry');
+      if (res?.redirectUrl) {
+        window.open(res.redirectUrl, '_blank', 'noopener,noreferrer');
+        setPersonaMsg('Persona verification opened in a new tab. Complete your ID check there.');
+      }
+    } catch (err: any) {
+      setPersonaMsg(err.message || 'Failed to initialize Persona inquiry');
+    } finally {
+      setStartingPersona(false);
+    }
+  };
+
+  const handleSimulatePersona = async () => {
+    setStartingPersona(true);
+    try {
+      await apiClient.post<any>('/profile/simulate-persona-verify');
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      setPersonaMsg('Sandbox verification approved successfully!');
+    } catch (err: any) {
+      setPersonaMsg(err.message || 'Simulation failed');
+    } finally {
+      setStartingPersona(false);
+    }
+  };
 
   const handleViewDocument = (doc: any) => {
     const token = apiClient.getToken() || localStorage.getItem('token') || localStorage.getItem('auth_token') || '';
@@ -146,6 +179,63 @@ const ProfilePage = () => {
             <label className="block text-sm font-medium text-navy-500">Email Address</label>
             <div className="mt-1 text-navy-900">{user?.email}</div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Automated Persona Identity Verification */}
+      <Card className="border-blue-100 bg-gradient-to-br from-white via-white to-blue-50/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-blue-100/60 text-brand-blue">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <CardTitle>Automated Persona Identity Verification</CardTitle>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Verify your driver's license (CDL), government photo ID, or operating authority instantly.
+                </p>
+              </div>
+            </div>
+            {renderBadge(currentStatus)}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">
+                Persona KYC & Driver License Validation
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5 max-w-lg">
+                Complete a guided 60-second mobile ID capture to verify your credentials without manual waiting.
+              </p>
+            </div>
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <Button
+                onClick={handleStartPersona}
+                isLoading={startingPersona}
+                className="bg-brand-blue hover:bg-blue-600 text-white"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Start Persona Check
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSimulatePersona}
+                disabled={startingPersona}
+                title="Sandbox test instant approval"
+              >
+                <Zap className="w-4 h-4 mr-1.5 text-amber-500" />
+                Demo Verify
+              </Button>
+            </div>
+          </div>
+
+          {personaMsg && (
+            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-xs">
+              {personaMsg}
+            </div>
+          )}
         </CardContent>
       </Card>
 

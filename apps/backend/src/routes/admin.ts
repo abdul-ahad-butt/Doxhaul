@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { Env } from '../types/env';
 import { authMiddleware, JwtPayload, requireRole } from '../middleware/auth';
 import { StorageService } from '../services/storage';
+import { SettingsService, PlatformSettings } from '../services/settings';
+import { PaddleService } from '../services/paddle';
+import { PersonaService } from '../services/persona';
 import ticketsRoutes from './tickets';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
@@ -437,4 +440,138 @@ router.post('/users/:id/suspend', async (c) => {
   }
 });
 
+// ============================================================
+// DYNAMIC PLATFORM SETTINGS & INTEGRATIONS
+// ============================================================
+
+// Get platform settings (Paddle, Persona, platform fees, onboarding fees)
+router.get('/settings', async (c) => {
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  return c.json({
+    success: true,
+    data: settings
+  });
+});
+
+// Update platform settings
+router.put('/settings', async (c) => {
+  const adminUser = c.get('user');
+  const body = await c.req.json();
+
+  const updatedSettings = await SettingsService.updatePlatformSettings(c.env.DB, body);
+
+  // Log admin action
+  await c.env.DB.prepare(`
+    INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, metadata)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(
+    crypto.randomUUID().replace(/-/g, '').toLowerCase(),
+    adminUser.id,
+    'ADMIN',
+    'UPDATE_PLATFORM_SETTINGS',
+    'PLATFORM_SETTINGS',
+    JSON.stringify({ updatedKeys: Object.keys(body) })
+  ).run().catch(() => {});
+
+  return c.json({
+    success: true,
+    data: updatedSettings
+  });
+});
+
+// Test Paddle connection
+router.post('/settings/test-paddle', async (c) => {
+  let settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+  
+  // Allow overriding with form values passed in body for immediate testing
+  if (body && Object.keys(body).length > 0) {
+    settings = {
+      ...settings,
+      ...body
+    };
+  }
+
+  const result = await PaddleService.testConnection(settings);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+});
+
+// Test Persona connection
+router.post('/settings/test-persona', async (c) => {
+  let settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+
+  if (body && Object.keys(body).length > 0) {
+    settings = {
+      ...settings,
+      ...body
+    };
+  }
+
+  const result = await PersonaService.testConnection(settings);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+});
+
+// Financial Ledger & Escrow Platform Overview
+router.get('/financials', async (c) => {
+  try {
+    const revenueStats = await c.env.DB.prepare(`
+      SELECT 
+        COALESCE(SUM(fee_deducted), 0) as total_platform_fees,
+        COALESCE(SUM(CASE WHEN type = 'ONBOARDING_FEE' THEN amount ELSE 0 END), 0) as total_onboarding_fees,
+        COALESCE(SUM(CASE WHEN type = 'ESCROW_RELEASE' THEN amount ELSE 0 END), 0) as total_settled_freight
+      FROM wallet_transactions
+      WHERE status = 'COMPLETED'
+    `).first<any>().catch(() => ({ total_platform_fees: 0, total_onboarding_fees: 0, total_settled_freight: 0 }));
+
+    const walletStats = await c.env.DB.prepare(`
+      SELECT 
+        COALESCE(SUM(balance), 0) as total_user_balance,
+        COALESCE(SUM(escrow_balance), 0) as total_in_escrow,
+        COUNT(id) as total_wallets
+      FROM wallets
+    `).first<any>().catch(() => ({ total_user_balance: 0, total_in_escrow: 0, total_wallets: 0 }));
+
+    const recentTransactions = await c.env.DB.prepare(`
+      SELECT 
+        wt.*,
+        w.user_id,
+        u.email as user_email,
+        u.role as user_role,
+        p.company_name
+      FROM wallet_transactions wt
+      LEFT JOIN wallets w ON wt.wallet_id = w.id
+      LEFT JOIN users u ON w.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      ORDER BY wt.created_at DESC
+      LIMIT 50
+    `).all().catch(() => ({ results: [] }));
+
+    return c.json({
+      success: true,
+      data: {
+        totalPlatformFees: Number(revenueStats?.total_platform_fees || 0),
+        totalOnboardingFees: Number(revenueStats?.total_onboarding_fees || 0),
+        totalSettledFreight: Number(revenueStats?.total_settled_freight || 0),
+        totalInEscrow: Number(walletStats?.total_in_escrow || 0),
+        totalUserBalance: Number(walletStats?.total_user_balance || 0),
+        totalWallets: Number(walletStats?.total_wallets || 0),
+        recentTransactions: recentTransactions.results || []
+      }
+    });
+  } catch (err: any) {
+    return c.json({
+      success: false,
+      error: { code: 'INTERNAL_SERVER_ERROR', message: err.message || 'Failed to fetch financials' }
+    }, 500);
+  }
+});
+
 export default router;
+

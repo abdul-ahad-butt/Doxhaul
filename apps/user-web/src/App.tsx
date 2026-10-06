@@ -15,6 +15,7 @@ import TripsPage from './pages/TripsPage';
 import InvoicesPage from './pages/InvoicesPage';
 import CreateLoadPage from './pages/shipper/CreateLoadPage';
 import MyShipmentsPage from './pages/shipper/MyShipmentsPage';
+import WalletPage from './pages/WalletPage';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
             <Route path="/active-hauls" element={<TripsPage />} />
             <Route path="/trips" element={<TripsPage />} />
             <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/wallet" element={<WalletPage />} />
             <Route path="/earnings" element={<InvoicesPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
             <Route path="/profile" element={<ProfilePage />} />

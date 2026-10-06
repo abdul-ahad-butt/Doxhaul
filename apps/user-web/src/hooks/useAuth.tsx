@@ -7,6 +7,7 @@ export type User = {
   email: string;
   role: 'SHIPPER' | 'BROKER' | 'CARRIER' | 'ADMIN';
   status: string;
+  onboarding_paid?: number | boolean;
   verification_status?: string;
   rejection_reason?: string;
 };

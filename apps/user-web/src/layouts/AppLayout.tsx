@@ -1,6 +1,7 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar } from '../components/layout/Sidebar';
+import { RolePaymentGate } from '../components/onboarding/RolePaymentGate';
 
 export const AppLayout = () => {
   const { user, profile, isAuthenticated, activeRole, switchRole } = useAuth();
@@ -72,7 +73,9 @@ export const AppLayout = () => {
 
         {/* Page Content */}
         <div className="flex-1 overflow-auto p-6 bg-[#f8fafc]">
-          <Outlet />
+          <RolePaymentGate>
+            <Outlet />
+          </RolePaymentGate>
         </div>
       </main>
     </div>
