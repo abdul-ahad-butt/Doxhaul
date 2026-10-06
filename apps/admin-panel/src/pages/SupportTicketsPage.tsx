@@ -3,18 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '../components/ui/Card';
 import { apiClient } from '../api/client';
 import { LifeBuoy, X, Check, Clock, Eye } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 
 export const SupportTicketsPage = () => {
   const [filter, setFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [viewImage, setViewImage] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { token } = useAuth() as any;
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || '';
 
   const { data: ticketsData, isLoading } = useQuery({
     queryKey: ['admin-tickets', filter, statusFilter],
-    queryFn: () => apiClient.get(`/tickets?category=${filter}&status=${statusFilter}`)
+    queryFn: () => apiClient.get<any[]>(`/tickets?category=${filter}&status=${statusFilter}`)
   });
 
   const updateStatusMutation = useMutation({
@@ -34,8 +33,15 @@ export const SupportTicketsPage = () => {
   const categoryLabels: Record<string, string> = {
     TECHNICAL: 'Technical',
     BILLING: 'Billing',
-    DOCUMENT_VERIFICATION: 'Verification',
+    DOCUMENT_VERIFICATION: 'Document Verification',
+    PLATFORM: 'Platform',
     PLATFORM_INQUIRY: 'Platform'
+  };
+
+  const getScreenshotUrl = (ticketId: string) => {
+    const apiBase = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
+    const prefix = apiBase.endsWith('/api') ? apiBase : `${apiBase}/api`;
+    return `${prefix}/tickets/${ticketId}/view-screenshot?token=${token}`;
   };
 
   return (
@@ -92,24 +98,24 @@ export const SupportTicketsPage = () => {
       </div>
 
       <Card>
-        <div className="flex flex-row items-center justify-between border-b border-gray-100 p-6 pb-4">
-          <div className="flex gap-2">
-            {['ALL', 'TECHNICAL', 'BILLING', 'DOCUMENT_VERIFICATION', 'PLATFORM_INQUIRY'].map(cat => (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 p-6 pb-4 gap-3">
+          <div className="flex flex-wrap gap-2">
+            {['ALL', 'TECHNICAL', 'BILLING', 'DOCUMENT_VERIFICATION', 'PLATFORM'].map(cat => (
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-colors cursor-pointer ${
                   filter === cat ? 'bg-brand-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {cat === 'ALL' ? 'All Categories' : categoryLabels[cat]}
+                {cat === 'ALL' ? 'All Categories' : categoryLabels[cat] || cat}
               </button>
             ))}
           </div>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-brand-blue focus:border-brand-blue"
+            className="text-xs font-medium border-gray-300 rounded-md shadow-sm focus:ring-brand-blue focus:border-brand-blue px-3 py-1.5 border bg-white"
           >
             <option value="ALL">All Statuses</option>
             <option value="OPEN">Open</option>
@@ -131,58 +137,71 @@ export const SupportTicketsPage = () => {
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={5} className="text-center py-8">Loading tickets...</td></tr>
+                  <tr><td colSpan={5} className="text-center py-8 text-gray-500">Loading tickets...</td></tr>
                 ) : tickets.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-8 text-gray-500">No support tickets found.</td></tr>
+                  <tr><td colSpan={5} className="text-center py-8 text-gray-500">No support tickets found in D1.</td></tr>
                 ) : (
-                  tickets.map((ticket: any) => (
-                    <tr key={ticket.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{ticket.first_name} {ticket.last_name}</div>
-                        <div className="text-gray-500">{ticket.email}</div>
-                        <div className="text-xs text-gray-400 mt-1">{new Date(ticket.created_at).toLocaleString()}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">
-                          {categoryLabels[ticket.category] || ticket.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 max-w-md">
-                        <p className="text-gray-900 whitespace-pre-wrap">{ticket.message}</p>
-                        {ticket.screenshot_r2_key && (
-                          <button
-                            onClick={() => {
-                               const BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev';
-                               setViewImage(`${BASE_URL}/api/tickets/${ticket.id}/view-screenshot`);
-                            }}
-                            className="mt-2 text-brand-blue text-xs flex items-center gap-1 hover:underline font-medium"
+                  tickets.map((ticket: any) => {
+                    const userName = ticket.name || `${ticket.first_name || ''} ${ticket.last_name || ''}`.trim() || 'User';
+                    return (
+                      <tr key={ticket.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900">{userName}</div>
+                          <div className="text-gray-500 text-xs">{ticket.email}</div>
+                          <div className="text-xs text-gray-400 mt-1">{new Date(ticket.created_at).toLocaleString()}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            {categoryLabels[ticket.category] || ticket.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 max-w-md">
+                          <p className="text-gray-900 whitespace-pre-wrap text-sm">{ticket.message}</p>
+                          {ticket.screenshot_r2_key && (
+                            <button
+                              onClick={() => setViewImage(getScreenshotUrl(ticket.id))}
+                              className="mt-2 text-brand-blue text-xs flex items-center gap-1 hover:underline font-semibold cursor-pointer"
+                            >
+                              <Eye size={14} /> View Attached Screenshot
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={ticket.status}
+                            onChange={(e) => updateStatusMutation.mutate({ id: ticket.id, status: e.target.value })}
+                            className={`text-xs font-semibold rounded-full px-2.5 py-1 border-0 cursor-pointer shadow-sm ${
+                              ticket.status === 'OPEN' ? 'bg-amber-100 text-amber-800' :
+                              ticket.status === 'IN_PROGRESS' ? 'bg-purple-100 text-purple-800' :
+                              'bg-green-100 text-green-800'
+                            }`}
                           >
-                            <Eye size={12} /> View Attached Screenshot
-                          </button>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={ticket.status}
-                          onChange={(e) => updateStatusMutation.mutate({ id: ticket.id, status: e.target.value })}
-                          className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer ${
-                            ticket.status === 'OPEN' ? 'bg-amber-100 text-amber-800' :
-                            ticket.status === 'IN_PROGRESS' ? 'bg-purple-100 text-purple-800' :
-                            'bg-green-100 text-green-800'
-                          }`}
-                        >
-                          <option value="OPEN">OPEN</option>
-                          <option value="IN_PROGRESS">IN PROGRESS</option>
-                          <option value="RESOLVED">RESOLVED</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <a href={`mailto:${ticket.email}`} className="text-gray-500 hover:text-brand-blue text-sm font-medium">
-                          Email User
-                        </a>
-                      </td>
-                    </tr>
-                  ))
+                            <option value="OPEN">OPEN</option>
+                            <option value="IN_PROGRESS">IN PROGRESS</option>
+                            <option value="RESOLVED">RESOLVED</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {ticket.status !== 'RESOLVED' && (
+                              <button
+                                onClick={() => updateStatusMutation.mutate({ id: ticket.id, status: 'RESOLVED' })}
+                                className="px-2.5 py-1 text-xs font-medium text-brand-green bg-green-50 hover:bg-green-100 rounded-md cursor-pointer transition-colors"
+                              >
+                                Mark Resolved
+                              </button>
+                            )}
+                            <a 
+                              href={`mailto:${ticket.email}?subject=Support Ticket: ${ticket.category}`} 
+                              className="text-gray-500 hover:text-brand-blue text-xs font-medium"
+                            >
+                              Email
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -192,17 +211,17 @@ export const SupportTicketsPage = () => {
 
       {/* Image Modal */}
       {viewImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-navy-900">Attached Screenshot</h2>
-              <button onClick={() => setViewImage(null)} className="text-gray-400 hover:text-gray-600">
-                <X size={24} />
+              <h2 className="text-base font-bold text-navy-900">Attached Screenshot</h2>
+              <button onClick={() => setViewImage(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded-md cursor-pointer">
+                <X size={20} />
               </button>
             </div>
             <div className="flex-1 overflow-auto bg-gray-50 p-4 flex justify-center items-center">
               <img 
-                src={`${viewImage}?token=${token}`} 
+                src={viewImage} 
                 alt="Support Ticket Attachment" 
                 crossOrigin="anonymous"
                 className="max-w-full max-h-full object-contain rounded-md shadow-sm"
@@ -214,3 +233,5 @@ export const SupportTicketsPage = () => {
     </div>
   );
 };
+
+export default SupportTicketsPage;

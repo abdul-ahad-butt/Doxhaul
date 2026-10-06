@@ -7,6 +7,8 @@ export type User = {
   email: string;
   role: 'SHIPPER' | 'BROKER' | 'CARRIER' | 'ADMIN';
   status: string;
+  verification_status?: string;
+  rejection_reason?: string;
 };
 
 export type Profile = {
@@ -15,6 +17,7 @@ export type Profile = {
   company_name: string;
   verification_status: string;
   rejection_reason?: string;
+  verification_notes?: string;
 };
 
 type AuthContextType = {

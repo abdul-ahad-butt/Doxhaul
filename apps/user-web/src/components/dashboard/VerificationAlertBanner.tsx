@@ -2,11 +2,17 @@ import { useNavigate } from 'react-router-dom';
 
 interface VerificationAlertBannerProps {
   status: string; // 'PENDING' | 'PENDING_VERIFICATION' | 'REJECTED' | 'VERIFIED' | 'APPROVED'
+  rejectionReason?: string | null;
   documentsUploaded?: boolean;
   role?: string;
 }
 
-export const VerificationAlertBanner = ({ status, documentsUploaded, role }: VerificationAlertBannerProps) => {
+export const VerificationAlertBanner = ({ 
+  status, 
+  rejectionReason, 
+  documentsUploaded, 
+  role 
+}: VerificationAlertBannerProps) => {
   const navigate = useNavigate();
   const s = (status || '').toUpperCase();
 
@@ -21,11 +27,16 @@ export const VerificationAlertBanner = ({ status, documentsUploaded, role }: Ver
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in">
         <div>
           <h3 className="text-sm font-bold text-red-800 flex items-center gap-1.5">
-            <span>❌</span> Verification Request Rejected
+            <span>❌</span> Verification Request Declined
           </h3>
           <p className="text-xs text-red-700 mt-1">
-            Your submitted compliance documents were rejected by the admin. Please wait 3 days to re-apply or contact our support team.
+            Your submitted document was not approved. Please wait 3 days to re-apply or contact our support team.
           </p>
+          {rejectionReason && (
+            <p className="text-xs text-red-800 font-semibold mt-1">
+              Reason: {rejectionReason}
+            </p>
+          )}
         </div>
         <button 
           onClick={() => navigate('/profile')} 
@@ -42,16 +53,16 @@ export const VerificationAlertBanner = ({ status, documentsUploaded, role }: Ver
     return null;
   }
 
-  // If unverified, pending verification, or documents not uploaded
+  // If unverified or pending verification
   if (s === 'PENDING' || s === 'PENDING_VERIFICATION' || documentsUploaded === false) {
     return (
       <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in">
         <div>
           <h3 className="text-sm font-bold text-amber-800 flex items-center gap-1.5">
-            <span>⚠️</span> Account Verification Required
+            <span>⚠️</span> Profile Pending Verification
           </h3>
           <p className="text-xs text-amber-700 mt-1">
-            Your account is not verified yet. Please upload your driver's license and compliance documents to unlock load posting and booking.
+            Upload your required compliance documents to activate booking.
           </p>
         </div>
         <button 
@@ -66,3 +77,5 @@ export const VerificationAlertBanner = ({ status, documentsUploaded, role }: Ver
 
   return null;
 };
+
+export default VerificationAlertBanner;

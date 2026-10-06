@@ -27,6 +27,7 @@ export const UsersDirectoryPage = () => {
 
   const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || '';
   const apiBase = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
+  const prefix = apiBase.endsWith('/api') ? apiBase : `${apiBase}/api`;
 
   return (
     <div className="space-y-6">
@@ -40,7 +41,7 @@ export const UsersDirectoryPage = () => {
             <input
               type="text"
               placeholder="Search users..."
-              className="pl-9 pr-4 py-2 w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-brand-blue focus:border-brand-blue"
+              className="pl-9 pr-4 py-2 w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-brand-blue focus:border-brand-blue border bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -68,7 +69,7 @@ export const UsersDirectoryPage = () => {
                     <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{user.first_name} {user.last_name}</div>
-                        <div className="text-gray-500">{user.email}</div>
+                        <div className="text-gray-500 text-xs">{user.email}</div>
                         {user.company_name && <div className="text-xs text-gray-400 mt-0.5">{user.company_name}</div>}
                       </td>
                       <td className="px-6 py-4">
@@ -79,7 +80,7 @@ export const UsersDirectoryPage = () => {
                       <td className="px-6 py-4">
                         <StatusBadge status={user.status} />
                       </td>
-                      <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
+                      <td className="px-6 py-4 text-gray-500 whitespace-nowrap text-xs">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -106,7 +107,7 @@ export const UsersDirectoryPage = () => {
         user={selectedUser}
         onViewDocument={(doc) => setViewDoc({ 
           id: doc.id, 
-          name: doc.original_filename, 
+          name: doc.file_name || doc.original_filename || 'Document', 
           mimeType: doc.mime_type 
         })}
       />
@@ -114,7 +115,7 @@ export const UsersDirectoryPage = () => {
       {viewDoc && (
         <DocumentViewerModal
           isOpen={true}
-          documentUrl={`${apiBase}/documents/${viewDoc.id}/view?token=${token}`}
+          documentUrl={`${prefix}/documents/${viewDoc.id}/view?token=${token}`}
           documentType={viewDoc.mimeType}
           filename={viewDoc.name}
           onClose={() => setViewDoc(null)}
@@ -124,3 +125,4 @@ export const UsersDirectoryPage = () => {
   );
 };
 
+export default UsersDirectoryPage;

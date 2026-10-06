@@ -27,6 +27,7 @@ const AdminDashboardPage = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-user-docs'] });
+      setSelectedUser(null);
     }
   });
 
@@ -37,6 +38,7 @@ const AdminDashboardPage = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-user-docs'] });
+      setSelectedUser(null);
     }
   });
 
@@ -176,7 +178,8 @@ const UserReviewDetails = ({ userId }: { userId: string }) => {
   const handleViewDocument = (doc: any) => {
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || '';
     const baseUrl = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
-    setSelectedDocUrl(`${baseUrl}/documents/${doc.id}/view?token=${token}`);
+    const prefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+    setSelectedDocUrl(`${prefix}/documents/${doc.id}/view?token=${token}`);
     setSelectedDoc(doc);
     setIsModalOpen(true);
   };

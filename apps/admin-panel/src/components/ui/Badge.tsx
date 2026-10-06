@@ -26,15 +26,15 @@ export const StatusBadge = ({ status }: { status: string }) => {
   const s = (status || '').toUpperCase();
 
   if (s === 'REJECTED' || s === 'SUSPENDED' || s === 'BANNED') {
-    return <Badge variant="danger">Declined / Rejected</Badge>;
+    return <Badge variant="danger">✕ Declined / Rejected</Badge>;
   }
 
   if (s === 'VERIFIED' || s === 'APPROVED' || s === 'ACTIVE' || s === 'COMPLETED') {
-    return <Badge variant="success">Verified</Badge>;
+    return <Badge variant="success">✓ Verified</Badge>;
   }
 
   if (s === 'PENDING' || s === 'PENDING_VERIFICATION') {
-    return <Badge variant="warning">Pending Verification</Badge>;
+    return <Badge variant="warning">⏳ Pending Verification</Badge>;
   }
 
   let variant: BadgeProps['variant'] = 'default';

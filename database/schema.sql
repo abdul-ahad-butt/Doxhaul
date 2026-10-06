@@ -11,8 +11,10 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   auth_provider TEXT NOT NULL DEFAULT 'local' CHECK (auth_provider IN ('local', 'google')),
   google_id TEXT,
-  role TEXT NOT NULL CHECK (role IN ('SHIPPER', 'BROKER', 'CARRIER', 'ADMIN')),
+  role TEXT NOT NULL DEFAULT 'CARRIER' CHECK (role IN ('SHIPPER', 'BROKER', 'CARRIER', 'ADMIN')),
   status TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION' CHECK (status IN ('PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'BANNED')),
+  verification_status TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION' CHECK (verification_status IN ('PENDING_VERIFICATION', 'PENDING', 'APPROVED', 'VERIFIED', 'REJECTED')),
+  rejection_reason TEXT,
   email_verified INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -22,6 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+CREATE INDEX IF NOT EXISTS idx_users_verification_status ON users(verification_status);
 
 -- ============================================================
 -- PROFILES TABLE
@@ -63,9 +66,11 @@ CREATE TABLE IF NOT EXISTS documents (
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   document_type TEXT NOT NULL CHECK (document_type IN ('DOT_CERTIFICATE', 'MC_CERTIFICATE', 'INSURANCE_CERTIFICATE', 'DRIVER_LICENSE', 'W9', 'BUSINESS_LICENSE', 'POD', 'BOL', 'RATE_CONFIRMATION', 'OTHER')),
   object_key TEXT NOT NULL UNIQUE,
+  r2_key TEXT,
   original_filename TEXT NOT NULL,
+  file_name TEXT,
   mime_type TEXT NOT NULL,
-  file_size INTEGER NOT NULL,
+  file_size INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED')),
   rejection_reason TEXT,
   reviewed_by TEXT REFERENCES users(id),
@@ -292,10 +297,11 @@ CREATE TRIGGER IF NOT EXISTS update_bids_updated_at
 CREATE TABLE IF NOT EXISTS support_tickets (
     id TEXT PRIMARY KEY,
     user_id TEXT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    name TEXT,
+    first_name TEXT,
+    last_name TEXT,
     email TEXT NOT NULL,
-    category TEXT NOT NULL CHECK (category IN ('TECHNICAL', 'BILLING', 'DOCUMENT_VERIFICATION', 'PLATFORM_INQUIRY')),
+    category TEXT NOT NULL CHECK (category IN ('TECHNICAL', 'BILLING', 'DOCUMENT_VERIFICATION', 'PLATFORM', 'PLATFORM_INQUIRY')),
     subject TEXT,
     message TEXT NOT NULL,
     screenshot_r2_key TEXT,
@@ -305,6 +311,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_category ON support_tickets(category);
+CREATE INDEX IF NOT EXISTS idx_tickets_user_id ON support_tickets(user_id);
 
 CREATE TRIGGER IF NOT EXISTS update_tickets_updated_at
   AFTER UPDATE ON support_tickets FOR EACH ROW

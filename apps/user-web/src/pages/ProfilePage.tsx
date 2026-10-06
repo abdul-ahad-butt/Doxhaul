@@ -1,12 +1,10 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileUp, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileUp, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { StatusBadge } from '../components/ui/Badge';
-
 import { DocumentViewerModal } from '../components/common/DocumentViewerModal';
 
 const ProfilePage = () => {
@@ -21,8 +19,8 @@ const ProfilePage = () => {
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
 
   const handleViewDocument = (doc: any) => {
-    const token = localStorage.getItem('token');
-    const baseUrl = (import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api';
+    const token = apiClient.getToken() || localStorage.getItem('token') || localStorage.getItem('auth_token') || '';
+    const baseUrl = ((import.meta as any).env?.VITE_API_URL || 'https://doxhaul.abdulahadbutt420.workers.dev/api').replace(/\/$/, '');
     setSelectedDocUrl(`${baseUrl}/documents/${doc.id}/view?token=${token}`);
     setSelectedDoc(doc);
     setIsModalOpen(true);
@@ -44,6 +42,7 @@ const ProfilePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setUploadError('');
     },
     onError: (err: any) => {
@@ -54,41 +53,71 @@ const ProfilePage = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setUploadError('File must be less than 5MB');
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError('File must be less than 10MB');
         return;
       }
       uploadMutation.mutate(file);
     }
   };
 
+  const renderBadge = (status: string) => {
+    const s = (status || '').toUpperCase();
+    if (s === 'REJECTED') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+          ✕ Declined / Rejected
+        </span>
+      );
+    }
+    if (s === 'APPROVED' || s === 'VERIFIED') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+          ✓ Verified
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+        ⏳ Pending Verification
+      </span>
+    );
+  };
+
   const getDocTypeIcon = (status: string) => {
-    switch (status) {
-      case 'APPROVED': return <CheckCircle className="text-brand-green h-5 w-5" />;
-      case 'PENDING': return <Clock className="text-brand-amber h-5 w-5" />;
-      case 'REJECTED': return <AlertCircle className="text-brand-red h-5 w-5" />;
-      default: return <FileText className="text-navy-400 h-5 w-5" />;
+    const s = (status || '').toUpperCase();
+    switch (s) {
+      case 'APPROVED':
+      case 'VERIFIED':
+        return <CheckCircle className="text-brand-green h-5 w-5" />;
+      case 'REJECTED': 
+        return <AlertCircle className="text-brand-red h-5 w-5" />;
+      default: 
+        return <Clock className="text-brand-amber h-5 w-5" />;
     }
   };
+
+  const currentStatus = profile?.verification_status || (user as any)?.verification_status || user?.status || 'PENDING_VERIFICATION';
+  const rejectionReason = profile?.verification_notes || (user as any)?.rejection_reason || null;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-navy-900 tracking-tight">Company Profile & Compliance</h2>
-        <StatusBadge status={profile?.verification_status || 'PENDING'} />
+        {renderBadge(currentStatus)}
       </div>
 
-      {profile?.verification_status === 'REJECTED' && (
+      {(currentStatus === 'REJECTED' || (currentStatus || '').toUpperCase() === 'REJECTED') && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
           <div className="flex items-start">
             <div className="flex-1">
               <h3 className="text-sm font-bold text-red-800">Verification Application Declined</h3>
               <p className="mt-1 text-sm text-red-700">
-                Your document verification was not approved by Admin. Please wait 3 days before re-applying, or click the support assistant in the bottom-right corner to speak with our support team.
+                Your submitted document was not approved. Please wait 3 days before re-applying, or click the support assistant in the bottom-right corner to speak with our support team.
               </p>
-              {profile?.rejection_reason && (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  Reason: {profile.rejection_reason}
+              {rejectionReason && (
+                <p className="mt-2 text-xs font-medium text-red-700 font-semibold">
+                  Reason: {rejectionReason}
                 </p>
               )}
             </div>
@@ -103,11 +132,11 @@ const ProfilePage = () => {
         <CardContent className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-navy-500">Company Name</label>
-            <div className="mt-1 text-navy-900">{profile?.company_name}</div>
+            <div className="mt-1 text-navy-900">{profile?.company_name || 'N/A'}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-navy-500">Account Role</label>
-            <div className="mt-1 text-navy-900 capitalize">{user?.role.toLowerCase()}</div>
+            <div className="mt-1 text-navy-900 capitalize">{user?.role?.toLowerCase() || 'Carrier'}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-navy-500">Primary Contact</label>
@@ -177,21 +206,26 @@ const ProfilePage = () => {
                 No documents uploaded yet.
               </div>
             ) : (
-              documents?.map((doc) => (
+              documents?.map((doc: any) => (
                 <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-navy-200 rounded-lg shadow-sm">
                   <div className="flex items-center">
-                    {getDocTypeIcon(doc.status || profile?.verification_status || 'PENDING')}
+                    {getDocTypeIcon(doc.status)}
                     <div className="ml-4">
                       <p className="text-sm font-medium text-navy-900">
-                        {doc.document_type.replace('_', ' ')}
+                        {doc.document_type.replace(/_/g, ' ')}
                       </p>
                       <p className="text-xs text-navy-500">
-                        Uploaded on {new Date(doc.created_at).toLocaleDateString()}
+                        Uploaded on {new Date(doc.created_at || doc.uploaded_at).toLocaleDateString()}
                       </p>
+                      {doc.rejection_reason && (
+                        <p className="text-xs text-red-600 mt-0.5 font-medium">
+                          Reason: {doc.rejection_reason}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <StatusBadge status={doc.status || profile?.verification_status || 'PENDING'} />
+                    {renderBadge(doc.status)}
                     <Button variant="ghost" size="sm" onClick={() => handleViewDocument(doc)}>
                       View
                     </Button>
@@ -208,7 +242,7 @@ const ProfilePage = () => {
         onClose={() => setIsModalOpen(false)}
         documentUrl={selectedDocUrl}
         documentType={selectedDoc?.mime_type}
-        filename={selectedDoc?.original_filename}
+        filename={selectedDoc?.file_name || selectedDoc?.original_filename}
       />
     </div>
   );

@@ -32,12 +32,13 @@ router.post('/', async (c) => {
   }
 
   // Validate mime type (allow pdf, images)
-  const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
   if (!allowedMimeTypes.includes(file.type)) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid file type. Only PDF, PNG, JPG allowed.' } }, 400);
   }
 
-  const storage = new StorageService(c.env.DOCUMENTS);
+  const bucket = c.env.DOCUMENTS || (c.env as any).DOCUMENTS_BUCKET;
+  const storage = new StorageService(bucket);
   let objectKey = storage.generateKey(user.id, file.name);
   if (loadId && (documentType === 'POD' || documentType === 'BOL' || documentType === 'RATE_CONFIRMATION')) {
     objectKey = `pod/${loadId}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
@@ -48,12 +49,14 @@ router.post('/', async (c) => {
 
     const docId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
     
-    // Insert record
+    // Insert record with both original_filename/object_key and file_name/r2_key
     const result = await c.env.DB.prepare(`
-      INSERT INTO documents (id, user_id, document_type, object_key, original_filename, mime_type, file_size)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO documents (
+        id, user_id, document_type, object_key, r2_key, original_filename, file_name, mime_type, file_size, status
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
       RETURNING *
-    `).bind(docId, user.id, documentType, objectKey, file.name, file.type, file.size).first();
+    `).bind(docId, user.id, documentType, objectKey, objectKey, file.name, file.name, file.type, file.size).first();
 
     // Log audit event
     await c.env.DB.prepare(`
@@ -63,9 +66,18 @@ router.post('/', async (c) => {
 
     // Reset verification status if it's a compliance document
     if (!loadId) {
-      await c.env.DB.prepare(`
-        UPDATE profiles SET verification_status = 'PENDING', updated_at = datetime('now') WHERE user_id = ?
-      `).bind(user.id).run();
+      await c.env.DB.batch([
+        c.env.DB.prepare(`
+          UPDATE profiles 
+          SET verification_status = 'PENDING', updated_at = datetime('now') 
+          WHERE user_id = ?
+        `).bind(user.id),
+        c.env.DB.prepare(`
+          UPDATE users 
+          SET verification_status = 'PENDING_VERIFICATION', updated_at = datetime('now') 
+          WHERE id = ?
+        `).bind(user.id)
+      ]);
     }
 
     return c.json({ success: true, data: result }, 201);
@@ -78,8 +90,16 @@ router.post('/', async (c) => {
 router.get('/', async (c) => {
   const user = c.get('user');
   
-  const documents = await c.env.DB.prepare('SELECT * FROM documents WHERE user_id = ? ORDER BY created_at DESC')
-    .bind(user.id).all();
+  const documents = await c.env.DB.prepare(`
+    SELECT 
+      id, user_id, document_type, original_filename, 
+      COALESCE(file_name, original_filename) as file_name,
+      COALESCE(r2_key, object_key) as r2_key,
+      object_key, mime_type, file_size, status, rejection_reason, created_at, uploaded_at
+    FROM documents 
+    WHERE user_id = ? 
+    ORDER BY created_at DESC
+  `).bind(user.id).all();
 
   return c.json({ success: true, data: documents.results });
 });
@@ -103,34 +123,52 @@ router.get('/:id/view', async (c) => {
     return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } }), { status: 404, headers });
   }
 
-  // To view/download, proxy through worker using StorageService
-  const storage = new StorageService(c.env.DOCUMENTS);
-  const file = await storage.getFile(doc.object_key as string);
-  
-  if (!file) {
+  // To view/download, proxy through worker using StorageService or direct bucket get
+  const bucket = c.env.DOCUMENTS || (c.env as any).DOCUMENTS_BUCKET;
+  const key = doc.r2_key || doc.object_key;
+  if (!key) {
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Content-Type', 'application/json');
+    return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Document key missing' } }), { status: 404, headers });
+  }
+
+  const object = await bucket.get(key);
+  if (!object) {
     const headers = new Headers();
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Content-Type', 'application/json');
     return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }), { status: 404, headers });
   }
 
-  const originalFilename = (doc.original_filename as string) || 'document';
-  const contentType = (doc.mime_type as string) || (originalFilename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : originalFilename.match(/\.png$/i) ? 'image/png' : 'application/octet-stream');
+  const originalFilename = doc.file_name || doc.original_filename || 'document';
+  const contentType = doc.mime_type || (originalFilename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : originalFilename.match(/\.png$/i) ? 'image/png' : originalFilename.match(/\.pdf$/i) ? 'application/pdf' : 'image/jpeg');
   
   const headers = new Headers();
   headers.set('Access-Control-Allow-Origin', '*');
   headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   headers.set('Content-Type', contentType);
-  headers.set('Content-Disposition', `inline; filename="${originalFilename}"`);
+  headers.set('Content-Disposition', 'inline');
   
-  return new Response(file.body, { headers });
+  return new Response(object.body, { headers });
+});
+
+router.options('/:id/view', () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    }
+  });
 });
 
 router.delete('/:id', async (c) => {
   const user = c.get('user');
   const docId = c.req.param('id');
 
-  const doc = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?').bind(docId, user.id).first();
+  const doc = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?').bind(docId, user.id).first() as any;
   
   if (!doc) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } }, 404);
@@ -140,8 +178,11 @@ router.delete('/:id', async (c) => {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot delete approved documents' } }, 400);
   }
 
-  const storage = new StorageService(c.env.DOCUMENTS);
-  await storage.deleteFile(doc.object_key as string);
+  const bucket = c.env.DOCUMENTS || (c.env as any).DOCUMENTS_BUCKET;
+  const key = doc.r2_key || doc.object_key;
+  if (key) {
+    await bucket.delete(key);
+  }
   
   await c.env.DB.prepare('DELETE FROM documents WHERE id = ?').bind(docId).run();
 

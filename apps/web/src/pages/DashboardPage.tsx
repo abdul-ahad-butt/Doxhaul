@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Package, Truck, Activity, CheckCircle, TrendingUp } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { apiClient } from '../api/client';
-import { Card, CardContent } from '../components/ui/Card';
-import { VerificationAlertBanner } from '../components/dashboard/VerificationAlertBanner';
+import { useAuth } from '../../user-web/src/hooks/useAuth';
+import { apiClient } from '../../user-web/src/api/client';
+import { Card, CardContent } from '../../user-web/src/components/ui/Card';
+import { VerificationAlertBanner } from '../../user-web/src/components/dashboard/VerificationAlertBanner';
 
 const DashboardPage = () => {
   const { user, profile } = useAuth();
@@ -70,7 +70,6 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Verification Gate / Alert Banner */}
       <VerificationAlertBanner 
         status={currentStatus}
         rejectionReason={rejectionReason}

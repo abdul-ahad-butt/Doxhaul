@@ -9,24 +9,32 @@ router.post('/', optionalAuthMiddleware, async (c) => {
   const user = c.get('user');
   const formData = await c.req.parseBody();
   
-  const firstName = formData['firstName'] as string;
-  const lastName = formData['lastName'] as string;
+  const rawName = (formData['name'] as string) || '';
+  const firstName = (formData['firstName'] as string) || (rawName ? rawName.split(' ')[0] : '');
+  const lastName = (formData['lastName'] as string) || (rawName ? rawName.split(' ').slice(1).join(' ') : '');
+  const fullName = rawName || `${firstName} ${lastName}`.trim();
   const email = formData['email'] as string;
-  const category = formData['category'] as string;
+  let category = formData['category'] as string;
   const message = formData['message'] as string;
   const file = formData['file'] as File | undefined;
   
-  if (!firstName || !lastName || !email || !category || !message) {
+  if (!email || !message) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing required fields' } }, 400);
+  }
+
+  // Normalize category if needed
+  if (!category) {
+    category = 'TECHNICAL';
   }
 
   let objectKey: string | null = null;
 
   if (file && file.size > 0) {
-    if (file.size > 5 * 1024 * 1024) {
-      return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'File too large (max 5MB)' } }, 400);
+    if (file.size > 10 * 1024 * 1024) {
+      return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'File too large (max 10MB)' } }, 400);
     }
-    const storage = new StorageService(c.env.DOCUMENTS);
+    const bucket = c.env.DOCUMENTS || (c.env as any).DOCUMENTS_BUCKET;
+    const storage = new StorageService(bucket);
     objectKey = `support/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
     await storage.uploadFile(objectKey, file);
   }
@@ -34,11 +42,12 @@ router.post('/', optionalAuthMiddleware, async (c) => {
   const ticketId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
 
   await c.env.DB.prepare(`
-    INSERT INTO support_tickets (id, user_id, first_name, last_name, email, category, message, screenshot_r2_key, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')
+    INSERT INTO support_tickets (id, user_id, name, first_name, last_name, email, category, message, screenshot_r2_key, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')
   `).bind(
     ticketId, 
     user?.id || null, 
+    fullName,
     firstName, 
     lastName, 
     email, 
@@ -68,8 +77,12 @@ router.get('/', authMiddleware, async (c) => {
   }
   
   if (category && category !== 'ALL') {
-    query += ' AND category = ?';
-    params.push(category);
+    if (category === 'PLATFORM') {
+      query += " AND (category = 'PLATFORM' OR category = 'PLATFORM_INQUIRY')";
+    } else {
+      query += ' AND category = ?';
+      params.push(category);
+    }
   }
   
   query += ' ORDER BY created_at DESC';
@@ -106,28 +119,47 @@ router.get('/:id/view-screenshot', authMiddleware, async (c) => {
   }
 
   const id = c.req.param('id');
-  const ticket = await c.env.DB.prepare('SELECT * FROM support_tickets WHERE id = ?').bind(id).first();
+  const ticket = (await c.env.DB.prepare('SELECT * FROM support_tickets WHERE id = ?').bind(id).first()) as any;
   
   if (!ticket || !ticket.screenshot_r2_key) {
-    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Screenshot not found' } }, 404);
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Content-Type', 'application/json');
+    return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'Screenshot not found' } }), { status: 404, headers });
   }
 
-  const storage = new StorageService(c.env.DOCUMENTS);
+  const bucket = c.env.DOCUMENTS || (c.env as any).DOCUMENTS_BUCKET;
+  const storage = new StorageService(bucket);
   const file = await storage.getFile(ticket.screenshot_r2_key as string);
   
   if (!file) {
-    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }, 404);
+    const headers = new Headers();
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Content-Type', 'application/json');
+    return new Response(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'File not found in storage' } }), { status: 404, headers });
   }
 
   const originalFilename = (ticket.screenshot_r2_key as string).split('/').pop() || 'screenshot.png';
-  const contentType = originalFilename.endsWith('.jpg') || originalFilename.endsWith('.jpeg') ? 'image/jpeg' : 'image/png';
+  const contentType = originalFilename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : originalFilename.match(/\.png$/i) ? 'image/png' : 'image/jpeg';
   
-  c.header('Content-Type', contentType);
-  c.header('Content-Disposition', `inline; filename="${originalFilename}"`);
-  c.header('Access-Control-Allow-Origin', '*');
-  c.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  headers.set('Content-Type', contentType);
+  headers.set('Content-Disposition', `inline; filename="${originalFilename}"`);
   
-  return c.body(file.body);
+  return new Response(file.body, { headers });
+});
+
+router.options('/:id/view-screenshot', () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    }
+  });
 });
 
 export default router;
