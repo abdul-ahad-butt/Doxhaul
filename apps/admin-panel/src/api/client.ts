@@ -68,7 +68,11 @@ export const apiClient = {
 
     if (isJson) {
       const data = await response.json();
-      return data.data as T;
+      if (data && typeof data === 'object') {
+        if (data.data !== undefined) return data.data as T;
+        if (data.users !== undefined) return data.users as T;
+      }
+      return data as T;
     }
 
     // For file downloads

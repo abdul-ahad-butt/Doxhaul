@@ -82,9 +82,9 @@ router.get('/users', async (c) => {
       u.verification_status as user_verification_status,
       u.rejection_reason as user_rejection_reason,
       u.created_at, 
-      p.first_name, 
-      p.last_name, 
-      p.company_name, 
+      COALESCE(p.first_name, '') as first_name, 
+      COALESCE(p.last_name, '') as last_name, 
+      COALESCE(p.company_name, '') as company_name, 
       p.verification_status as profile_verification_status,
       p.verification_notes,
       (SELECT COUNT(*) FROM documents d WHERE d.user_id = u.id AND d.status = 'REJECTED') as rejected_docs_count,
@@ -105,13 +105,22 @@ router.get('/users', async (c) => {
     const pendingDocs = Number(u.pending_docs_count || 0);
     const totalDocs = Number(u.total_docs_count || 0);
 
+    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+    const displayName = fullName || u.company_name || u.email;
+
     // Dynamic compliance computation:
-    // 1. If user verification_status is REJECTED or profile is REJECTED or any doc is REJECTED -> REJECTED
-    // 2. If approved/verified and has no pending/rejected docs -> VERIFIED
-    // 3. Otherwise -> PENDING
-    if (userV === 'REJECTED' || profV === 'REJECTED' || rejectedDocs > 0) {
+    // 1. Admins are automatically verified
+    // 2. If rejected -> REJECTED
+    // 3. If approved/verified -> VERIFIED
+    // 4. Otherwise -> PENDING
+    if (u.role === 'ADMIN') {
+      computedStatus = 'VERIFIED';
+    } else if (userV === 'REJECTED' || profV === 'REJECTED' || rejectedDocs > 0) {
       computedStatus = 'REJECTED';
-    } else if ((userV === 'APPROVED' || profV === 'VERIFIED' || profV === 'APPROVED') && (approvedDocs > 0 || totalDocs === 0) && pendingDocs === 0 && rejectedDocs === 0) {
+    } else if (
+      (userV === 'APPROVED' || userV === 'VERIFIED' || profV === 'VERIFIED' || profV === 'APPROVED') &&
+      rejectedDocs === 0
+    ) {
       computedStatus = 'VERIFIED';
     } else {
       computedStatus = 'PENDING';
@@ -120,6 +129,7 @@ router.get('/users', async (c) => {
     return {
       id: u.id,
       email: u.email,
+      name: displayName,
       role: u.role,
       status: computedStatus,
       raw_status: u.user_status,
@@ -130,13 +140,18 @@ router.get('/users', async (c) => {
       last_name: u.last_name,
       company_name: u.company_name,
       total_docs: totalDocs,
+      documents_count: totalDocs,
       approved_docs: approvedDocs,
       rejected_docs: rejectedDocs,
       pending_docs: pendingDocs
     };
   });
 
-  return c.json({ success: true, data: formatted });
+  return c.json({ 
+    success: true, 
+    data: formatted,
+    users: formatted 
+  });
 });
 
 router.get('/users/:id/documents', async (c) => {

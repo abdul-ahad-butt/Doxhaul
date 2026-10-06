@@ -81,12 +81,18 @@ router.post('/', requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, a
 router.get('/', async (c) => {
   const user = c.get('user');
   
-  // Parse query params for filtering
+  // Parse query params for DAT One filtering
   const origin = c.req.query('origin');
   const destination = c.req.query('destination');
+  const anywhere = c.req.query('anywhere') === 'true' || c.req.query('anywhere') === '1';
   const equipment = c.req.query('equipment');
   const minRate = c.req.query('minRate');
+  const minRpm = c.req.query('minRpm');
+  const loadSize = c.req.query('loadSize');
+  const pickupDate = c.req.query('pickupDate');
+  const sort = c.req.query('sort') || 'NEWEST';
   const status = c.req.query('status');
+  const q = c.req.query('q') || c.req.query('search');
   const ownerOnly = c.req.query('ownerOnly') === 'true'; // For shippers/brokers to view their own loads
   
   const page = parseInt(c.req.query('page') || '1');
@@ -100,29 +106,89 @@ router.get('/', async (c) => {
     query += ' AND owner_user_id = ?';
     values.push(user.id);
   } else if (user.role === 'CARRIER') {
-    // Carriers mostly see OPEN loads unless filtering specific status for their booked loads
+    // Carriers see OPEN loads unless explicitly filtering
     if (!status) {
       query += ' AND status = ?';
       values.push('OPEN');
     }
   }
 
-  if (origin) {
-    query += ' AND (origin_city LIKE ? OR origin_state LIKE ?)';
-    values.push(`%${origin}%`, `%${origin}%`);
+  // Free text search fallback
+  if (q && q.trim()) {
+    const term = `%${q.trim()}%`;
+    query += ' AND (origin_city LIKE ? OR origin_state LIKE ? OR destination_city LIKE ? OR destination_state LIKE ? OR title LIKE ? OR reference_number LIKE ?)';
+    values.push(term, term, term, term, term, term);
   }
-  if (destination) {
-    query += ' AND (destination_city LIKE ? OR destination_state LIKE ?)';
-    values.push(`%${destination}%`, `%${destination}%`);
+
+  // Origin filter
+  if (origin && origin.trim()) {
+    const o = `%${origin.trim()}%`;
+    query += ' AND (origin_city LIKE ? OR origin_state LIKE ? OR origin_zip LIKE ?)';
+    values.push(o, o, o);
   }
-  if (equipment) {
-    query += ' AND equipment_type = ?';
-    values.push(equipment);
+
+  // Destination filter (ignored if anywhere is true)
+  if (!anywhere && destination && destination.trim()) {
+    const d = `%${destination.trim()}%`;
+    query += ' AND (destination_city LIKE ? OR destination_state LIKE ? OR destination_zip LIKE ?)';
+    values.push(d, d, d);
   }
+
+  // Multi-equipment filter
+  if (equipment && equipment !== 'ALL') {
+    const eqList = equipment
+      .split(',')
+      .map((e: string) => e.trim().toUpperCase())
+      .filter((e: string) => Boolean(e) && e !== 'ALL');
+
+    if (eqList.length === 1) {
+      query += ' AND equipment_type = ?';
+      values.push(eqList[0]);
+    } else if (eqList.length > 1) {
+      const placeholders = eqList.map(() => '?').join(', ');
+      query += ` AND equipment_type IN (${placeholders})`;
+      values.push(...eqList);
+    }
+  }
+
+  // Min payout rate
   if (minRate) {
-    query += ' AND rate >= ?';
-    values.push(parseFloat(minRate));
+    const parsedRate = parseFloat(minRate);
+    if (!isNaN(parsedRate) && parsedRate > 0) {
+      query += ' AND rate >= ?';
+      values.push(parsedRate);
+    }
   }
+
+  // Min rate per mile
+  if (minRpm) {
+    const parsedRpm = parseFloat(minRpm);
+    if (!isNaN(parsedRpm) && parsedRpm > 0) {
+      query += ' AND (rate_per_mile >= ? OR (mileage > 0 AND (rate / mileage) >= ?))';
+      values.push(parsedRpm, parsedRpm);
+    }
+  }
+
+  // Load size (FTL / LTL)
+  if (loadSize === 'FTL') {
+    query += ' AND (weight >= 15000 OR length >= 48)';
+  } else if (loadSize === 'LTL') {
+    query += ' AND weight < 15000';
+  }
+
+  // Pickup date filter
+  if (pickupDate && pickupDate !== 'ALL') {
+    if (pickupDate === 'TODAY') {
+      query += " AND date(pickup_date) = date('now')";
+    } else if (pickupDate === 'TOMORROW') {
+      query += " AND date(pickup_date) = date('now', '+1 day')";
+    } else if (pickupDate === 'NEXT_3_DAYS') {
+      query += " AND date(pickup_date) >= date('now') AND date(pickup_date) <= date('now', '+3 days')";
+    } else if (pickupDate === 'NEXT_7_DAYS') {
+      query += " AND date(pickup_date) >= date('now') AND date(pickup_date) <= date('now', '+7 days')";
+    }
+  }
+
   if (status) {
     query += ' AND status = ?';
     values.push(status);
@@ -133,8 +199,21 @@ router.get('/', async (c) => {
   const totalResult = await c.env.DB.prepare(countQuery).bind(...values).first<{total: number}>();
   const total = totalResult?.total || 0;
 
-  // Add order, limit, offset
-  query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+  // Sorting
+  let orderBy = 'created_at DESC';
+  if (sort === 'HIGHEST_RATE') {
+    orderBy = 'rate DESC';
+  } else if (sort === 'RPM') {
+    orderBy = 'COALESCE(rate_per_mile, rate / NULLIF(mileage, 0)) DESC';
+  } else if (sort === 'EARLIEST_PICKUP') {
+    orderBy = 'pickup_date ASC';
+  } else if (sort === 'DEADHEAD') {
+    orderBy = 'mileage ASC, created_at DESC';
+  } else if (sort === 'NEWEST') {
+    orderBy = 'created_at DESC';
+  }
+
+  query += ` ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
   values.push(pageSize, offset);
 
   const results = await c.env.DB.prepare(query).bind(...values).all();
@@ -142,7 +221,7 @@ router.get('/', async (c) => {
   return c.json({ 
     success: true, 
     data: {
-      items: results.results,
+      items: results.results || [],
       total,
       page,
       pageSize,

@@ -49,6 +49,9 @@ export const IntegrationsSettingsPage: React.FC = () => {
     persona_template_id: '',
   });
 
+  const [paddleEnv, setPaddleEnv] = useState<'sandbox' | 'production'>('sandbox');
+  const [personaEnv, setPersonaEnv] = useState<'sandbox' | 'production'>('sandbox');
+
   // Mask/unmask state
   const [showPaddleKey, setShowPaddleKey] = useState(false);
   const [showPaddleToken, setShowPaddleToken] = useState(false);
@@ -78,8 +81,12 @@ export const IntegrationsSettingsPage: React.FC = () => {
       ]);
 
       if (settingsRes) {
+        const pEnv = (settingsRes.paddle_environment === 'production' ? 'production' : 'sandbox');
+        const perEnv = (settingsRes.persona_environment === 'production' ? 'production' : 'sandbox');
+        setPaddleEnv(pEnv);
+        setPersonaEnv(perEnv);
         setSettings({
-          paddle_environment: settingsRes.paddle_environment || 'sandbox',
+          paddle_environment: pEnv,
           paddle_vendor_id: settingsRes.paddle_vendor_id || '',
           paddle_api_key: settingsRes.paddle_api_key || '',
           paddle_client_token: settingsRes.paddle_client_token || '',
@@ -88,7 +95,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
           carrier_onboarding_fee: Number(settingsRes.carrier_onboarding_fee ?? 25.0),
           shipper_onboarding_fee: Number(settingsRes.shipper_onboarding_fee ?? 0.0),
           broker_onboarding_fee: Number(settingsRes.broker_onboarding_fee ?? 50.0),
-          persona_environment: settingsRes.persona_environment || 'sandbox',
+          persona_environment: perEnv,
           persona_api_key: settingsRes.persona_api_key || '',
           persona_template_id: settingsRes.persona_template_id || '',
         });
@@ -111,15 +118,26 @@ export const IntegrationsSettingsPage: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const updated = await apiClient.put<any>('/admin/settings', settings);
+      const payload = {
+        ...settings,
+        paddle_environment: paddleEnv,
+        persona_environment: personaEnv,
+      };
+      const updated = await apiClient.put<any>('/admin/settings', payload);
       if (updated) {
+        const pEnv = (updated.paddle_environment === 'production' ? 'production' : 'sandbox');
+        const perEnv = (updated.persona_environment === 'production' ? 'production' : 'sandbox');
+        setPaddleEnv(pEnv);
+        setPersonaEnv(perEnv);
         setSettings(prev => ({
           ...prev,
           ...updated,
-          platform_fee_percent: Number(updated.platform_fee_percent),
-          carrier_onboarding_fee: Number(updated.carrier_onboarding_fee),
-          shipper_onboarding_fee: Number(updated.shipper_onboarding_fee),
-          broker_onboarding_fee: Number(updated.broker_onboarding_fee),
+          paddle_environment: pEnv,
+          persona_environment: perEnv,
+          platform_fee_percent: Number(updated.platform_fee_percent ?? 7.5),
+          carrier_onboarding_fee: Number(updated.carrier_onboarding_fee ?? 25.0),
+          shipper_onboarding_fee: Number(updated.shipper_onboarding_fee ?? 0.0),
+          broker_onboarding_fee: Number(updated.broker_onboarding_fee ?? 50.0),
         }));
       }
       setSaveSuccess(true);
@@ -137,7 +155,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
     try {
       const res = await apiClient.post<any>('/admin/settings/test-paddle', {
         paddle_api_key: settings.paddle_api_key,
-        paddle_environment: settings.paddle_environment,
+        paddle_environment: paddleEnv,
       });
       setPaddleTestResult(res);
     } catch (err: any) {
@@ -157,7 +175,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
       const res = await apiClient.post<any>('/admin/settings/test-persona', {
         persona_api_key: settings.persona_api_key,
         persona_template_id: settings.persona_template_id,
-        persona_environment: settings.persona_environment,
+        persona_environment: personaEnv,
       });
       setPersonaTestResult(res);
     } catch (err: any) {
@@ -189,7 +207,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-16">
+    <div className="min-h-full w-full max-w-6xl mx-auto space-y-8 pb-20">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl pointer-events-none" />
@@ -345,7 +363,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
             </label>
             <div className="grid grid-cols-2 gap-3 max-w-md">
               <label className={`flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer font-medium text-sm transition-all ${
-                settings.paddle_environment === 'sandbox'
+                paddleEnv === 'sandbox'
                   ? 'border-brand-blue bg-blue-50/50 text-brand-blue shadow-sm'
                   : 'border-slate-200 hover:bg-slate-50 text-slate-600'
               }`}>
@@ -353,8 +371,11 @@ export const IntegrationsSettingsPage: React.FC = () => {
                   type="radio"
                   name="paddle_environment"
                   value="sandbox"
-                  checked={settings.paddle_environment === 'sandbox'}
-                  onChange={() => setSettings(s => ({ ...s, paddle_environment: 'sandbox' }))}
+                  checked={paddleEnv === 'sandbox'}
+                  onChange={() => {
+                    setPaddleEnv('sandbox');
+                    setSettings(s => ({ ...s, paddle_environment: 'sandbox' }));
+                  }}
                   className="sr-only"
                 />
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
@@ -362,7 +383,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
               </label>
 
               <label className={`flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer font-medium text-sm transition-all ${
-                settings.paddle_environment === 'production'
+                paddleEnv === 'production'
                   ? 'border-brand-blue bg-blue-50/50 text-brand-blue shadow-sm'
                   : 'border-slate-200 hover:bg-slate-50 text-slate-600'
               }`}>
@@ -370,8 +391,11 @@ export const IntegrationsSettingsPage: React.FC = () => {
                   type="radio"
                   name="paddle_environment"
                   value="production"
-                  checked={settings.paddle_environment === 'production'}
-                  onChange={() => setSettings(s => ({ ...s, paddle_environment: 'production' }))}
+                  checked={paddleEnv === 'production'}
+                  onChange={() => {
+                    setPaddleEnv('production');
+                    setSettings(s => ({ ...s, paddle_environment: 'production' }));
+                  }}
                   className="sr-only"
                 />
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -621,7 +645,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
             </label>
             <div className="grid grid-cols-2 gap-3 max-w-md">
               <label className={`flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer font-medium text-sm transition-all ${
-                settings.persona_environment === 'sandbox'
+                personaEnv === 'sandbox'
                   ? 'border-purple-600 bg-purple-50/50 text-purple-700 shadow-sm'
                   : 'border-slate-200 hover:bg-slate-50 text-slate-600'
               }`}>
@@ -629,8 +653,11 @@ export const IntegrationsSettingsPage: React.FC = () => {
                   type="radio"
                   name="persona_environment"
                   value="sandbox"
-                  checked={settings.persona_environment === 'sandbox'}
-                  onChange={() => setSettings(s => ({ ...s, persona_environment: 'sandbox' }))}
+                  checked={personaEnv === 'sandbox'}
+                  onChange={() => {
+                    setPersonaEnv('sandbox');
+                    setSettings(s => ({ ...s, persona_environment: 'sandbox' }));
+                  }}
                   className="sr-only"
                 />
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
@@ -638,7 +665,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
               </label>
 
               <label className={`flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer font-medium text-sm transition-all ${
-                settings.persona_environment === 'production'
+                personaEnv === 'production'
                   ? 'border-purple-600 bg-purple-50/50 text-purple-700 shadow-sm'
                   : 'border-slate-200 hover:bg-slate-50 text-slate-600'
               }`}>
@@ -646,8 +673,11 @@ export const IntegrationsSettingsPage: React.FC = () => {
                   type="radio"
                   name="persona_environment"
                   value="production"
-                  checked={settings.persona_environment === 'production'}
-                  onChange={() => setSettings(s => ({ ...s, persona_environment: 'production' }))}
+                  checked={personaEnv === 'production'}
+                  onChange={() => {
+                    setPersonaEnv('production');
+                    setSettings(s => ({ ...s, persona_environment: 'production' }));
+                  }}
                   className="sr-only"
                 />
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
