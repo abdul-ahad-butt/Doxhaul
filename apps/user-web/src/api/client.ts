@@ -89,6 +89,15 @@ export const apiClient = {
     });
   },
 
+  patch<T>(endpoint: string, body?: any, options?: RequestInit) {
+    const isFormData = body instanceof FormData;
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: isFormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+    });
+  },
+
   delete<T>(endpoint: string, options?: RequestInit) {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }

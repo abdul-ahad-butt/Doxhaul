@@ -151,19 +151,22 @@ CREATE INDEX IF NOT EXISTS idx_loads_equipment ON loads(equipment_type);
 -- BIDS TABLE
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bids (
-  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-  load_id TEXT NOT NULL REFERENCES loads(id) ON DELETE RESTRICT,
-  carrier_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-  amount REAL NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'USD',
-  notes TEXT,
-  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'COUNTERED')),
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    id TEXT PRIMARY KEY,
+    load_id TEXT NOT NULL,
+    bidder_id TEXT NOT NULL,
+    bidder_role TEXT NOT NULL CHECK (bidder_role IN ('CARRIER', 'BROKER')),
+    amount REAL NOT NULL,
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'COUNTERED')),
+    counter_amount REAL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (load_id) REFERENCES loads(id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_bids_load_id_status ON bids(load_id, status);
-CREATE INDEX IF NOT EXISTS idx_bids_carrier_id ON bids(carrier_id);
+CREATE INDEX IF NOT EXISTS idx_bids_load ON bids(load_id, status);
+CREATE INDEX IF NOT EXISTS idx_bids_bidder ON bids(bidder_id);
 
 -- ============================================================
 -- BOOKINGS TABLE

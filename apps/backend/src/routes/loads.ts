@@ -3,6 +3,7 @@ import { Env } from '../types/env';
 import { authMiddleware, JwtPayload, requireRole, requireVerified } from '../middleware/auth';
 import { createLoadSchema } from '../validators/loads';
 import { calculateDistance } from '../services/distance';
+import { handleSubmitBid, handleGetLoadBids } from './bids';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
 
@@ -81,7 +82,7 @@ router.post('/', requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, a
 router.get('/', async (c) => {
   const user = c.get('user');
   
-  // Parse query params for DAT One filtering
+  // Parse query params for Doxhaul Marketplace filtering
   const origin = c.req.query('origin');
   const destination = c.req.query('destination');
   const anywhere = c.req.query('anywhere') === 'true' || c.req.query('anywhere') === '1';
@@ -99,17 +100,21 @@ router.get('/', async (c) => {
   const pageSize = parseInt(c.req.query('pageSize') || '20');
   const offset = (page - 1) * pageSize;
 
-  let query = 'SELECT * FROM loads WHERE is_deleted = 0';
+  const selectClause = `SELECT loads.*, 
+    (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id AND bids.status = 'PENDING') as pending_bids_count,
+    (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id) as total_bids_count`;
+
+  let query = `${selectClause} FROM loads WHERE is_deleted = 0`;
   const values: any[] = [];
 
   if (ownerOnly && (user.role === 'SHIPPER' || user.role === 'BROKER' || user.role === 'ADMIN')) {
     query += ' AND owner_user_id = ?';
     values.push(user.id);
   } else if (user.role === 'CARRIER') {
-    // Carriers see OPEN loads unless explicitly filtering
+    // Carriers see OPEN and BIDDING loads unless explicitly filtering
     if (!status) {
-      query += ' AND status = ?';
-      values.push('OPEN');
+      query += ' AND (status = ? OR status = ?)';
+      values.push('OPEN', 'BIDDING');
     }
   }
 
@@ -195,7 +200,7 @@ router.get('/', async (c) => {
   }
 
   // Count total for pagination
-  const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+  const countQuery = query.replace(selectClause, 'SELECT COUNT(*) as total');
   const totalResult = await c.env.DB.prepare(countQuery).bind(...values).first<{total: number}>();
   const total = totalResult?.total || 0;
 
@@ -342,5 +347,9 @@ router.delete('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
 
   return c.json({ success: true, data: { message: 'Load deleted successfully' } });
 });
+
+// Load Bidding endpoints
+router.post('/:id/bids', requireRole(['CARRIER', 'BROKER', 'ADMIN']), requireVerified, (c) => handleSubmitBid(c));
+router.get('/:id/bids', (c) => handleGetLoadBids(c));
 
 export default router;

@@ -8,10 +8,12 @@ import {
   MapPin, 
   Calendar, 
   Truck, 
-  RefreshCw
+  RefreshCw,
+  Tag
 } from 'lucide-react';
 import { apiClient } from '../../api/client';
 import { Card, CardContent } from '../../components/ui/Card';
+import { ManageBidsModal } from './ManageBidsModal';
 
 interface LoadItem {
   id: string;
@@ -27,6 +29,8 @@ interface LoadItem {
   weight: number;
   rate: number;
   status: 'OPEN' | 'BIDDING' | 'ASSIGNED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  pending_bids_count?: number;
+  total_bids_count?: number;
   created_at: string;
 }
 
@@ -34,16 +38,19 @@ export const MyShipmentsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLoadForBids, setSelectedLoadForBids] = useState<LoadItem | null>(null);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['loads', 'my-shipments'],
     queryFn: async () => {
-      const res = await apiClient.get<{ loads: LoadItem[], total: number }>('/loads?ownerOnly=true&pageSize=50');
-      return res;
+      const res = await apiClient.get<any>('/loads?ownerOnly=true&pageSize=50');
+      if (res && res.items) return res.items;
+      if (res && res.loads) return res.loads;
+      return Array.isArray(res) ? res : [];
     }
   });
 
-  const loads: LoadItem[] = (data as any)?.loads || (Array.isArray(data) ? data : []);
+  const loads: LoadItem[] = Array.isArray(data) ? data : ((data as any)?.items || (data as any)?.loads || []);
 
   const filteredLoads = loads.filter(l => {
     const matchesTab = activeTab === 'ALL' || l.status === activeTab;
@@ -82,7 +89,7 @@ export const MyShipmentsPage: React.FC = () => {
             My Shipments & Freight Dispatch
           </h1>
           <p className="text-sm text-navy-500">
-            Track live carrier assignments, in-transit status, and freight delivery confirmations.
+            Track live carrier assignments, incoming bids, in-transit status, and freight escrow settlement.
           </p>
         </div>
 
@@ -90,14 +97,14 @@ export const MyShipmentsPage: React.FC = () => {
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="p-2.5 rounded-lg border border-navy-200 bg-white hover:bg-navy-50 text-navy-600 transition-colors"
+            className="p-2.5 rounded-lg border border-navy-200 bg-white hover:bg-navy-50 text-navy-600 transition-colors cursor-pointer"
             title="Refresh shipments"
           >
             <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </button>
           <Link
             to="/loads/create"
-            className="px-4 py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+            className="px-4 py-2.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-lg text-sm font-semibold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             Post a New Load
@@ -111,6 +118,7 @@ export const MyShipmentsPage: React.FC = () => {
           {[
             { key: 'ALL', label: 'All Loads' },
             { key: 'OPEN', label: 'Open' },
+            { key: 'BIDDING', label: 'Bidding' },
             { key: 'ASSIGNED', label: 'Assigned' },
             { key: 'IN_TRANSIT', label: 'In Transit' },
             { key: 'DELIVERED', label: 'Delivered' },
@@ -141,7 +149,7 @@ export const MyShipmentsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Table or Cards */}
+      {/* Table of Shipments */}
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
@@ -160,7 +168,7 @@ export const MyShipmentsPage: React.FC = () => {
               </p>
               <button
                 onClick={() => navigate('/loads/create')}
-                className="px-4 py-2 bg-brand-blue text-white rounded-lg text-xs font-semibold hover:bg-brand-blueHover transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 bg-brand-blue text-white rounded-lg text-xs font-semibold hover:bg-brand-blueHover transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
                 Post a Load Now
@@ -177,62 +185,102 @@ export const MyShipmentsPage: React.FC = () => {
                     <th className="py-3 px-4">Equipment & Weight</th>
                     <th className="py-3 px-4">Rate</th>
                     <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Carrier Offers</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-navy-100 text-navy-800">
-                  {filteredLoads.map((load) => (
-                    <tr key={load.id} className="hover:bg-navy-50/40 transition-colors">
-                      <td className="py-3 px-4">
-                        <span className="font-mono font-bold text-brand-blue text-[11px] block">
-                          {load.reference_number || load.id.slice(0, 8).toUpperCase()}
-                        </span>
-                        <span className="font-medium text-navy-900 block truncate max-w-xs text-xs">
-                          {load.title}
-                        </span>
-                      </td>
+                  {filteredLoads.map((load) => {
+                    const totalBids = load.total_bids_count !== undefined ? Number(load.total_bids_count) : 0;
+                    const pendingBids = load.pending_bids_count !== undefined ? Number(load.pending_bids_count) : 0;
 
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 font-medium">
-                          <MapPin className="w-3.5 h-3.5 text-navy-400" />
-                          <span>{load.origin_city}, {load.origin_state}</span>
-                          <span className="text-navy-400">→</span>
-                          <span>{load.destination_city}, {load.destination_state}</span>
-                        </div>
-                      </td>
+                    return (
+                      <tr key={load.id} className="hover:bg-navy-50/40 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="font-mono font-bold text-brand-blue text-[11px] block">
+                            {load.reference_number || load.id.slice(0, 8).toUpperCase()}
+                          </span>
+                          <span className="font-medium text-navy-900 block truncate max-w-xs text-xs">
+                            {load.title}
+                          </span>
+                        </td>
 
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 text-navy-600">
-                          <Calendar className="w-3.5 h-3.5 text-navy-400" />
-                          <span>{load.pickup_date}</span>
-                          <span className="text-navy-400">to</span>
-                          <span>{load.delivery_date}</span>
-                        </div>
-                      </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <MapPin className="w-3.5 h-3.5 text-navy-400" />
+                            <span>{load.origin_city}, {load.origin_state}</span>
+                            <span className="text-navy-400">→</span>
+                            <span>{load.destination_city}, {load.destination_state}</span>
+                          </div>
+                        </td>
 
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1 text-navy-700">
-                          <Truck className="w-3.5 h-3.5 text-navy-400" />
-                          <span>{load.equipment_type?.replace('_', ' ')}</span>
-                          <span className="text-navy-400">•</span>
-                          <span>{Number(load.weight || 0).toLocaleString()} lbs</span>
-                        </div>
-                      </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1.5 text-navy-600">
+                            <Calendar className="w-3.5 h-3.5 text-navy-400" />
+                            <span>{load.pickup_date}</span>
+                            <span className="text-navy-400">to</span>
+                            <span>{load.delivery_date}</span>
+                          </div>
+                        </td>
 
-                      <td className="py-3 px-4 font-bold text-navy-900">
-                        ${Number(load.rate || 0).toLocaleString()}
-                      </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1 text-navy-700">
+                            <Truck className="w-3.5 h-3.5 text-navy-400" />
+                            <span>{load.equipment_type?.replace('_', ' ')}</span>
+                            <span className="text-navy-400">•</span>
+                            <span>{Number(load.weight || 0).toLocaleString()} lbs</span>
+                          </div>
+                        </td>
 
-                      <td className="py-3 px-4">
-                        {getStatusBadge(load.status)}
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="py-3 px-4 font-bold text-navy-900">
+                          ${Number(load.rate || 0).toLocaleString()}
+                        </td>
+
+                        <td className="py-3 px-4">
+                          {getStatusBadge(load.status)}
+                        </td>
+
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLoadForBids(load)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm ${
+                              pendingBids > 0
+                                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25'
+                                : totalBids > 0
+                                  ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                                  : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            <Tag className="w-3.5 h-3.5" />
+                            <span>
+                              {totalBids > 0 
+                                ? `[${totalBids} ${totalBids === 1 ? 'Bid' : 'Bids'} Received]` 
+                                : 'Review Bids'}
+                            </span>
+                            {pendingBids > 0 && (
+                              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Review Bids Drawer / Modal */}
+      <ManageBidsModal
+        isOpen={!!selectedLoadForBids}
+        load={selectedLoadForBids}
+        onClose={() => setSelectedLoadForBids(null)}
+        onBidAccepted={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 };

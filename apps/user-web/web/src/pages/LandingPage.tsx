@@ -89,7 +89,7 @@ const LandingPage = () => {
             <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">Samsara</div>
             <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">KeepTruckin</div>
             <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">QuickBooks</div>
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">DAT</div>
+            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">Project44</div>
             <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">TruckStop</div>
           </div>
         </div>

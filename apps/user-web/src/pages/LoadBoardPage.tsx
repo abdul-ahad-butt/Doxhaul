@@ -2,25 +2,22 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
-  Calendar, 
-  Package, 
   Lock, 
-  MapPin, 
   Truck, 
-  Navigation, 
   Compass, 
   X, 
-  Building2, 
-  ArrowRight
+  ArrowRight,
+  Tag,
+  ShieldCheck
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
-import { StatusBadge } from '../components/ui/Badge';
-import { Card } from '../components/ui/Card';
 import { PostLoadModal } from '../components/PostLoadModal';
 import { VerificationAlertBanner } from '../components/dashboard/VerificationAlertBanner';
 import { DATFilterBar, FilterState, INITIAL_FILTERS } from '../components/loadboard/DATFilterBar';
+import { PlaceBidModal } from '../components/loadboard/PlaceBidModal';
+import { LoadCard } from '../components/loadboard/LoadCard';
 
 export const LoadBoardPage = () => {
   const { user, profile } = useAuth();
@@ -28,7 +25,7 @@ export const LoadBoardPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // DAT Filter Bar State
+  // Filter Bar State
   const [filters, setFilters] = useState<FilterState>(() => ({
     origin: searchParams.get('origin') || '',
     deadheadRadius: searchParams.get('deadhead') || '100',
@@ -45,6 +42,7 @@ export const LoadBoardPage = () => {
   // Modals state
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [selectedLoadForDetails, setSelectedLoadForDetails] = useState<any | null>(null);
+  const [selectedLoadForBid, setSelectedLoadForBid] = useState<any | null>(null);
 
   const currentStatus = (profile?.verification_status || (user as any)?.verification_status || user?.status || 'PENDING_VERIFICATION').toUpperCase();
   const isVerified = currentStatus === 'APPROVED' || currentStatus === 'VERIFIED';
@@ -129,16 +127,24 @@ export const LoadBoardPage = () => {
 
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-navy-900 tracking-tight flex items-center gap-2">
-            Load Board
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-              Live DAT Network
-            </span>
-          </h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Real-time North American commercial freight marketplace with guaranteed digital escrow.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
+            <Truck className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-navy-900 tracking-tight flex flex-wrap items-center gap-2">
+              Doxhaul Freight Marketplace
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                Doxhaul Verified Network
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Guaranteed Escrow
+              </span>
+            </h1>
+            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Live commercial freight board with guaranteed digital escrow settlement.
+            </p>
+          </div>
         </div>
 
         {(user?.role === 'SHIPPER' || user?.role === 'BROKER') && (
@@ -164,7 +170,18 @@ export const LoadBoardPage = () => {
         }} 
       />
 
-      {/* Industry-Standard DAT One / Truckstop Filter Bar */}
+      {/* Place Bid Modal */}
+      <PlaceBidModal
+        isOpen={!!selectedLoadForBid}
+        load={selectedLoadForBid}
+        onClose={() => setSelectedLoadForBid(null)}
+        onBidSubmitted={() => {
+          queryClient.invalidateQueries({ queryKey: ['loads'] });
+          refetch();
+        }}
+      />
+
+      {/* Freight Marketplace Filter Bar */}
       <DATFilterBar
         filters={filters}
         onChange={setFilters}
@@ -178,10 +195,10 @@ export const LoadBoardPage = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center p-16 bg-white rounded-2xl border border-slate-200 space-y-4">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-blue" />
-          <p className="text-sm font-medium text-slate-500">Searching active DAT freight loads...</p>
+          <p className="text-sm font-medium text-slate-500">Searching active freight loads on Doxhaul...</p>
         </div>
       ) : loadsList.length === 0 ? (
-        /* Sleek DAT-style Empty State Card */
+        /* Empty State Card */
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-5">
           <div className="w-16 h-16 rounded-2xl bg-blue-50 text-brand-blue border border-blue-100 flex items-center justify-center mx-auto shadow-inner">
             <Compass className="w-8 h-8" />
@@ -204,153 +221,17 @@ export const LoadBoardPage = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {loadsList.map((load: any) => {
-            const originCity = load.origin_city || 'Origin';
-            const originState = load.origin_state || '';
-            const destCity = load.destination_city || 'Destination';
-            const destState = load.destination_state || '';
-            const rateNum = parseFloat(load.rate || 0);
-            const rpm = load.rate_per_mile 
-              ? Number(load.rate_per_mile) 
-              : load.mileage && rateNum > 0 
-                ? rateNum / load.mileage 
-                : null;
-
-            return (
-              <Card 
-                key={load.id} 
-                className="hover:border-brand-blue/50 hover:shadow-md transition-all group cursor-pointer bg-white overflow-hidden border border-slate-200 rounded-2xl"
-                onClick={() => setSelectedLoadForDetails(load)}
-              >
-                <div className="p-5 sm:p-6 flex flex-col lg:flex-row justify-between gap-6">
-                  {/* Route Column */}
-                  <div className="flex-1 space-y-4">
-                    {/* Top load meta bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                          REF #{load.reference_number || load.id.substring(0, 8).toUpperCase()}
-                        </span>
-                        {load.owner_company_name && (
-                          <span className="text-xs text-slate-500 flex items-center gap-1">
-                            <Building2 className="w-3.5 h-3.5" />
-                            {load.owner_company_name}
-                          </span>
-                        )}
-                      </div>
-                      <StatusBadge status={load.status} />
-                    </div>
-
-                    {/* Routing Stepper */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                      {/* Origin Box */}
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-blue-100 text-brand-blue flex-shrink-0 mt-0.5">
-                          <MapPin className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Origin / Pickup</p>
-                          <h4 className="text-base font-bold text-slate-900">
-                            {originCity}, {originState}
-                          </h4>
-                          <div className="flex items-center text-xs text-slate-500 mt-0.5">
-                            <Calendar className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                            {load.pickup_date ? new Date(load.pickup_date).toLocaleDateString() : 'Immediate'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Destination Box */}
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-purple-100 text-purple-700 flex-shrink-0 mt-0.5">
-                          <Navigation className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Destination / Drop</p>
-                          <h4 className="text-base font-bold text-slate-900">
-                            {destCity}, {destState}
-                          </h4>
-                          <div className="flex items-center text-xs text-slate-500 mt-0.5">
-                            <Calendar className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                            {load.delivery_date ? new Date(load.delivery_date).toLocaleDateString() : 'Flexible'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Freight Specs & Financial Action Column */}
-                  <div className="flex flex-col justify-between lg:items-end min-w-[240px] border-t lg:border-t-0 lg:border-l border-slate-100 pt-4 lg:pt-0 lg:pl-6 space-y-4">
-                    {/* Rate & RPM */}
-                    <div className="space-y-1.5 lg:text-right">
-                      <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                        ${rateNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                      <div className="flex flex-wrap items-center lg:justify-end gap-2 text-xs">
-                        {rpm !== null && rpm > 0 && (
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold font-mono border border-emerald-200">
-                            ${rpm.toFixed(2)}/mi
-                          </span>
-                        )}
-                        {load.mileage && (
-                          <span className="text-slate-500 font-medium font-mono">
-                            {load.mileage} mi
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Specs Pills */}
-                    <div className="flex flex-wrap gap-2 lg:justify-end">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
-                        <Truck className="w-3.5 h-3.5 text-slate-500" />
-                        {load.equipment_type || 'DRY_VAN'}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
-                        <Package className="w-3.5 h-3.5 text-slate-500" />
-                        {load.weight ? `${Number(load.weight).toLocaleString()} lbs` : 'FTL'}
-                      </span>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="w-full pt-1">
-                      {user?.role === 'CARRIER' && load.status === 'OPEN' ? (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            bookMutation.mutate(load.id);
-                          }}
-                          disabled={bookMutation.isPending && bookMutation.variables === load.id}
-                          className="w-full py-2.5 px-4 rounded-xl bg-brand-blue hover:bg-blue-600 active:scale-95 text-white font-bold text-xs shadow-md shadow-brand-blue/20 transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
-                        >
-                          {bookMutation.isPending && bookMutation.variables === load.id ? (
-                            'Booking Load...'
-                          ) : (
-                            <>
-                              Book Instant Haul
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </>
-                          )}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedLoadForDetails(load);
-                          }}
-                          className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all cursor-pointer"
-                        >
-                          View Full Details
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+          {loadsList.map((load: any) => (
+            <LoadCard
+              key={load.id}
+              load={load}
+              userRole={user?.role}
+              isBooking={bookMutation.isPending && bookMutation.variables === load.id}
+              onBookNow={(l) => bookMutation.mutate(l.id)}
+              onPlaceBid={(l) => setSelectedLoadForBid(l)}
+              onClick={(l) => setSelectedLoadForDetails(l)}
+            />
+          ))}
         </div>
       )}
 
@@ -371,7 +252,7 @@ export const LoadBoardPage = () => {
               <button
                 type="button"
                 onClick={() => setSelectedLoadForDetails(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -431,6 +312,14 @@ export const LoadBoardPage = () => {
                   {selectedLoadForDetails.special_instructions}
                 </div>
               )}
+
+              {/* Escrow Guarantee Banner */}
+              <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-brand-blue flex-shrink-0" />
+                <span>
+                  <strong>Guaranteed Digital Escrow:</strong> Carrier payout is secured in platform escrow upon booking or bid acceptance.
+                </span>
+              </div>
             </div>
 
             {/* Modal Actions */}
@@ -443,15 +332,34 @@ export const LoadBoardPage = () => {
                 Close
               </button>
 
-              {user?.role === 'CARRIER' && selectedLoadForDetails.status === 'OPEN' && (
-                <button
-                  type="button"
-                  onClick={() => bookMutation.mutate(selectedLoadForDetails.id)}
-                  disabled={bookMutation.isPending}
-                  className="px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 active:scale-95 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
-                >
-                  {bookMutation.isPending ? 'Booking...' : 'Book This Load'}
-                </button>
+              {user?.role === 'CARRIER' && (selectedLoadForDetails.status === 'OPEN' || selectedLoadForDetails.status === 'BIDDING') && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const l = selectedLoadForDetails;
+                      setSelectedLoadForDetails(null);
+                      setSelectedLoadForBid(l);
+                    }}
+                    className="px-5 py-2.5 rounded-xl border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Tag className="w-3.5 h-3.5" />
+                    Submit Custom Bid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => bookMutation.mutate(selectedLoadForDetails.id)}
+                    disabled={bookMutation.isPending}
+                    className="px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 active:scale-95 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    {bookMutation.isPending ? 'Booking...' : (
+                      <>
+                        Book Now (${parseFloat(selectedLoadForDetails.rate || 0).toLocaleString()})
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </>
               )}
             </div>
           </div>

@@ -9,8 +9,7 @@ import {
   Calendar, 
   Truck, 
   Box,
-  Compass,
-  SlidersHorizontal
+  Compass
 } from 'lucide-react';
 
 export interface FilterState {
@@ -116,19 +115,19 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
       {/* Top Filter Bar Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-navy-900 text-white">
-            <SlidersHorizontal className="w-4 h-4" />
+          <div className="p-2.5 rounded-xl bg-blue-600 text-white">
+            <Truck className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              DAT One Freight Search
+              Doxhaul Freight Marketplace
               {activeFilterCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-blue/10 text-brand-blue border border-brand-blue/20">
                   {activeFilterCount} active
                 </span>
               )}
             </h3>
-            <p className="text-xs text-slate-500">Live North American freight dispatch & carrier load board</p>
+            <p className="text-xs text-slate-500">Live commercial freight board with guaranteed digital escrow settlement.</p>
           </div>
         </div>
 
@@ -373,4 +372,5 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
   );
 };
 
+export const DoxhaulFilterBar = DATFilterBar;
 export default DATFilterBar;
