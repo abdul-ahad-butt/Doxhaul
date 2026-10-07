@@ -31,9 +31,9 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-navy-100 flex flex-col flex-shrink-0">
+    <aside className="w-64 h-full shrink-0 flex flex-col bg-white border-r border-slate-200 overflow-hidden">
       {/* Brand */}
-      <div className="h-16 flex items-center px-6 border-b border-navy-100 justify-between">
+      <div className="h-16 shrink-0 flex items-center px-6 border-b border-slate-200 justify-between">
         <Link to="/admin" className="text-xl font-bold text-navy-900 tracking-tight">
           Doxhaul<span className="text-brand-blue">.</span>
         </Link>
@@ -69,7 +69,7 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       {/* User Footer */}
-      <div className="p-4 border-t border-navy-100 bg-slate-50/50">
+      <div className="p-4 border-t border-slate-200 bg-slate-50/50 shrink-0">
         <div className="flex items-center mb-3">
           <div className="w-8 h-8 rounded-full bg-navy-900 text-white flex items-center justify-center font-bold text-xs">
             {profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'A'}

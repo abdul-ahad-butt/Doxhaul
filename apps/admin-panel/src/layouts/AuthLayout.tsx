@@ -9,7 +9,7 @@ export const AuthLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900">
+    <div className="h-screen w-screen overflow-y-auto bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link to="/" className="flex justify-center text-3xl font-bold text-navy-950 tracking-tight">
           Doxhaul<span className="text-brand-blue">.</span>

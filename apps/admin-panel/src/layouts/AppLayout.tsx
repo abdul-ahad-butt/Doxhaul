@@ -10,14 +10,15 @@ export const AppLayout = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background text-slate-900">
-      {/* Sidebar */}
+    // 1. Outer viewport wrapper: locked to 100vh with NO window scroll
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900">
+      {/* 2. Fixed Sidebar: independent scroll only if menu items exceed height */}
       <Sidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-navy-900 text-white flex items-center justify-between px-6 shadow-sm z-10">
+      {/* 3. Main Content Column */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+        {/* Top Header: Fixed height, does not scroll */}
+        <header className="h-16 shrink-0 bg-navy-900 text-white flex items-center justify-between px-6 shadow-sm z-10 overflow-hidden">
           <div className="flex items-center">
             <h1 className="text-lg font-semibold tracking-wide">Marketplace</h1>
             {profile?.verification_status === 'VERIFIED' && (
@@ -36,11 +37,13 @@ export const AppLayout = () => {
           </div>
         </header>
 
-        {/* Page Content */}
-        <div className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </div>
-      </main>
+        {/* 4. THE ONLY SCROLL CONTAINER ON THE PAGE */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+          <div className="max-w-6xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

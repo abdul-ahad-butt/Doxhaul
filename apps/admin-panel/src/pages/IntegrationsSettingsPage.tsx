@@ -207,7 +207,7 @@ export const IntegrationsSettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-full w-full max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="w-full space-y-8 pb-16">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl pointer-events-none" />
