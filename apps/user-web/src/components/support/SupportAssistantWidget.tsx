@@ -180,6 +180,9 @@ export const SupportAssistantWidget = () => {
   if (!isOpen) {
     return (
       <button
+        id="contact-support-btn"
+        name="contactSupport"
+        aria-label="Contact Support Team"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 bg-brand-blue hover:bg-brand-blueHover text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all hover:scale-105 active:scale-95 group border border-white/20"
         title="Contact Support Team"
@@ -213,6 +216,9 @@ export const SupportAssistantWidget = () => {
           </div>
         </div>
         <button 
+          id="support-close-btn"
+          name="closeSupport"
+          aria-label="Close Support Assistant"
           onClick={() => setIsOpen(false)} 
           className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-navy-800 transition-colors cursor-pointer"
         >
@@ -223,6 +229,9 @@ export const SupportAssistantWidget = () => {
       {/* Tabs */}
       <div className="flex border-b border-gray-200 bg-gray-50 text-xs font-semibold">
         <button
+          id="support-tab-ai"
+          name="supportTabAi"
+          aria-label="Ask AI Logistics Assistant"
           onClick={() => setActiveTab('ai')}
           className={`flex-1 py-2.5 px-3 flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
             activeTab === 'ai' 
@@ -234,6 +243,9 @@ export const SupportAssistantWidget = () => {
           Ask AI Assistant
         </button>
         <button
+          id="support-tab-ticket"
+          name="supportTabTicket"
+          aria-label="Submit Ticket to Human Team"
           onClick={() => setActiveTab('ticket')}
           className={`flex-1 py-2.5 px-3 flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
             activeTab === 'ticket' 
@@ -285,6 +297,9 @@ export const SupportAssistantWidget = () => {
             {quickQuestions.map((q, idx) => (
               <button
                 key={idx}
+                id={`support-quick-${idx}`}
+                name={`supportQuickQuestion${idx}`}
+                aria-label={`Ask: ${q}`}
                 onClick={() => handleSendAiMessage(q)}
                 className="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full cursor-pointer transition-colors border border-slate-200"
               >
@@ -298,7 +313,11 @@ export const SupportAssistantWidget = () => {
             onSubmit={(e) => { e.preventDefault(); handleSendAiMessage(); }} 
             className="p-3 bg-white border-t border-slate-200 flex gap-2 items-center"
           >
+            <label htmlFor="support-chat-input" className="sr-only">Ask anything about Doxhaul</label>
             <input
+              id="support-chat-input"
+              name="supportChatInput"
+              aria-label="Ask anything about Doxhaul"
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
@@ -307,6 +326,9 @@ export const SupportAssistantWidget = () => {
               disabled={isAiLoading}
             />
             <button
+              id="support-chat-submit"
+              name="sendSupportMessage"
+              aria-label="Send support question"
               type="submit"
               disabled={!chatInput.trim() || isAiLoading}
               className="bg-brand-blue hover:bg-brand-blueHover disabled:opacity-40 text-white p-2 rounded-xl transition-colors cursor-pointer shadow-xs"
@@ -330,6 +352,9 @@ export const SupportAssistantWidget = () => {
                 Our support desk has received your ticket and screenshot. We review tickets under <strong>User Issues</strong> in the admin panel and respond promptly.
               </p>
               <button 
+                id="support-ticket-close-success"
+                name="closeSuccessDialog"
+                aria-label="Close Window"
                 onClick={() => {
                   setIsOpen(false);
                   setTimeout(() => {
@@ -353,8 +378,11 @@ export const SupportAssistantWidget = () => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-medium text-gray-700 mb-1">Your Name</label>
+                  <label htmlFor="support-ticket-name" className="block font-medium text-gray-700 mb-1 cursor-pointer">Your Name</label>
                   <input 
+                    id="support-ticket-name"
+                    name="ticketName"
+                    aria-label="Your Name"
                     required 
                     type="text" 
                     value={ticketData.name} 
@@ -363,8 +391,11 @@ export const SupportAssistantWidget = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-gray-700 mb-1">Email</label>
+                  <label htmlFor="support-ticket-email" className="block font-medium text-gray-700 mb-1 cursor-pointer">Email</label>
                   <input 
+                    id="support-ticket-email"
+                    name="ticketEmail"
+                    aria-label="Your Email"
                     required 
                     type="email" 
                     value={ticketData.email} 
@@ -375,11 +406,14 @@ export const SupportAssistantWidget = () => {
               </div>
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">Category</label>
+                <label htmlFor="support-ticket-category" className="block font-medium text-gray-700 mb-1 cursor-pointer">Category</label>
                 <select 
+                  id="support-ticket-category"
+                  name="ticketCategory"
+                  aria-label="Ticket Category"
                   value={ticketData.category} 
                   onChange={(e) => setTicketData({ ...ticketData, category: e.target.value })} 
-                  className="w-full border-gray-300 rounded-lg px-2.5 py-1.5 border bg-white focus:ring-1 focus:ring-brand-blue"
+                  className="w-full border-gray-300 rounded-lg px-2.5 py-1.5 border bg-white focus:ring-1 focus:ring-brand-blue cursor-pointer"
                 >
                   <option value="DOCUMENT_VERIFICATION">📄 Document Verification Problem</option>
                   <option value="TECHNICAL">🛠️ Technical Issue</option>
@@ -389,8 +423,11 @@ export const SupportAssistantWidget = () => {
               </div>
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">Description</label>
+                <label htmlFor="support-ticket-message" className="block font-medium text-gray-700 mb-1 cursor-pointer">Description</label>
                 <textarea 
+                  id="support-ticket-message"
+                  name="ticketMessage"
+                  aria-label="Ticket Description"
                   required 
                   rows={3}
                   value={ticketData.message} 
@@ -401,13 +438,16 @@ export const SupportAssistantWidget = () => {
               </div>
 
               <div>
-                <label className="block font-medium text-gray-700 mb-1">Screenshot / Error Image</label>
-                <label className="flex flex-col items-center justify-center w-full h-18 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors p-2">
+                <label htmlFor="support-ticket-file" className="block font-medium text-gray-700 mb-1 cursor-pointer">Screenshot / Error Image</label>
+                <label htmlFor="support-ticket-file" className="flex flex-col items-center justify-center w-full h-18 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors p-2">
                   <div className="flex items-center gap-2 text-gray-500">
                     <Paperclip size={14} />
                     <span className="text-[11px] truncate">{file ? file.name : "Attach screenshot file"}</span>
                   </div>
                   <input 
+                    id="support-ticket-file"
+                    name="ticketFile"
+                    aria-label="Attach screenshot file"
                     type="file" 
                     accept="image/*" 
                     className="hidden" 
@@ -421,6 +461,9 @@ export const SupportAssistantWidget = () => {
               </div>
 
               <button 
+                id="support-ticket-submit"
+                name="submitTicket"
+                aria-label="Submit Support Ticket"
                 type="submit" 
                 disabled={isSubmitting}
                 className="w-full py-2 px-3 rounded-lg text-white font-semibold bg-brand-blue hover:bg-brand-blueHover disabled:opacity-50 cursor-pointer transition-colors shadow-sm flex items-center justify-center gap-1.5"

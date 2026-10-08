@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { DoxhaulLogo } from '../common/DoxhaulLogo';
 import { 
   LayoutDashboard, 
   PackagePlus, 
@@ -83,9 +84,9 @@ export const Sidebar = () => {
   return (
     <aside className="w-64 bg-white border-r border-navy-100 flex flex-col flex-shrink-0">
       {/* Brand Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-navy-100">
-        <Link to="/dashboard" className="text-xl font-bold text-navy-900 tracking-tight">
-          Doxhaul<span className="text-brand-blue">.</span>
+      <div className="h-16 flex items-center px-6 border-b border-navy-100 justify-between">
+        <Link to="/dashboard" className="flex items-center focus:outline-none">
+          <DoxhaulLogo variant="dark" height={22} alt="Doxhaul Logo" />
         </Link>
         <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-brand-blue border border-blue-200 uppercase tracking-wider">
           {activeRole}
@@ -132,6 +133,9 @@ export const Sidebar = () => {
           </div>
         </div>
         <button
+          id="sign-out-btn"
+          name="signOut"
+          aria-label="Sign Out of Doxhaul"
           onClick={logout}
           className="flex w-full items-center px-3 py-2 rounded-lg text-sm font-medium text-navy-600 hover:text-brand-red hover:bg-brand-red/10 transition-colors cursor-pointer"
         >

@@ -7,16 +7,19 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className = '', label, error, id, options, ...props }, ref) => {
+  ({ className = '', label, error, id, name, options, ...props }, ref) => {
+    const selectId = id || (name ? `select-${name}` : undefined);
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={id} className="block text-sm font-medium text-navy-700 mb-1">
+          <label htmlFor={selectId} className="block text-sm font-medium text-navy-700 mb-1 cursor-pointer">
             {label}
           </label>
         )}
         <select
-          id={id}
+          id={selectId}
+          name={name}
+          aria-label={props['aria-label'] || label}
           ref={ref}
           className={`input-field ${error ? 'border-brand-red focus:ring-brand-red focus:border-brand-red' : ''} ${className}`}
           {...props}

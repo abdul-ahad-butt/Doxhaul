@@ -4,6 +4,7 @@ import { Truck, ShieldCheck, BarChart3, Clock, UserPlus, FileSearch, Banknote, S
 import { Button } from '../components/ui/Button';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useCountUp } from '../hooks/useCountUp';
+import { DoxhaulLogo } from '../components/common/DoxhaulLogo';
 
 const StatNumber = ({ end, label, prefix = '', suffix = '' }: { end: number, label: string, prefix?: string, suffix?: string }) => {
   const { count, ref } = useCountUp(end);
@@ -43,7 +44,9 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white text-slate-900">
       {/* Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${isScrolled ? 'bg-navy-950/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
-        <div className="text-2xl font-bold tracking-tight">Doxhaul<span className="text-brand-blue">.</span></div>
+        <Link to="/" className="flex items-center focus:outline-none">
+          <DoxhaulLogo variant="white" height={26} alt="Doxhaul Logo" />
+        </Link>
         <div className="space-x-4 flex items-center">
           <Link to="/login" className="text-white hover:text-navy-100 font-medium transition-colors">Log In</Link>
           <Link to="/register">
@@ -418,7 +421,9 @@ const LandingPage = () => {
       <footer className="bg-navy-950 text-white pt-16 pb-8 px-6 sm:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
-            <div className="text-2xl font-bold tracking-tight mb-4">Doxhaul<span className="text-brand-blue">.</span></div>
+            <Link to="/" className="inline-block mb-4 focus:outline-none">
+              <DoxhaulLogo variant="white" height={28} alt="Doxhaul Logo" />
+            </Link>
             <p className="text-slate-50/70 text-sm mb-6 max-w-xs">Connecting the world's supply chain through a verified, transparent, and efficient digital marketplace.</p>
           </div>
           <div>

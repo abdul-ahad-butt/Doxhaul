@@ -169,7 +169,7 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
         {/* Bid Form */}
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <label htmlFor="bid-amount" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between cursor-pointer">
               <span>Your Bid Payout ($ USD) *</span>
               {rateDiff !== 0 && !isNaN(parsedBid) && parsedBid > 0 && (
                 <span className={`text-[11px] font-bold ${rateDiff > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
@@ -182,6 +182,9 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
                 $
               </div>
               <input
+                id="bid-amount"
+                name="bidAmount"
+                aria-label="Your Bid Payout ($ USD)"
                 type="number"
                 step="0.01"
                 min="1"
@@ -205,10 +208,13 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label htmlFor="bid-notes" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 cursor-pointer">
               Equipment & Transit Proposal Notes (Optional)
             </label>
             <textarea
+              id="bid-notes"
+              name="notes"
+              aria-label="Equipment & Transit Proposal Notes"
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -228,6 +234,9 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
+              id="bid-cancel-btn"
+              name="cancelBid"
+              aria-label="Cancel bid submission"
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
@@ -236,6 +245,9 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
               Cancel
             </button>
             <button
+              id="bid-submit-btn"
+              name="submitBid"
+              aria-label="Submit Bid or Counter-Offer"
               type="submit"
               disabled={isSubmitting || !!successMessage}
               className="px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 active:scale-95 text-white font-bold text-xs shadow-md shadow-brand-blue/20 transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"

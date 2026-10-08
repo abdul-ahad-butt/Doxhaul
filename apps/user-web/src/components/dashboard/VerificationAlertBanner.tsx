@@ -39,6 +39,9 @@ export const VerificationAlertBanner = ({
           )}
         </div>
         <button 
+          id="reapply-verification-btn"
+          name="reapplyVerification"
+          aria-label="View Details & Re-apply"
           onClick={() => navigate('/profile')} 
           className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-sm self-start sm:self-auto"
         >
@@ -66,6 +69,9 @@ export const VerificationAlertBanner = ({
           </p>
         </div>
         <button 
+          id="upload-docs-btn"
+          name="uploadDocuments"
+          aria-label="Upload Documents"
           onClick={() => navigate('/profile')} 
           className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-sm self-start sm:self-auto"
         >

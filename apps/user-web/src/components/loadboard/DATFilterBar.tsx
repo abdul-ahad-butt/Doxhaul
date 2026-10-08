@@ -142,11 +142,14 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center">
         {/* Origin */}
         <div className="md:col-span-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+          <label htmlFor="filter-origin" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
             <MapPin className="w-3.5 h-3.5 text-brand-blue" /> Origin (City, State, or ZIP)
           </label>
           <div className="relative">
             <input
+              id="filter-origin"
+              name="origin"
+              aria-label="Origin City, State, or ZIP"
               type="text"
               placeholder="e.g. Chicago, IL or 60601"
               value={filters.origin}
@@ -160,10 +163,13 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
         {/* Deadhead Radius */}
         <div className="md:col-span-2">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+          <label htmlFor="filter-deadhead" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
             <Compass className="w-3.5 h-3.5 text-slate-500" /> D/H Radius
           </label>
           <select
+            id="filter-deadhead"
+            name="deadheadRadius"
+            aria-label="Deadhead Radius"
             value={filters.deadheadRadius}
             onChange={(e) => onChange({ ...filters, deadheadRadius: e.target.value })}
             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all cursor-pointer"
@@ -178,11 +184,14 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
         {/* Destination */}
         <div className="md:col-span-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+          <label htmlFor="filter-destination" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
             <Navigation className="w-3.5 h-3.5 text-purple-600" /> Destination
           </label>
           <div className="relative">
             <input
+              id="filter-destination"
+              name="destination"
+              aria-label="Destination City, State, or ZIP"
               type="text"
               placeholder={filters.anywhere ? 'Anywhere in North America' : 'e.g. Dallas, TX or 75001'}
               value={filters.destination}
@@ -201,8 +210,11 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
         {/* Anywhere Checkbox */}
         <div className="md:col-span-2 flex items-center md:justify-center md:pt-6">
-          <label className="inline-flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors w-full justify-center">
+          <label htmlFor="filter-anywhere" className="inline-flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors w-full justify-center">
             <input
+              id="filter-anywhere"
+              name="anywhere"
+              aria-label="Search Anywhere in North America"
               type="checkbox"
               checked={filters.anywhere}
               onChange={(e) => onChange({ ...filters, anywhere: e.target.checked })}
@@ -217,16 +229,21 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
       <div className="space-y-4 pt-1">
         {/* Equipment Selector Pills */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+          <label id="filter-equipment-label" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
             <Truck className="w-3.5 h-3.5 text-slate-500" /> Equipment Types (Select Multiple)
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-labelledby="filter-equipment-label">
             {EQUIPMENT_OPTIONS.map((eq) => {
               const active = isEquipActive(eq.id);
               return (
                 <button
                   key={eq.id}
+                  id={`filter-equipment-${eq.id.toLowerCase()}`}
+                  name="equipment"
                   type="button"
+                  role="checkbox"
+                  aria-checked={active}
+                  aria-label={`Equipment type: ${eq.label}`}
                   onClick={() => handleToggleEquipment(eq.id)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     active
@@ -252,10 +269,13 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {/* Load Size */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+            <label htmlFor="filter-load-size" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
               <Box className="w-3.5 h-3.5 text-slate-500" /> Load Size
             </label>
             <select
+              id="filter-load-size"
+              name="loadSize"
+              aria-label="Load Size"
               value={filters.loadSize}
               onChange={(e) => onChange({ ...filters, loadSize: e.target.value })}
               className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all cursor-pointer"
@@ -268,10 +288,13 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
           {/* Pickup Date */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+            <label htmlFor="filter-pickup-date" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
               <Calendar className="w-3.5 h-3.5 text-slate-500" /> Pickup Date
             </label>
             <select
+              id="filter-pickup-date"
+              name="pickupDate"
+              aria-label="Pickup Date"
               value={filters.pickupDate}
               onChange={(e) => onChange({ ...filters, pickupDate: e.target.value })}
               className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all cursor-pointer"
@@ -286,12 +309,15 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
           {/* Min Rate ($) */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+            <label htmlFor="filter-min-rate" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
               <DollarSign className="w-3.5 h-3.5 text-emerald-600" /> Min Rate ($)
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
               <input
+                id="filter-min-rate"
+                name="minRate"
+                aria-label="Minimum Rate in Dollars"
                 type="number"
                 min="0"
                 step="50"
@@ -306,12 +332,15 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
 
           {/* Min Rate Per Mile ($/mi) */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1">
+            <label htmlFor="filter-min-rpm" className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1 cursor-pointer">
               <DollarSign className="w-3.5 h-3.5 text-blue-600" /> Min $/Mile
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
               <input
+                id="filter-min-rpm"
+                name="minRpm"
+                aria-label="Minimum Rate Per Mile in Dollars"
                 type="number"
                 min="0"
                 step="0.25"
@@ -330,10 +359,13 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100">
         {/* Sort Dropdown */}
         <div className="flex items-center gap-2.5">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1 whitespace-nowrap">
+          <label htmlFor="filter-sort" className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1 whitespace-nowrap cursor-pointer">
             <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" /> Sort By:
           </label>
           <select
+            id="filter-sort"
+            name="sort"
+            aria-label="Sort Loads By"
             value={filters.sort}
             onChange={(e) => onChange({ ...filters, sort: e.target.value })}
             className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all cursor-pointer"
@@ -349,6 +381,9 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
         {/* Buttons: Reset & Search Loads */}
         <div className="flex items-center gap-2.5">
           <button
+            id="filter-reset-btn"
+            name="resetFilters"
+            aria-label="Reset all search filters"
             type="button"
             onClick={onReset}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all cursor-pointer"
@@ -358,6 +393,9 @@ export const DATFilterBar: React.FC<DATFilterBarProps> = ({
           </button>
 
           <button
+            id="filter-search-btn"
+            name="searchLoads"
+            aria-label="Search freight loads"
             type="button"
             onClick={onSearch}
             disabled={isLoading}

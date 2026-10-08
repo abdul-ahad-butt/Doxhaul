@@ -35,6 +35,9 @@ export const AppLayout = () => {
             <span>Logged in with Admin Account — Testing as <strong className="text-white uppercase font-bold">{activeRole}</strong></span>
             <div className="flex items-center gap-3">
               <button 
+                id="switch-role-btn"
+                name="switchRole"
+                aria-label={`Switch to ${activeRole === 'SHIPPER' ? 'Carrier' : 'Shipper'} View`}
                 onClick={() => switchRole(activeRole === 'SHIPPER' ? 'CARRIER' : 'SHIPPER')} 
                 className="hover:text-white underline cursor-pointer text-slate-300"
               >

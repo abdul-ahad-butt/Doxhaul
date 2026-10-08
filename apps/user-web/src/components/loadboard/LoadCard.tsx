@@ -147,6 +147,9 @@ export const LoadCard: React.FC<LoadCardProps> = ({
             {userRole === 'CARRIER' && isBiddable ? (
               <>
                 <button
+                  id={`bid-btn-${load.id}`}
+                  name="placeBid"
+                  aria-label={`Submit Bid or Counter-Offer for load ${load.reference_number || load.id}`}
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -158,6 +161,9 @@ export const LoadCard: React.FC<LoadCardProps> = ({
                   Submit Bid / Counter-Offer
                 </button>
                 <button
+                  id={`book-btn-${load.id}`}
+                  name="bookNow"
+                  aria-label={`Book Load Now for $${rateNum.toLocaleString()}`}
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -178,6 +184,9 @@ export const LoadCard: React.FC<LoadCardProps> = ({
               </>
             ) : (
               <button
+                id={`details-btn-${load.id}`}
+                name="viewDetails"
+                aria-label={`View Full Details for load ${load.reference_number || load.id}`}
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();

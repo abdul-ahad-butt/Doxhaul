@@ -79,7 +79,22 @@ export const LoadBoardPage = () => {
 
   const { data: loadsResponse, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['loads', queryString],
-    queryFn: () => apiClient.get<{ items: any[]; total: number }>(`/loads${queryString ? `?${queryString}` : ''}`),
+    queryFn: async () => {
+      try {
+        // Enforce a strict 2.5s maximum timeout so the search never spins indefinitely
+        const timeoutPromise = new Promise<{ items: any[]; total: number }>((_, reject) =>
+          setTimeout(() => reject(new Error('Load search timed out')), 2500)
+        );
+        const fetchPromise = apiClient.get<{ items: any[]; total: number }>(`/loads${queryString ? `?${queryString}` : ''}`);
+        const res = await Promise.race([fetchPromise, timeoutPromise]);
+        return res || { items: [], total: 0 };
+      } catch (error) {
+        console.error('Failed to fetch freight loads:', error);
+        // Graceful fallback: return empty result so the UI never hangs on Searching...
+        return { items: [], total: 0 };
+      }
+    },
+    retry: 0,
   });
 
   const loadsList: any[] = loadsResponse?.items || (Array.isArray(loadsResponse) ? loadsResponse : []);
@@ -149,6 +164,9 @@ export const LoadBoardPage = () => {
 
         {(user?.role === 'SHIPPER' || user?.role === 'BROKER') && (
           <Button 
+            id="post-load-header-btn"
+            name="postNewLoad"
+            aria-label="Post New Load"
             onClick={handlePostClick} 
             className={`shadow-md ${!isVerified ? 'bg-gray-600 hover:bg-gray-700' : 'bg-brand-blue hover:bg-blue-600'}`}
           >
@@ -211,6 +229,9 @@ export const LoadBoardPage = () => {
           </div>
           <div className="pt-2">
             <button
+              id="clear-filters-btn"
+              name="clearFilters"
+              aria-label="Clear All Filters"
               type="button"
               onClick={handleResetFilters}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-md transition-all cursor-pointer"
@@ -325,6 +346,9 @@ export const LoadBoardPage = () => {
             {/* Modal Actions */}
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button
+                id="modal-close-btn"
+                name="closeDetailsModal"
+                aria-label="Close load details modal"
                 type="button"
                 onClick={() => setSelectedLoadForDetails(null)}
                 className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer"
@@ -335,6 +359,9 @@ export const LoadBoardPage = () => {
               {user?.role === 'CARRIER' && (selectedLoadForDetails.status === 'OPEN' || selectedLoadForDetails.status === 'BIDDING') && (
                 <>
                   <button
+                    id="modal-custom-bid-btn"
+                    name="submitCustomBid"
+                    aria-label="Submit custom bid for this load"
                     type="button"
                     onClick={() => {
                       const l = selectedLoadForDetails;
@@ -347,6 +374,9 @@ export const LoadBoardPage = () => {
                     Submit Custom Bid
                   </button>
                   <button
+                    id="modal-book-now-btn"
+                    name="bookLoadNow"
+                    aria-label={`Book this load now for $${parseFloat(selectedLoadForDetails.rate || 0).toLocaleString()}`}
                     type="button"
                     onClick={() => bookMutation.mutate(selectedLoadForDetails.id)}
                     disabled={bookMutation.isPending}

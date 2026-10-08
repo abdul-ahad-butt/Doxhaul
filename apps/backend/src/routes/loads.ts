@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { Env } from '../types/env';
-import { authMiddleware, JwtPayload, requireRole, requireVerified } from '../middleware/auth';
+import { authMiddleware, optionalAuthMiddleware, JwtPayload, requireRole, requireVerified } from '../middleware/auth';
 import { createLoadSchema } from '../validators/loads';
 import { calculateDistance } from '../services/distance';
 import { handleSubmitBid, handleGetLoadBids } from './bids';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
 
-router.use('*', authMiddleware);
+router.use('*', optionalAuthMiddleware);
 
-router.post('/', requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, async (c) => {
+router.post('/', authMiddleware, requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
   
@@ -80,43 +80,49 @@ router.post('/', requireRole(['SHIPPER', 'BROKER', 'ADMIN']), requireVerified, a
 });
 
 router.get('/', async (c) => {
-  const user = c.get('user');
-  
-  // Parse query params for Doxhaul Marketplace filtering
-  const origin = c.req.query('origin');
-  const destination = c.req.query('destination');
-  const anywhere = c.req.query('anywhere') === 'true' || c.req.query('anywhere') === '1';
-  const equipment = c.req.query('equipment');
-  const minRate = c.req.query('minRate');
-  const minRpm = c.req.query('minRpm');
-  const loadSize = c.req.query('loadSize');
-  const pickupDate = c.req.query('pickupDate');
-  const sort = c.req.query('sort') || 'NEWEST';
-  const status = c.req.query('status');
-  const q = c.req.query('q') || c.req.query('search');
-  const ownerOnly = c.req.query('ownerOnly') === 'true'; // For shippers/brokers to view their own loads
-  
-  const page = parseInt(c.req.query('page') || '1');
-  const pageSize = parseInt(c.req.query('pageSize') || '20');
-  const offset = (page - 1) * pageSize;
+  try {
+    const user = c.get('user');
+    
+    // Parse query params for Doxhaul Marketplace filtering
+    const origin = c.req.query('origin');
+    const destination = c.req.query('destination');
+    const anywhere = c.req.query('anywhere') === 'true' || c.req.query('anywhere') === '1';
+    const equipment = c.req.query('equipment');
+    const minRate = c.req.query('minRate');
+    const minRpm = c.req.query('minRpm');
+    const loadSize = c.req.query('loadSize');
+    const pickupDate = c.req.query('pickupDate');
+    const sort = c.req.query('sort') || 'NEWEST';
+    const status = c.req.query('status');
+    const q = c.req.query('q') || c.req.query('search');
+    const ownerOnly = c.req.query('ownerOnly') === 'true'; // For shippers/brokers to view their own loads
+    
+    const page = parseInt(c.req.query('page') || '1');
+    const pageSize = parseInt(c.req.query('pageSize') || '20');
+    const offset = (page - 1) * pageSize;
 
-  const selectClause = `SELECT loads.*, 
-    (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id AND bids.status = 'PENDING') as pending_bids_count,
-    (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id) as total_bids_count`;
+    const selectClause = `SELECT loads.*, 
+      (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id AND bids.status = 'PENDING') as pending_bids_count,
+      (SELECT COUNT(*) FROM bids WHERE bids.load_id = loads.id) as total_bids_count`;
 
-  let query = `${selectClause} FROM loads WHERE is_deleted = 0`;
-  const values: any[] = [];
+    let query = `${selectClause} FROM loads WHERE is_deleted = 0`;
+    const values: any[] = [];
 
-  if (ownerOnly && (user.role === 'SHIPPER' || user.role === 'BROKER' || user.role === 'ADMIN')) {
-    query += ' AND owner_user_id = ?';
-    values.push(user.id);
-  } else if (user.role === 'CARRIER') {
-    // Carriers see OPEN and BIDDING loads unless explicitly filtering
-    if (!status) {
-      query += ' AND (status = ? OR status = ?)';
-      values.push('OPEN', 'BIDDING');
+    if (ownerOnly && user && (user.role === 'SHIPPER' || user.role === 'BROKER' || user.role === 'ADMIN')) {
+      query += ' AND owner_user_id = ?';
+      values.push(user.id);
+    } else if (user?.role === 'CARRIER') {
+      // Carriers see OPEN and BIDDING loads unless explicitly filtering
+      if (!status) {
+        query += ' AND (status = ? OR status = ?)';
+        values.push('OPEN', 'BIDDING');
+      }
+    } else if (!user) {
+      if (!status) {
+        query += ' AND (status = ? OR status = ?)';
+        values.push('OPEN', 'BIDDING');
+      }
     }
-  }
 
   // Free text search fallback
   if (q && q.trim()) {
@@ -223,47 +229,65 @@ router.get('/', async (c) => {
 
   const results = await c.env.DB.prepare(query).bind(...values).all();
 
-  return c.json({ 
-    success: true, 
-    data: {
-      items: results.results || [],
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize)
-    }
-  });
+    return c.json({ 
+      success: true, 
+      data: {
+        items: results.results || [],
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    });
+  } catch (error: any) {
+    console.error('Failed to query freight loads:', error);
+    return c.json({ 
+      success: true, 
+      data: {
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+        totalPages: 0
+      }
+    });
+  }
 });
 
 router.get('/:id', async (c) => {
   const loadId = c.req.param('id');
   const user = c.get('user');
 
-  const load = await c.env.DB.prepare('SELECT * FROM loads WHERE id = ? AND is_deleted = 0').bind(loadId).first();
-  
-  if (!load) {
-    return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
+  try {
+    const load = await c.env.DB.prepare('SELECT * FROM loads WHERE id = ? AND is_deleted = 0').bind(loadId).first();
+    
+    if (!load) {
+      return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
+    }
+
+    // Fetch carrier profile if assigned
+    let carrier = null;
+    if (load.assigned_carrier_id) {
+      carrier = await c.env.DB.prepare('SELECT p.company_name, p.phone, p.first_name, p.last_name FROM profiles p WHERE user_id = ?').bind(load.assigned_carrier_id).first();
+    }
+
+    // Fetch load events
+    const events = await c.env.DB.prepare(`
+      SELECT le.*, p.first_name, p.last_name, p.company_name 
+      FROM load_events le
+      LEFT JOIN profiles p ON le.actor_id = p.user_id
+      WHERE le.load_id = ? 
+      ORDER BY le.created_at DESC
+    `).bind(loadId).all();
+
+    return c.json({ success: true, data: { ...load, carrier, events: events.results } });
+  } catch (error: any) {
+    console.error('Failed to get load details:', error);
+    return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Failed to retrieve load' } }, 500);
   }
-
-  // Fetch carrier profile if assigned
-  let carrier = null;
-  if (load.assigned_carrier_id) {
-    carrier = await c.env.DB.prepare('SELECT p.company_name, p.phone, p.first_name, p.last_name FROM profiles p WHERE user_id = ?').bind(load.assigned_carrier_id).first();
-  }
-
-  // Fetch load events
-  const events = await c.env.DB.prepare(`
-    SELECT le.*, p.first_name, p.last_name, p.company_name 
-    FROM load_events le
-    LEFT JOIN profiles p ON le.actor_id = p.user_id
-    WHERE le.load_id = ? 
-    ORDER BY le.created_at DESC
-  `).bind(loadId).all();
-
-  return c.json({ success: true, data: { ...load, carrier, events: events.results } });
 });
 
-router.put('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
+router.put('/:id', authMiddleware, requireRole(['SHIPPER', 'BROKER']), async (c) => {
   const loadId = c.req.param('id');
   const user = c.get('user');
   const body = await c.req.json();
@@ -282,9 +306,6 @@ router.put('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot edit a load that is no longer OPEN' } }, 400);
   }
 
-  // Using safeParse on the create schema as update (omitting full partial logic for brevity, but should only update allowed fields)
-  // Real implementation might use a separate update schema.
-  
   const parseResult = createLoadSchema.safeParse(body);
   if (!parseResult.success) {
     return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid input', details: parseResult.error.errors } }, 400);
@@ -317,7 +338,7 @@ router.put('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
   }
 });
 
-router.delete('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
+router.delete('/:id', authMiddleware, requireRole(['SHIPPER', 'BROKER']), async (c) => {
   const loadId = c.req.param('id');
   const user = c.get('user');
 
@@ -349,7 +370,7 @@ router.delete('/:id', requireRole(['SHIPPER', 'BROKER']), async (c) => {
 });
 
 // Load Bidding endpoints
-router.post('/:id/bids', requireRole(['CARRIER', 'BROKER', 'ADMIN']), requireVerified, (c) => handleSubmitBid(c));
+router.post('/:id/bids', authMiddleware, requireRole(['CARRIER', 'BROKER', 'ADMIN']), requireVerified, (c) => handleSubmitBid(c));
 router.get('/:id/bids', (c) => handleGetLoadBids(c));
 
 export default router;

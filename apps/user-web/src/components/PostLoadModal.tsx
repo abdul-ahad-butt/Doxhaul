@@ -63,7 +63,13 @@ export const PostLoadModal: React.FC<PostLoadModalProps> = ({ isOpen, onClose })
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-navy-100">
           <h2 className="text-xl font-bold text-navy-900">Post New Load</h2>
-          <button onClick={onClose} className="text-navy-500 hover:text-navy-700">
+          <button 
+            id="post-load-close-btn"
+            name="closePostLoad"
+            aria-label="Close Post Load Modal"
+            onClick={onClose} 
+            className="text-navy-500 hover:text-navy-700 cursor-pointer p-1 rounded-lg"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
