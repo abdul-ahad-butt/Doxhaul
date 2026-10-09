@@ -304,25 +304,48 @@ router.post('/admin-login', async (c) => {
 });
 
 router.post('/google', async (c) => {
-  const body = await c.req.json();
-  const token = body.token;
-  if (!token) return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing token' } }, 400);
-
-  // Fetch Google user profile
   try {
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!response.ok) {
-      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid Google token' } }, 401);
+    const body = await c.req.json();
+    const token = body.token || body.access_token || body.credential;
+    if (!token) {
+      return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'No Google token provided' } }, 400);
     }
 
-    const googleUser = await response.json() as any;
+    let googleUser: { sub: string; email: string; name?: string; picture?: string } | null = null;
+
+    // 1. Try verifying as OAuth access_token via userinfo endpoint
+    try {
+      const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (userinfoRes.ok) {
+        googleUser = await userinfoRes.json() as any;
+      }
+    } catch (e) {
+      // Fall through to id_token check
+    }
+
+    // 2. If access_token check failed, try verifying as JWT ID token
+    if (!googleUser) {
+      try {
+        const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+        if (tokenInfoRes.ok) {
+          googleUser = await tokenInfoRes.json() as any;
+        }
+      } catch (e) {
+        // Fall through
+      }
+    }
+
+    if (!googleUser || !googleUser.email) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or expired Google token' } }, 401);
+    }
+
     const { sub: googleId, email, name } = googleUser;
 
-    // Check if user exists by email or google_id
-    const user = await c.env.DB.prepare(`
+    // 3. User Lookup & Registration logic
+    const db = c.env.DB;
+    const existingUser = await db.prepare(`
       SELECT id, email, password_hash, role, status,
         COALESCE(onboarding_paid, 0) as onboarding_paid,
         COALESCE(onboarding_payment_status, 'ACTIVE') as onboarding_payment_status
@@ -340,39 +363,39 @@ router.post('/google', async (c) => {
         onboarding_payment_status: string 
       }>();
 
-    if (user) {
-      if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
+    if (existingUser) {
+      if (existingUser.status === 'BANNED' || existingUser.status === 'SUSPENDED') {
         return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Account is suspended' } }, 403);
       }
 
       // Check onboarding payment lockout for existing Google user
-      if (user.onboarding_payment_status === 'PENDING_PAYMENT') {
+      if (existingUser.onboarding_payment_status === 'PENDING_PAYMENT') {
         const settings = await SettingsService.getPlatformSettings(c.env.DB);
         let fee = 0;
-        if (user.role === 'CARRIER') fee = settings.carrier_onboarding_fee;
-        else if (user.role === 'BROKER') fee = settings.broker_onboarding_fee;
-        else if (user.role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
+        if (existingUser.role === 'CARRIER') fee = settings.carrier_onboarding_fee;
+        else if (existingUser.role === 'BROKER') fee = settings.broker_onboarding_fee;
+        else if (existingUser.role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
 
         return c.json({
           success: false,
           error: 'PAYMENT_REQUIRED',
           code: 'PAYMENT_REQUIRED',
-          message: `Your ${user.role} registration is pending activation. Please complete the $${fee} onboarding fee to unlock your credentials.`,
+          message: `Your ${existingUser.role} registration is pending activation. Please complete the $${fee} onboarding fee to unlock your credentials.`,
           fee,
-          role: user.role,
-          email: user.email
+          role: existingUser.role,
+          email: existingUser.email
         }, 403);
       }
 
       // Update google_id if it's not set
       await c.env.DB.prepare('UPDATE users SET google_id = ?, auth_provider = ? WHERE id = ?')
-        .bind(googleId, 'google', user.id).run();
+        .bind(googleId, 'google', existingUser.id).run();
 
       const payload: JwtPayload = {
-        id: user.id,
-        email: user.email,
-        role: user.role as any,
-        status: user.status,
+        id: existingUser.id,
+        email: existingUser.email,
+        role: existingUser.role as any,
+        status: existingUser.status,
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
       };
       
@@ -381,37 +404,50 @@ router.post('/google', async (c) => {
       await c.env.DB.prepare(`
         INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), user.id, user.role, 'USER_LOGIN_GOOGLE', 'USER', user.id).run();
+      `).bind(crypto.randomUUID().replace(/-/g, '').toLowerCase(), existingUser.id, existingUser.role, 'USER_LOGIN_GOOGLE', 'USER', existingUser.id).run();
 
       return c.json({
         success: true,
         data: {
           token: jwtToken,
           user: { 
-            id: user.id, 
-            email: user.email, 
-            role: user.role, 
-            status: user.status,
-            onboarding_payment_status: user.onboarding_payment_status,
-            onboarding_paid: Number(user.onboarding_paid || 0)
+            id: existingUser.id, 
+            email: existingUser.email, 
+            role: existingUser.role, 
+            status: existingUser.status,
+            onboarding_payment_status: existingUser.onboarding_payment_status,
+            onboarding_paid: Number(existingUser.onboarding_paid || 0)
           }
         }
       });
-    } else {
+    }
+
+    // 4. New user handling
+    if (body.intent === 'register' || body.mode === 'register') {
       return c.json({
         success: true,
         data: {
           status: 'PROFILE_INCOMPLETE',
           email: email.toLowerCase(),
           googleId,
-          name,
+          name: name || '',
           googleToken: token
         }
       });
     }
-  } catch (error) {
+
+    // Default for login: Return USER_NOT_REGISTERED (404) so frontend triggers "Account Not Found" modal
+    return c.json({
+      success: false,
+      error: {
+        code: 'USER_NOT_REGISTERED',
+        message: 'Account not found. Please register first.',
+        googleProfile: { email: email.toLowerCase(), name: name || '', sub: googleId }
+      }
+    }, 404);
+  } catch (error: any) {
     console.error('Google auth error:', error);
-    return c.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Google Auth Failed' } }, 500);
+    return c.json({ success: false, error: { code: 'SERVER_ERROR', message: error.message || 'Google Auth Error' } }, 500);
   }
 });
 

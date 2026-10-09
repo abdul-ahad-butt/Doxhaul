@@ -5,7 +5,7 @@ import { DoxhaulLogo } from '../components/common/DoxhaulLogo';
 
 // Fallback for development if not provided in .env
 // @ts-ignore
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '280420756458-59qn7n8qkme1pri81vpu3j6j61jtrqr7.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '238804830152-7ujv7jkeeslmcjipae1dqk53vkgc2qgh.apps.googleusercontent.com';
 
 export const AuthLayout = () => {
   const { isAuthenticated, user } = useAuth();

@@ -64,13 +64,17 @@ const RegisterPage = () => {
       ? brokerFee 
       : shipperFee;
 
+  const [lastGoogleToken, setLastGoogleToken] = useState('');
+
   const googleLoginMutation = useMutation({
-    mutationFn: async (tokenResponse: any) => {
-      return apiClient.post<any>('/auth/google', { token: tokenResponse.access_token });
+    mutationFn: async (payload: any) => {
+      const token = typeof payload === 'string' ? payload : (payload.token || payload.access_token);
+      setLastGoogleToken(token);
+      return apiClient.post<any>('/auth/google', { token, intent: 'register' });
     },
     onSuccess: (data) => {
       if (data.status === 'PROFILE_INCOMPLETE') {
-        navigate('/complete-profile', { state: { email: data.email, googleToken: data.googleToken, googleId: data.googleId } });
+        navigate('/complete-profile', { state: { email: data.email, googleToken: data.googleToken, googleId: data.googleId, name: data.name } });
       } else {
         login(data.token, data.user);
         if (data.user?.role === 'CARRIER') navigate('/loads');
@@ -78,6 +82,18 @@ const RegisterPage = () => {
       }
     },
     onError: (err: any) => {
+      if (err.code === 'USER_NOT_REGISTERED') {
+        const profile = err.googleProfile || err.details?.googleProfile;
+        navigate('/complete-profile', {
+          state: {
+            email: profile?.email || err.email,
+            googleToken: lastGoogleToken,
+            googleId: profile?.sub,
+            name: profile?.name
+          }
+        });
+        return;
+      }
       if (err.code === 'PAYMENT_REQUIRED') {
         navigate(`/onboarding-payment?email=${encodeURIComponent(err.email || '')}&role=${err.role || ''}&fee=${err.fee || currentRoleFee}`);
         return;
@@ -90,20 +106,19 @@ const RegisterPage = () => {
     onSuccess: async (tokenResponse) => {
       setError('');
       if (!tokenResponse?.access_token) {
-        setError('No access token received from Google.');
+        setError('Failed to receive access token from Google.');
         return;
       }
-      googleLoginMutation.mutate(tokenResponse);
+      googleLoginMutation.mutate({ token: tokenResponse.access_token });
     },
     onError: (errorResponse: any) => {
-      console.error('Google Auth Popup Error:', errorResponse);
-      // Handle specific OAuth errors gracefully
+      console.error('Google Sign-in Popup Error:', errorResponse);
       if (errorResponse?.error === 'popup_closed_by_user') {
-        setError('Sign-in cancelled. Please complete authentication in the popup window.');
+        setError('Sign-in cancelled. Please complete authentication in the popup.');
       } else if (errorResponse?.error === 'access_denied') {
-        setError('Access was denied by Google.');
+        setError('Access was denied. Please ensure your email is added as an approved test user.');
       } else {
-        setError(`Google authentication failed (${errorResponse?.error_description || errorResponse?.error || 'Unknown error'}).`);
+        setError(`Google Sign-in failed: ${errorResponse?.error_description || errorResponse?.error || 'Unknown error'}`);
       }
     },
     flow: 'implicit',
