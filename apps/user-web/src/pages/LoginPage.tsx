@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useGoogleLogin } from '@react-oauth/google';
-import { apiClient, ApiError } from '../api/client';
+import { UserX, CreditCard, X } from 'lucide-react';
+import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -14,6 +15,17 @@ const LoginPage = () => {
   const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState('');
   
+  // Modals state
+  const [showNotFoundModal, setShowNotFoundModal] = useState(false);
+  const [notFoundEmail, setNotFoundEmail] = useState('');
+
+  const [showPaymentRequiredModal, setShowPaymentRequiredModal] = useState(false);
+  const [paymentRequiredData, setPaymentRequiredData] = useState<{
+    fee: number;
+    role: string;
+    email: string;
+  }>({ fee: 0, role: '', email: '' });
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -30,7 +42,20 @@ const LoginPage = () => {
         else navigate('/dashboard');
       }
     },
-    onError: (err: ApiError) => {
+    onError: (err: any) => {
+      if (err.code === 'USER_NOT_REGISTERED' || err.status === 404) {
+        setNotFoundEmail('');
+        setShowNotFoundModal(true);
+        return;
+      }
+      if (err.code === 'PAYMENT_REQUIRED' || (err.status === 403 && (err.fee !== undefined || err.details?.fee !== undefined))) {
+        const fee = err.fee ?? err.details?.fee ?? 0;
+        const role = err.role ?? err.details?.role ?? 'Member';
+        const targetEmail = err.email ?? err.details?.email ?? '';
+        setPaymentRequiredData({ fee, role, email: targetEmail });
+        setShowPaymentRequiredModal(true);
+        return;
+      }
       setError(err.message || 'Google Login failed.');
     }
   });
@@ -49,7 +74,24 @@ const LoginPage = () => {
       if (data.user.role === 'CARRIER') navigate('/loads');
       else navigate('/dashboard');
     },
-    onError: (err: ApiError) => {
+    onError: (err: any) => {
+      // 1. Intercept 404 / USER_NOT_REGISTERED -> Trigger Account Not Found Modal
+      if (err.code === 'USER_NOT_REGISTERED' || err.status === 404 || err.message?.includes('No account found')) {
+        setNotFoundEmail(email);
+        setShowNotFoundModal(true);
+        return;
+      }
+      
+      // 2. Intercept 403 / PAYMENT_REQUIRED -> Trigger Payment Required Modal
+      if (err.code === 'PAYMENT_REQUIRED' || (err.status === 403 && (err.fee !== undefined || err.details?.fee !== undefined))) {
+        const fee = err.fee ?? err.details?.fee ?? 0;
+        const role = err.role ?? err.details?.role ?? 'Member';
+        const targetEmail = err.email ?? err.details?.email ?? email;
+        setPaymentRequiredData({ fee, role, email: targetEmail });
+        setShowPaymentRequiredModal(true);
+        return;
+      }
+
       setError(err.message || 'Login failed. Please check your credentials.');
     }
   });
@@ -187,7 +229,7 @@ const LoginPage = () => {
           <button 
             type="button" 
             onClick={() => { setEmail('sarah@acmecorp.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
+            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group cursor-pointer"
           >
             <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Shipper</span> &middot; sarah@acmecorp.dev</div>
             <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
@@ -195,7 +237,7 @@ const LoginPage = () => {
           <button 
             type="button" 
             onClick={() => { setEmail('carlos@swiftlogistics.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
+            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group cursor-pointer"
           >
             <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Carrier</span> &middot; carlos@swiftlogistics.dev</div>
             <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
@@ -203,13 +245,133 @@ const LoginPage = () => {
           <button 
             type="button" 
             onClick={() => { setEmail('tom@apexbrokerage.dev'); setPassword('Password123!'); setEmailError(''); setPasswordError(''); }}
-            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group"
+            className="w-full text-left px-3 py-2 text-xs rounded border border-slate-200 hover:border-brand-blue hover:bg-brand-blue/5 transition-colors flex justify-between items-center group cursor-pointer"
           >
             <div><span className="font-bold text-navy-900 group-hover:text-brand-blue">Broker</span> &middot; tom@apexbrokerage.dev</div>
             <div className="text-slate-400 group-hover:text-brand-blue">&rarr;</div>
           </button>
         </div>
       </div>
+
+      {/* Modal 1: Account Not Found Modal */}
+      {showNotFoundModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="account-not-found-title"
+          onClick={() => setShowNotFoundModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-200 text-center relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="button" 
+              onClick={() => setShowNotFoundModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <UserX className="w-7 h-7" />
+            </div>
+
+            <h3 id="account-not-found-title" className="text-xl font-bold text-navy-950 mb-2">
+              Account Not Found
+            </h3>
+
+            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+              It looks like you don't have an account on Doxhaul yet. Please register first to access the marketplace.
+            </p>
+
+            {notFoundEmail && (
+              <div className="mb-6 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 break-all text-left">
+                Attempted login with: <span className="font-semibold text-slate-900">{notFoundEmail}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setShowNotFoundModal(false)}
+                className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNotFoundModal(false);
+                  navigate(`/register?email=${encodeURIComponent(notFoundEmail)}`);
+                }}
+                className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer"
+              >
+                Register Here
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Payment Required Modal */}
+      {showPaymentRequiredModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="payment-required-title"
+          onClick={() => setShowPaymentRequiredModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-200 text-center relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="button" 
+              onClick={() => setShowPaymentRequiredModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-brand-blue border border-blue-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <CreditCard className="w-7 h-7" />
+            </div>
+
+            <h3 id="payment-required-title" className="text-xl font-bold text-navy-950 mb-2">
+              Payment Required
+            </h3>
+
+            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+              Your <span className="font-bold text-navy-900">{paymentRequiredData.role}</span> registration is pending activation. Please complete the <span className="font-bold text-brand-blue">${paymentRequiredData.fee}</span> onboarding fee to unlock your credentials.
+            </p>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setShowPaymentRequiredModal(false)}
+                className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPaymentRequiredModal(false);
+                  navigate(`/onboarding-payment?email=${encodeURIComponent(paymentRequiredData.email)}&role=${paymentRequiredData.role}&fee=${paymentRequiredData.fee}`);
+                }}
+                className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer"
+              >
+                Complete Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

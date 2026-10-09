@@ -24,6 +24,8 @@ export interface GeofenceResult {
   eventType: 'ENTER_ORIGIN' | 'EXIT_ORIGIN' | 'ENTER_DESTINATION' | 'DELIVERED' | null;
   distanceMeters: number;
   target: 'ORIGIN' | 'DESTINATION' | null;
+  shouldAdvanceStatus?: boolean;
+  newStatus?: 'AT_PICKUP' | 'IN_TRANSIT' | 'ARRIVED_AT_DESTINATION' | null;
 }
 
 // Major North American freight hub coordinates for geofence and corridor resolution
@@ -185,15 +187,6 @@ export async function ensureTelematicsTables(db: D1Database): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_telemetry_load ON load_telemetry(load_id, recorded_at DESC);
     CREATE INDEX IF NOT EXISTS idx_geofence_load ON load_geofence_events(load_id, triggered_at DESC);
   `);
-}
-
-export interface GeofenceResult {
-  isTriggered: boolean;
-  eventType: 'ENTER_ORIGIN' | 'EXIT_ORIGIN' | 'ENTER_DESTINATION' | null;
-  distanceMeters: number;
-  target: 'ORIGIN' | 'DESTINATION';
-  shouldAdvanceStatus?: boolean;
-  newStatus?: 'AT_PICKUP' | 'IN_TRANSIT' | 'ARRIVED_AT_DESTINATION' | null;
 }
 
 /**

@@ -57,13 +57,19 @@ export const apiClient = {
     if (!response.ok) {
       if (isJson) {
         const errorData = await response.json();
-        throw new ApiError(
-          errorData.error?.code || 'UNKNOWN_ERROR',
-          errorData.error?.message || 'An error occurred',
-          errorData.error?.details
-        );
+        const code = errorData.code || errorData.error?.code || (typeof errorData.error === 'string' ? errorData.error : 'UNKNOWN_ERROR');
+        const message = errorData.message || errorData.error?.message || (typeof errorData.error === 'string' ? errorData.error : 'An error occurred');
+        const details = errorData.details || errorData.error?.details || errorData;
+        const err = new ApiError(code, message, details);
+        (err as any).status = response.status;
+        (err as any).fee = errorData.fee ?? errorData.error?.fee;
+        (err as any).role = errorData.role ?? errorData.error?.role;
+        (err as any).email = errorData.email ?? errorData.error?.email;
+        throw err;
       }
-      throw new ApiError('NETWORK_ERROR', response.statusText);
+      const err = new ApiError('NETWORK_ERROR', response.statusText);
+      (err as any).status = response.status;
+      throw err;
     }
 
     if (isJson) {

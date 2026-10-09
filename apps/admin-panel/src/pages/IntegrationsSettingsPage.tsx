@@ -149,6 +149,42 @@ export const IntegrationsSettingsPage: React.FC = () => {
     }
   };
 
+  const [savingFinancials, setSavingFinancials] = useState(false);
+  const [financialsSaveSuccess, setFinancialsSaveSuccess] = useState(false);
+  const [financialsErrorMessage, setFinancialsErrorMessage] = useState<string | null>(null);
+
+  const handleSaveFinancialPolicies = async () => {
+    setSavingFinancials(true);
+    setFinancialsSaveSuccess(false);
+    setFinancialsErrorMessage(null);
+
+    try {
+      const payload = {
+        platform_fee_percent: Number(settings.platform_fee_percent),
+        platform_commission_percent: Number(settings.platform_fee_percent),
+        carrier_onboarding_fee: Number(settings.carrier_onboarding_fee),
+        shipper_onboarding_fee: Number(settings.shipper_onboarding_fee),
+        broker_onboarding_fee: Number(settings.broker_onboarding_fee),
+      };
+      const updated = await apiClient.put<any>('/admin/settings', payload);
+      if (updated) {
+        setSettings(prev => ({
+          ...prev,
+          platform_fee_percent: Number(updated.platform_fee_percent ?? prev.platform_fee_percent),
+          carrier_onboarding_fee: Number(updated.carrier_onboarding_fee ?? prev.carrier_onboarding_fee),
+          shipper_onboarding_fee: Number(updated.shipper_onboarding_fee ?? prev.shipper_onboarding_fee),
+          broker_onboarding_fee: Number(updated.broker_onboarding_fee ?? prev.broker_onboarding_fee),
+        }));
+      }
+      setFinancialsSaveSuccess(true);
+      setTimeout(() => setFinancialsSaveSuccess(false), 4000);
+    } catch (err: any) {
+      setFinancialsErrorMessage(err.message || 'Failed to save financial policies');
+    } finally {
+      setSavingFinancials(false);
+    }
+  };
+
   const handleTestPaddle = async () => {
     setTestingPaddle(true);
     setPaddleTestResult(null);
@@ -507,17 +543,53 @@ export const IntegrationsSettingsPage: React.FC = () => {
 
       {/* Section B: Platform & Onboarding Fees */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-        <div className="flex items-start gap-4 pb-6 border-b border-slate-100">
-          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-            <DollarSign className="w-6 h-6" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <DollarSign className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Section B: Platform & Onboarding Financial Policies</h2>
+              <p className="text-sm text-slate-500">
+                Set the commission percentage deducted automatically upon load delivery and registration gate fees per role.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">Section B: Platform & Onboarding Financial Policies</h2>
-            <p className="text-sm text-slate-500">
-              Set the commission percentage deducted automatically upon load delivery and registration gate fees per role.
-            </p>
-          </div>
+
+          <button
+            type="button"
+            onClick={handleSaveFinancialPolicies}
+            disabled={savingFinancials}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50 self-start sm:self-auto cursor-pointer"
+          >
+            {savingFinancials ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            {savingFinancials ? 'Saving Policies...' : 'Save Financial Policies'}
+          </button>
         </div>
+
+        {financialsSaveSuccess && (
+          <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Financial Policies Saved Successfully</p>
+              <p className="text-xs mt-0.5">Platform commission and onboarding gate fees are live in D1 and apply immediately to registration & load settlements.</p>
+            </div>
+          </div>
+        )}
+
+        {financialsErrorMessage && (
+          <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-sm flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Failed to Save Policies</p>
+              <p className="text-xs mt-0.5">{financialsErrorMessage}</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Platform Fee Percent */}

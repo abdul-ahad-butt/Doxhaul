@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { sign } from 'hono/jwt';
 import { Env } from '../types/env';
 import { CryptoService } from '../services/crypto';
+import { SettingsService } from '../services/settings';
 import { registerSchema, loginSchema } from '../validators/auth';
 import { authMiddleware, JwtPayload } from '../middleware/auth';
 
@@ -10,6 +11,17 @@ const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
 router.post('/register', async (c) => {
   const body = await c.req.json();
   
+  // 1. Terms & Conditions acceptance verification
+  const termsAccepted = Boolean(body.termsAccepted || body.terms_accepted || body.terms);
+  if (!termsAccepted) {
+    return c.json({ 
+      success: false, 
+      error: 'TERMS_REQUIRED',
+      code: 'TERMS_REQUIRED',
+      message: 'You must agree to the Doxhaul Terms of Service and Privacy Policy to create an account.' 
+    }, 400);
+  }
+
   const parseResult = registerSchema.safeParse(body);
   if (!parseResult.success) {
     return c.json({ 
@@ -36,6 +48,16 @@ router.post('/register', async (c) => {
 
   const passwordHash = await CryptoService.hashPassword(data.password);
   
+  // Dynamic Role Onboarding Fee from live Platform Settings
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  let fee = 0;
+  if (data.role === 'CARRIER') fee = settings.carrier_onboarding_fee;
+  else if (data.role === 'BROKER') fee = settings.broker_onboarding_fee;
+  else if (data.role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
+
+  const onboardingPaymentStatus = fee > 0 ? 'PENDING_PAYMENT' : 'ACTIVE';
+  const onboardingPaid = fee > 0 ? 0 : 1;
+
   // Create user and profile in a transaction (simulated with batch)
   const userId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
   const profileId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
@@ -43,9 +65,13 @@ router.post('/register', async (c) => {
   const status = data.role === 'SHIPPER' || data.role === 'CARRIER' ? 'PENDING_VERIFICATION' : 'ACTIVE';
   
   const userStmt = c.env.DB.prepare(`
-    INSERT INTO users (id, email, password_hash, role, status)
-    VALUES (?, ?, ?, ?, ?)
-  `).bind(userId, data.email.toLowerCase(), passwordHash, data.role, status);
+    INSERT INTO users (
+      id, email, password_hash, role, status, 
+      terms_accepted, terms_accepted_at, 
+      onboarding_payment_status, onboarding_paid, onboarding_fee_paid
+    )
+    VALUES (?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, 0)
+  `).bind(userId, data.email.toLowerCase(), passwordHash, data.role, status, onboardingPaymentStatus, onboardingPaid);
 
   const profileStmt = c.env.DB.prepare(`
     INSERT INTO profiles (id, user_id, first_name, last_name, company_name, phone, dot_number, mc_number, equipment_types, operating_regions, address, city, state, zip, country, verification_status)
@@ -91,7 +117,15 @@ router.post('/register', async (c) => {
       success: true,
       data: {
         token,
-        user: { id: userId, email: data.email.toLowerCase(), role: data.role, status }
+        user: { 
+          id: userId, 
+          email: data.email.toLowerCase(), 
+          role: data.role, 
+          status,
+          onboarding_payment_status: onboardingPaymentStatus,
+          onboarding_paid: onboardingPaid,
+          fee
+        }
       }
     }, 201);
   } catch (error) {
@@ -113,12 +147,32 @@ router.post('/login', async (c) => {
 
   const { email, password } = parseResult.data;
 
-  const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status, COALESCE(onboarding_paid, 0) as onboarding_paid FROM users WHERE email = ?')
+  const user = await c.env.DB.prepare(`
+    SELECT id, email, password_hash, role, status, 
+      COALESCE(onboarding_paid, 0) as onboarding_paid,
+      COALESCE(onboarding_payment_status, 'ACTIVE') as onboarding_payment_status
+    FROM users 
+    WHERE email = ?
+  `)
     .bind(email.toLowerCase())
-    .first<{ id: string, email: string, password_hash: string, role: string, status: string, onboarding_paid: number }>();
+    .first<{ 
+      id: string, 
+      email: string, 
+      password_hash: string, 
+      role: string, 
+      status: string, 
+      onboarding_paid: number,
+      onboarding_payment_status: string 
+    }>();
 
+  // 1. Unregistered user check: Return 404 USER_NOT_REGISTERED
   if (!user) {
-    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, 401);
+    return c.json({ 
+      success: false, 
+      error: 'USER_NOT_REGISTERED', 
+      code: 'USER_NOT_REGISTERED', 
+      message: 'No account found with this email.' 
+    }, 404);
   }
 
   const isValid = await CryptoService.verifyPassword(password, user.password_hash);
@@ -129,6 +183,25 @@ router.post('/login', async (c) => {
 
   if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
     return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Account is suspended' } }, 403);
+  }
+
+  // 2. Role Onboarding Fee Gate / Payment Lockout check
+  if (user.onboarding_payment_status === 'PENDING_PAYMENT') {
+    const settings = await SettingsService.getPlatformSettings(c.env.DB);
+    let fee = 0;
+    if (user.role === 'CARRIER') fee = settings.carrier_onboarding_fee;
+    else if (user.role === 'BROKER') fee = settings.broker_onboarding_fee;
+    else if (user.role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
+
+    return c.json({
+      success: false,
+      error: 'PAYMENT_REQUIRED',
+      code: 'PAYMENT_REQUIRED',
+      message: `Your ${user.role} registration is pending activation. Please complete the $${fee} onboarding fee to unlock your credentials.`,
+      fee,
+      role: user.role,
+      email: user.email
+    }, 403);
   }
 
   const payload: JwtPayload = {
@@ -156,6 +229,7 @@ router.post('/login', async (c) => {
         email: user.email, 
         role: user.role, 
         status: user.status,
+        onboarding_payment_status: user.onboarding_payment_status,
         onboarding_paid: Number(user.onboarding_paid || 0)
       }
     }
@@ -222,7 +296,8 @@ router.post('/admin-login', async (c) => {
         email: user.email, 
         role: user.role, 
         status: user.status,
-        onboarding_paid: 1
+        onboarding_paid: 1,
+        onboarding_payment_status: 'ACTIVE'
       }
     }
   });
@@ -247,13 +322,46 @@ router.post('/google', async (c) => {
     const { sub: googleId, email, name } = googleUser;
 
     // Check if user exists by email or google_id
-    const user = await c.env.DB.prepare('SELECT id, email, password_hash, role, status FROM users WHERE email = ? OR google_id = ?')
+    const user = await c.env.DB.prepare(`
+      SELECT id, email, password_hash, role, status,
+        COALESCE(onboarding_paid, 0) as onboarding_paid,
+        COALESCE(onboarding_payment_status, 'ACTIVE') as onboarding_payment_status
+      FROM users 
+      WHERE email = ? OR google_id = ?
+    `)
       .bind(email.toLowerCase(), googleId)
-      .first<{ id: string, email: string, password_hash: string, role: string, status: string }>();
+      .first<{ 
+        id: string, 
+        email: string, 
+        password_hash: string, 
+        role: string, 
+        status: string,
+        onboarding_paid: number,
+        onboarding_payment_status: string 
+      }>();
 
     if (user) {
       if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
         return c.json({ success: false, error: { code: 'FORBIDDEN', message: 'Account is suspended' } }, 403);
+      }
+
+      // Check onboarding payment lockout for existing Google user
+      if (user.onboarding_payment_status === 'PENDING_PAYMENT') {
+        const settings = await SettingsService.getPlatformSettings(c.env.DB);
+        let fee = 0;
+        if (user.role === 'CARRIER') fee = settings.carrier_onboarding_fee;
+        else if (user.role === 'BROKER') fee = settings.broker_onboarding_fee;
+        else if (user.role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
+
+        return c.json({
+          success: false,
+          error: 'PAYMENT_REQUIRED',
+          code: 'PAYMENT_REQUIRED',
+          message: `Your ${user.role} registration is pending activation. Please complete the $${fee} onboarding fee to unlock your credentials.`,
+          fee,
+          role: user.role,
+          email: user.email
+        }, 403);
       }
 
       // Update google_id if it's not set
@@ -279,7 +387,14 @@ router.post('/google', async (c) => {
         success: true,
         data: {
           token: jwtToken,
-          user: { id: user.id, email: user.email, role: user.role, status: user.status }
+          user: { 
+            id: user.id, 
+            email: user.email, 
+            role: user.role, 
+            status: user.status,
+            onboarding_payment_status: user.onboarding_payment_status,
+            onboarding_paid: Number(user.onboarding_paid || 0)
+          }
         }
       });
     } else {
@@ -305,6 +420,17 @@ router.post('/google-complete', async (c) => {
   const { email, googleId, googleToken, role, firstName, lastName, companyName, dotNumber, mcNumber } = body;
   const rawPhone = body.phoneNumber || body.phone || '';
   
+  // Terms & Conditions verification
+  const termsAccepted = Boolean(body.termsAccepted || body.terms_accepted || body.terms);
+  if (!termsAccepted) {
+    return c.json({ 
+      success: false, 
+      error: 'TERMS_REQUIRED',
+      code: 'TERMS_REQUIRED',
+      message: 'You must agree to the Doxhaul Terms of Service and Privacy Policy to complete registration.' 
+    }, 400);
+  }
+
   if (!email || !googleId) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing google info' } }, 400);
   }
@@ -315,14 +441,27 @@ router.post('/google-complete', async (c) => {
     phone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
   }
 
+  // Dynamic Role Onboarding Fee from live Platform Settings
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  let fee = 0;
+  if (role === 'CARRIER') fee = settings.carrier_onboarding_fee;
+  else if (role === 'BROKER') fee = settings.broker_onboarding_fee;
+  else if (role === 'SHIPPER') fee = settings.shipper_onboarding_fee;
+
+  const onboardingPaymentStatus = fee > 0 ? 'PENDING_PAYMENT' : 'ACTIVE';
+  const onboardingPaid = fee > 0 ? 0 : 1;
+
   const userId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
   const profileId = crypto.randomUUID().replace(/-/g, '').toLowerCase();
   const status = role === 'SHIPPER' || role === 'CARRIER' ? 'PENDING_VERIFICATION' : 'ACTIVE';
   
   const userStmt = c.env.DB.prepare(`
-    INSERT INTO users (id, email, password_hash, auth_provider, google_id, role, status, email_verified)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).bind(userId, email.toLowerCase(), '', 'google', googleId, role, status, 1);
+    INSERT INTO users (
+      id, email, password_hash, auth_provider, google_id, role, status, email_verified,
+      terms_accepted, terms_accepted_at, onboarding_payment_status, onboarding_paid, onboarding_fee_paid
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'), ?, ?, 0)
+  `).bind(userId, email.toLowerCase(), '', 'google', googleId, role, status, 1, onboardingPaymentStatus, onboardingPaid);
 
   const profileStmt = c.env.DB.prepare(`
     INSERT INTO profiles (id, user_id, first_name, last_name, company_name, phone, dot_number, mc_number, verification_status)
@@ -351,7 +490,15 @@ router.post('/google-complete', async (c) => {
       success: true,
       data: {
         token,
-        user: { id: userId, email: email.toLowerCase(), role, status }
+        user: { 
+          id: userId, 
+          email: email.toLowerCase(), 
+          role, 
+          status,
+          onboarding_payment_status: onboardingPaymentStatus,
+          onboarding_paid: onboardingPaid,
+          fee
+        }
       }
     }, 201);
   } catch (error) {
@@ -361,8 +508,6 @@ router.post('/google-complete', async (c) => {
 });
 
 router.post('/logout', authMiddleware, async (c) => {
-  // Since we are using stateless JWT, we can't truly invalidate it server-side without a denylist.
-  // We'll just return success and let the client delete the token.
   return c.json({ success: true, data: { message: 'Logged out successfully' } });
 });
 
@@ -397,7 +542,9 @@ router.get('/me', authMiddleware, async (c) => {
         email: dbUser.email,
         role: dbUser.role,
         status: dbUser.status,
+        onboarding_payment_status: dbUser.onboarding_payment_status || 'ACTIVE',
         onboarding_paid: Number(dbUser.onboarding_paid || 0),
+        onboarding_fee_paid: Number(dbUser.onboarding_fee_paid || 0),
         verification_status: vStatus,
         documents_uploaded: docsUploaded
       },

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useGoogleLogin } from '@react-oauth/google';
 import { apiClient, ApiError } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
@@ -19,8 +19,32 @@ const RegisterPage = () => {
     dotNumber: '', mcNumber: ''
   });
   
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+
+  // Fetch live Platform & Onboarding Financial Policies
+  const { data: policies } = useQuery({
+    queryKey: ['platform-policies'],
+    queryFn: async () => {
+      try {
+        return await apiClient.get<{ commissionPercent: number, carrierFee: number, shipperFee: number, brokerFee: number }>('/platform/policies');
+      } catch {
+        return { commissionPercent: 8, carrierFee: 25, shipperFee: 30, brokerFee: 50 };
+      }
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const carrierFee = policies?.carrierFee ?? 25;
+  const shipperFee = policies?.shipperFee ?? 30;
+  const brokerFee = policies?.brokerFee ?? 50;
+
+  const currentRoleFee = formData.role === 'CARRIER' 
+    ? carrierFee 
+    : formData.role === 'BROKER' 
+      ? brokerFee 
+      : shipperFee;
 
   const googleLoginMutation = useMutation({
     mutationFn: async (tokenResponse: any) => {
@@ -31,27 +55,52 @@ const RegisterPage = () => {
         navigate('/complete-profile', { state: { email: data.email, googleToken: data.googleToken, googleId: data.googleId } });
       } else {
         login(data.token, data.user);
-        if (data.user.role === 'CARRIER') navigate('/loads');
+        if (data.user?.role === 'CARRIER') navigate('/loads');
         else navigate('/dashboard');
       }
     },
-    onError: (err: ApiError) => {
+    onError: (err: any) => {
+      if (err.code === 'PAYMENT_REQUIRED') {
+        navigate(`/onboarding-payment?email=${encodeURIComponent(err.email || '')}&role=${err.role || ''}&fee=${err.fee || currentRoleFee}`);
+        return;
+      }
       setError(err.message || 'Google Login failed.');
     }
   });
 
-  const handleGoogleLogin = useGoogleLogin({
+  const triggerGoogleLogin = useGoogleLogin({
     onSuccess: (tokenResponse) => googleLoginMutation.mutate(tokenResponse),
     onError: () => setError('Google Login failed.')
   });
 
+  const handleGoogleClick = () => {
+    if (!termsAccepted) {
+      setError('Please agree to the Doxhaul Terms of Service and Privacy Policy before continuing with Google.');
+      return;
+    }
+    setError('');
+    triggerGoogleLogin();
+  };
+
   const registerMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.post<{token: string, user: any}>('/auth/register', formData);
+      return apiClient.post<{ token: string, user: any }>('/auth/register', {
+        ...formData,
+        termsAccepted: true
+      });
     },
     onSuccess: (data) => {
-      login(data.token, data.user);
-      navigate('/dashboard'); 
+      const user = data.user;
+      const userRole = user?.role || formData.role;
+      const feeToPay = userRole === 'CARRIER' ? carrierFee : userRole === 'BROKER' ? brokerFee : shipperFee;
+
+      // Role Onboarding Fee Gate: If fee > $0, redirect to onboarding payment screen
+      if (user?.onboarding_payment_status === 'PENDING_PAYMENT' || feeToPay > 0) {
+        navigate(`/onboarding-payment?email=${encodeURIComponent(user?.email || formData.email)}&role=${userRole}&fee=${feeToPay}`);
+      } else {
+        login(data.token, data.user);
+        navigate('/dashboard');
+      }
     },
     onError: (err: ApiError) => {
       setError(err.message || 'Registration failed. Please check your inputs.');
@@ -91,6 +140,11 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
     
+    if (!termsAccepted) {
+      setError('You must agree to the Doxhaul Terms of Service and Privacy Policy to create an account.');
+      return;
+    }
+
     // Validate all fields
     let isValid = true;
     Object.keys(formData).forEach(key => {
@@ -144,18 +198,26 @@ const RegisterPage = () => {
         
         <Input label="Password" type="password" name="password" required value={formData.password} onChange={handleChange} onBlur={handleBlur} error={errors.password} />
         
-        <Select 
-          label="I am a..." 
-          name="role" 
-          value={formData.role} 
-          onChange={handleChange}
-          onBlur={handleBlur}
-          options={[
-            { value: 'SHIPPER', label: 'Shipper' },
-            { value: 'BROKER', label: 'Broker' },
-            { value: 'CARRIER', label: 'Carrier' }
-          ]}
-        />
+        <div>
+          <Select 
+            label="I am a..." 
+            name="role" 
+            value={formData.role} 
+            onChange={handleChange}
+            onBlur={handleBlur}
+            options={[
+              { value: 'SHIPPER', label: `Shipper ($${shipperFee} Fee)` },
+              { value: 'BROKER', label: `Broker ($${brokerFee} Fee)` },
+              { value: 'CARRIER', label: `Carrier ($${carrierFee} Fee)` }
+            ]}
+          />
+          <div className="mt-2 flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+            <span className="text-xs text-slate-600 font-medium">Onboarding Activation Gate:</span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800">
+              ${currentRoleFee} USD
+            </span>
+          </div>
+        </div>
         
         {formData.role === 'CARRIER' && (
           <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-md border border-slate-200">
@@ -169,8 +231,28 @@ const RegisterPage = () => {
             <Input label="MC Number" name="mcNumber" required value={formData.mcNumber} onChange={handleChange} onBlur={handleBlur} error={errors.mcNumber} />
           </div>
         )}
+
+        {/* Terms & Conditions Agreement Checkbox */}
+        <div className="flex items-center gap-2 mt-4 mb-2">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+            required
+          />
+          <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer select-none">
+            I agree to the <a href="/terms" target="_blank" rel="noreferrer" className="text-blue-600 underline">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer" className="text-blue-600 underline">Privacy Policy</a>
+          </label>
+        </div>
         
-        <Button type="submit" className="w-full mt-6" isLoading={registerMutation.isPending}>
+        <Button 
+          type="submit" 
+          className="w-full mt-4" 
+          isLoading={registerMutation.isPending}
+          disabled={!termsAccepted || registerMutation.isPending}
+        >
           Create Account
         </Button>
       </form>
@@ -186,7 +268,7 @@ const RegisterPage = () => {
           type="button" 
           variant="outline" 
           className="w-full flex justify-center items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
-          onClick={() => handleGoogleLogin()}
+          onClick={handleGoogleClick}
           isLoading={googleLoginMutation.isPending}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -216,6 +298,7 @@ const RegisterPage = () => {
               password: 'Password123!', companyName: 'Demo Logistics LLC', role: 'SHIPPER',
               dotNumber: '', mcNumber: ''
             }); 
+            setTermsAccepted(true);
             setErrors({}); 
           }}
           className="w-full text-center px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 rounded hover:bg-slate-200 transition-colors"

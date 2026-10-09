@@ -20,6 +20,27 @@ describe('SettingsService', () => {
     expect(settings.paddle_environment).toBe('sandbox');
     expect(settings.persona_environment).toBe('sandbox');
   });
+
+  it('returns financial policies properly', async () => {
+    const mockDb: any = {
+      prepare: () => ({
+        all: async () => ({
+          results: [
+            { key: 'platform_commission_percent', value: '8' },
+            { key: 'carrier_onboarding_fee', value: '25' },
+            { key: 'shipper_onboarding_fee', value: '30' },
+            { key: 'broker_onboarding_fee', value: '50' },
+          ]
+        }),
+      }),
+    };
+
+    const policies = await SettingsService.getFinancialPolicies(mockDb);
+    expect(policies.commissionPercent).toBe(8);
+    expect(policies.carrierFee).toBe(25);
+    expect(policies.shipperFee).toBe(30);
+    expect(policies.brokerFee).toBe(50);
+  });
 });
 
 describe('PaddleService', () => {

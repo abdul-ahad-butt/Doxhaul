@@ -576,7 +576,14 @@ router.post('/onboarding/checkout', async (c) => {
 
   if (isSimulated || fee === 0) {
     // Complete onboarding immediately
-    await c.env.DB.prepare(`UPDATE users SET onboarding_paid = 1, updated_at = datetime('now') WHERE id = ?`).bind(user.id).run();
+    await c.env.DB.prepare(`
+      UPDATE users 
+      SET onboarding_paid = 1, 
+          onboarding_payment_status = 'ACTIVE',
+          onboarding_fee_paid = ?,
+          updated_at = datetime('now') 
+      WHERE id = ?
+    `).bind(fee, user.id).run();
 
     const wallet = await getOrCreateWallet(c.env.DB, user.id);
     if (fee > 0) {

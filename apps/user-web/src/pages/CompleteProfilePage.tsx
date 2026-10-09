@@ -58,6 +58,7 @@ const CompleteProfilePage = () => {
     mcNumber: ''
   });
   
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
 
@@ -75,14 +76,20 @@ const CompleteProfilePage = () => {
         phoneNumber: finalPhone,
         email,
         googleId,
-        googleToken
+        googleToken,
+        termsAccepted: true
       });
     },
     onSuccess: (data) => {
-      login(data.token, data.user);
-      if (data.user.role === 'ADMIN') navigate('/admin');
-      else if (data.user.role === 'CARRIER') navigate('/loads');
-      else navigate('/dashboard');
+      const user = data.user;
+      if (user?.onboarding_payment_status === 'PENDING_PAYMENT' || (user?.fee && user.fee > 0)) {
+        navigate(`/onboarding-payment?email=${encodeURIComponent(user?.email || email)}&role=${user?.role || formData.role}&fee=${user?.fee || 0}`);
+      } else {
+        login(data.token, data.user);
+        if (data.user?.role === 'ADMIN') navigate('/admin');
+        else if (data.user?.role === 'CARRIER') navigate('/loads');
+        else navigate('/dashboard');
+      }
     },
     onError: (err: ApiError) => {
       setError(err.message || 'Registration failed. Please check your inputs.');
@@ -125,6 +132,11 @@ const CompleteProfilePage = () => {
     
     // Validate all fields
     let isValid = true;
+    if (!termsAccepted) {
+      setError('You must agree to the Doxhaul Terms of Service and Privacy Policy to complete registration.');
+      return;
+    }
+
     const phoneVal = formData.phoneNumber || formData.phone;
     if (!validateField('phoneNumber', phoneVal)) {
       isValid = false;
@@ -210,7 +222,27 @@ const CompleteProfilePage = () => {
           </div>
         )}
         
-        <Button type="submit" className="w-full mt-6" isLoading={completeMutation.isPending}>
+        {/* Terms & Conditions Agreement Checkbox */}
+        <div className="flex items-center gap-2 mt-4 mb-2">
+          <input
+            type="checkbox"
+            id="terms"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+            required
+          />
+          <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer select-none">
+            I agree to the <a href="/terms" target="_blank" rel="noreferrer" className="text-blue-600 underline">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer" className="text-blue-600 underline">Privacy Policy</a>
+          </label>
+        </div>
+
+        <Button 
+          type="submit" 
+          className="w-full mt-4" 
+          isLoading={completeMutation.isPending}
+          disabled={!termsAccepted || completeMutation.isPending}
+        >
           Complete Registration
         </Button>
       </form>

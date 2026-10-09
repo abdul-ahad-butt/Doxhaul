@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS users (
   rejection_reason TEXT,
   email_verified INTEGER NOT NULL DEFAULT 0,
   onboarding_paid INTEGER NOT NULL DEFAULT 0,
+  terms_accepted INTEGER NOT NULL DEFAULT 0,
+  terms_accepted_at DATETIME,
+  onboarding_payment_status TEXT NOT NULL DEFAULT 'ACTIVE', -- 'PENDING_PAYMENT' | 'ACTIVE' | 'WAIVED'
+  onboarding_fee_paid REAL NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -343,9 +347,10 @@ INSERT OR IGNORE INTO platform_settings (key, value, description) VALUES
 ('paddle_api_key', '', 'Paddle API Secret Key'),
 ('paddle_client_token', '', 'Paddle Client-side Token'),
 ('paddle_webhook_secret', '', 'Paddle Webhook Secret for signature validation'),
-('platform_fee_percent', '7.5', 'Platform commission percentage deducted from completed loads'),
+('platform_commission_percent', '8', 'Platform commission percentage deducted from completed loads'),
+('platform_fee_percent', '8', 'Platform commission percentage alias'),
 ('carrier_onboarding_fee', '25.00', 'Carrier / Driver registration and verification fee in USD'),
-('shipper_onboarding_fee', '0.00', 'Shipper registration fee in USD'),
+('shipper_onboarding_fee', '30.00', 'Shipper registration fee in USD (set to 0 for free)'),
 ('broker_onboarding_fee', '50.00', 'Broker registration and compliance fee in USD'),
 ('persona_environment', 'sandbox', 'Persona environment: sandbox or production'),
 ('persona_api_key', '', 'Persona API Secret Key'),

@@ -50,12 +50,16 @@ router.post('/paddle', async (c) => {
     const paymentType = customData.type;
 
     if (paymentType === 'ONBOARDING_FEE' && userId) {
-      // 1. Mark user onboarding paid
+      // 1. Mark user onboarding paid and active
+      const feeAmount = Number(customData.amount || 0);
       await c.env.DB.prepare(`
         UPDATE users 
-        SET onboarding_paid = 1, updated_at = datetime('now') 
+        SET onboarding_paid = 1, 
+            onboarding_payment_status = 'ACTIVE',
+            onboarding_fee_paid = ?,
+            updated_at = datetime('now') 
         WHERE id = ?
-      `).bind(userId).run();
+      `).bind(feeAmount, userId).run();
 
       // Find user's wallet
       const wallet = await c.env.DB.prepare('SELECT id FROM wallets WHERE user_id = ?').bind(userId).first<any>();

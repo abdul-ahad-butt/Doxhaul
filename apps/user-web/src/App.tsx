@@ -18,6 +18,7 @@ import MyShipmentsPage from './pages/shipper/MyShipmentsPage';
 import WalletPage from './pages/WalletPage';
 import LoadTrackingPage from './pages/LoadTrackingPage';
 import ELDIntegrations from './pages/carrier/ELDIntegrations';
+import OnboardingPaymentPage from './pages/OnboardingPaymentPage';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
@@ -34,6 +35,9 @@ function App() {
             <Route path="/signup" element={<RegisterPage />} />
             <Route path="/complete-profile" element={<CompleteProfilePage />} />
           </Route>
+
+          {/* Onboarding Paywall Checkout Route */}
+          <Route path="/onboarding-payment" element={<OnboardingPaymentPage />} />
 
           {/* Standalone Full-Screen Radar Tracking Route */}
           <Route path="/loads/:id/tracking" element={<LoadTrackingPage />} />

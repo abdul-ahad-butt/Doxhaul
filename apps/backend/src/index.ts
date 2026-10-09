@@ -17,6 +17,8 @@ import aiRoutes from './routes/ai';
 import walletRoutes from './routes/wallet';
 import webhookRoutes from './routes/webhooks';
 import telematicsRoutes from './routes/telematics';
+import settingsRoutes from './routes/settings';
+import onboardingRoutes from './routes/onboarding';
 import { errorHandler } from './middleware/error-handler';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -62,6 +64,8 @@ app.route('/api/ai', aiRoutes);
 app.route('/api/wallet', walletRoutes);
 app.route('/api/webhooks', webhookRoutes);
 app.route('/api/telematics', telematicsRoutes);
+app.route('/api/platform', settingsRoutes);
+app.route('/api/onboarding', onboardingRoutes);
 
 // 404 handler
 app.notFound((c) => {
