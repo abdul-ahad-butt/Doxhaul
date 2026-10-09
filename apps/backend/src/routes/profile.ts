@@ -48,6 +48,15 @@ router.put('/', async (c) => {
   }
 
   const data = parseResult.data;
+  if ((data as any).phoneNumber && !data.phone) {
+    data.phone = (data as any).phoneNumber;
+  }
+  delete (data as any).phoneNumber;
+
+  if (data.phone) {
+    const cleaned = data.phone.replace(/[\s()-]/g, '');
+    data.phone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+  }
   
   const updates: string[] = [];
   const values: any[] = [];

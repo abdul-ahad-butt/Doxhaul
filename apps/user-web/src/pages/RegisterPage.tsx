@@ -7,6 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { CountryPhoneInput } from '../components/ui/CountryPhoneInput';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -61,6 +62,11 @@ const RegisterPage = () => {
     let errorMsg = '';
     if (!value && name !== 'mcNumber') {
       errorMsg = 'This field is required';
+    } else if (name === 'phone') {
+      const digits = (value || '').replace(/\D/g, '');
+      if (digits.length < 7 || digits.length > 15) {
+        errorMsg = 'Please enter a valid phone number (7-15 digits)';
+      }
     } else if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       errorMsg = 'Please enter a valid email address';
     } else if (name === 'password' && value.length < 8) {
@@ -120,7 +126,20 @@ const RegisterPage = () => {
         
         <div className="grid grid-cols-2 gap-4">
           <Input label="Email Address" type="email" name="email" required value={formData.email} onChange={handleChange} onBlur={handleBlur} error={errors.email} />
-          <Input label="Phone Number" name="phone" required value={formData.phone} onChange={handleChange} onBlur={handleBlur} error={errors.phone} />
+          <div>
+            <CountryPhoneInput
+              label="Phone Number"
+              name="phone"
+              required
+              value={formData.phone}
+              onChange={(val) => {
+                setFormData(prev => ({ ...prev, phone: val }));
+                if (errors.phone) validateField('phone', val);
+              }}
+              onBlur={() => validateField('phone', formData.phone)}
+              error={errors.phone}
+            />
+          </div>
         </div>
         
         <Input label="Password" type="password" name="password" required value={formData.password} onChange={handleChange} onBlur={handleBlur} error={errors.password} />
@@ -193,7 +212,7 @@ const RegisterPage = () => {
           type="button" 
           onClick={() => { 
             setFormData({
-              firstName: 'Demo', lastName: 'User', email: `demo${Math.floor(Math.random()*1000)}@example.com`, phone: '(555) 123-4567',
+              firstName: 'Demo', lastName: 'User', email: `demo${Math.floor(Math.random()*1000)}@example.com`, phone: '+15551234567',
               password: 'Password123!', companyName: 'Demo Logistics LLC', role: 'SHIPPER',
               dotNumber: '', mcNumber: ''
             }); 

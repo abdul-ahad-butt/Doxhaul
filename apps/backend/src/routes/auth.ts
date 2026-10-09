@@ -19,6 +19,11 @@ router.post('/register', async (c) => {
   }
 
   const data = parseResult.data;
+  const rawPhone = data.phone || data.phoneNumber || (body.phone || body.phoneNumber);
+  if (rawPhone) {
+    const cleaned = rawPhone.replace(/[\s()-]/g, '');
+    data.phone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+  }
 
   // Check if email exists
   const existingUser = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?')
@@ -297,10 +302,17 @@ router.post('/google', async (c) => {
 
 router.post('/google-complete', async (c) => {
   const body = await c.req.json();
-  const { email, googleId, googleToken, role, firstName, lastName, companyName, phone, dotNumber, mcNumber } = body;
+  const { email, googleId, googleToken, role, firstName, lastName, companyName, dotNumber, mcNumber } = body;
+  const rawPhone = body.phoneNumber || body.phone || '';
   
   if (!email || !googleId) {
     return c.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing google info' } }, 400);
+  }
+
+  let phone = rawPhone;
+  if (phone) {
+    const cleaned = phone.replace(/[\s()-]/g, '');
+    phone = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
   }
 
   const userId = crypto.randomUUID().replace(/-/g, '').toLowerCase();

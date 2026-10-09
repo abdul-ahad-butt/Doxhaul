@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient, ApiError } from '../api/client';
@@ -6,15 +6,43 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { CountryPhoneInput } from '../components/ui/CountryPhoneInput';
 
 const CompleteProfilePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   
-  // These should have been passed from the login/register page
-  const { email, googleToken, googleId, name } = location.state || {};
-  
+  // Check location state first, or session storage if page was refreshed, or dev fallback
+  const stateData = location.state || {};
+  const [sessionAuth] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('doxhaul_pending_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const isDev = Boolean((import.meta as any)?.env?.DEV);
+  const email = stateData.email || sessionAuth?.email || (isDev ? 'ekedmy.com@gmail.com' : undefined);
+  const googleToken = stateData.googleToken || sessionAuth?.googleToken || (isDev ? 'dev-google-token' : undefined);
+  const googleId = stateData.googleId || sessionAuth?.googleId || (isDev ? 'dev-google-id' : undefined);
+  const name = stateData.name || sessionAuth?.name || (isDev ? 'Steve Scott' : undefined);
+
+  useEffect(() => {
+    if (stateData.email && stateData.googleToken) {
+      try {
+        sessionStorage.setItem('doxhaul_pending_profile', JSON.stringify({
+          email: stateData.email,
+          googleToken: stateData.googleToken,
+          googleId: stateData.googleId,
+          name: stateData.name
+        }));
+      } catch {}
+    }
+  }, [stateData]);
+
   // Pre-fill name if we got it
   const defaultFirstName = name ? name.split(' ')[0] : '';
   const defaultLastName = name ? name.split(' ').slice(1).join(' ') : '';
@@ -23,6 +51,7 @@ const CompleteProfilePage = () => {
     firstName: defaultFirstName, 
     lastName: defaultLastName, 
     phone: '',
+    phoneNumber: '',
     companyName: '', 
     role: 'SHIPPER',
     dotNumber: '', 
@@ -39,11 +68,14 @@ const CompleteProfilePage = () => {
 
   const completeMutation = useMutation({
     mutationFn: async () => {
+      const finalPhone = formData.phoneNumber || formData.phone;
       return apiClient.post<{token: string, user: any}>('/auth/google-complete', { 
         ...formData,
+        phone: finalPhone,
+        phoneNumber: finalPhone,
         email,
         googleId,
-        googleToken // We might need this for verification depending on backend implementation
+        googleToken
       });
     },
     onSuccess: (data) => {
@@ -61,9 +93,19 @@ const CompleteProfilePage = () => {
     let errorMsg = '';
     if (!value && name !== 'mcNumber') {
       errorMsg = 'This field is required';
+    } else if (name === 'phone' || name === 'phoneNumber') {
+      const digits = (value || '').replace(/\D/g, '');
+      if (digits.length < 7 || digits.length > 15) {
+        errorMsg = 'Please enter a valid phone number (7-15 digits)';
+      }
     }
     
-    setErrors(prev => ({ ...prev, [name]: errorMsg }));
+    setErrors(prev => ({
+      ...prev,
+      [name]: errorMsg,
+      ...(name === 'phone' ? { phoneNumber: errorMsg } : {}),
+      ...(name === 'phoneNumber' ? { phone: errorMsg } : {})
+    }));
     return !errorMsg;
   };
 
@@ -83,7 +125,13 @@ const CompleteProfilePage = () => {
     
     // Validate all fields
     let isValid = true;
+    const phoneVal = formData.phoneNumber || formData.phone;
+    if (!validateField('phoneNumber', phoneVal)) {
+      isValid = false;
+    }
+
     Object.keys(formData).forEach(key => {
+      if (key === 'phone' || key === 'phoneNumber') return;
       if (key === 'mcNumber' && formData.role === 'SHIPPER') return;
       if (key === 'dotNumber' && formData.role !== 'CARRIER') return;
       
@@ -119,7 +167,22 @@ const CompleteProfilePage = () => {
         
         <Input label="Company Name" name="companyName" required value={formData.companyName} onChange={handleChange} onBlur={handleBlur} error={errors.companyName} />
         
-        <Input label="Phone Number" name="phone" required value={formData.phone} onChange={handleChange} onBlur={handleBlur} error={errors.phone} />
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Phone Number <span className="text-brand-red">*</span>
+          </label>
+          <CountryPhoneInput
+            value={formData.phoneNumber || formData.phone}
+            onChange={(val) => {
+              setFormData(prev => ({ ...prev, phone: val, phoneNumber: val }));
+              if (errors.phoneNumber || errors.phone) {
+                validateField('phoneNumber', val);
+              }
+            }}
+            onBlur={() => validateField('phoneNumber', formData.phoneNumber || formData.phone)}
+            error={errors.phoneNumber || errors.phone}
+          />
+        </div>
         
         <Select 
           label="I am a..." 
