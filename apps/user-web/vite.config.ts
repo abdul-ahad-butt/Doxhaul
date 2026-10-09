@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     port: 3000,
     headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
       'Cross-Origin-Embedder-Policy': 'unsafe-none',
     },
     proxy: {
@@ -21,6 +21,13 @@ export default defineConfig({
         target: 'http://127.0.0.1:8787',
         changeOrigin: true,
       },
+    },
+  },
+  preview: {
+    port: 3000,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none',
     },
   },
 });

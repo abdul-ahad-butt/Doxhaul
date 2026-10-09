@@ -27,9 +27,9 @@ const app = new Hono<{ Bindings: Env }>();
 // Middleware
 app.use('*', logger());
 app.use('*', async (c, next) => {
-  c.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   await next();
-  c.res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  c.header('Cross-Origin-Opener-Policy', 'unsafe-none');
+  c.res.headers.set('Cross-Origin-Opener-Policy', 'unsafe-none');
 });
 app.use('*', cors({
   origin: (origin) => {

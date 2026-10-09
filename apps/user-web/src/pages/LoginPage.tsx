@@ -61,8 +61,26 @@ const LoginPage = () => {
   });
 
   const handleGoogleLogin = useGoogleLogin({
-    onSuccess: (tokenResponse) => googleLoginMutation.mutate(tokenResponse),
-    onError: () => setError('Google Login failed.')
+    onSuccess: async (tokenResponse) => {
+      setError('');
+      if (!tokenResponse?.access_token) {
+        setError('No access token received from Google.');
+        return;
+      }
+      googleLoginMutation.mutate(tokenResponse);
+    },
+    onError: (errorResponse: any) => {
+      console.error('Google Auth Popup Error:', errorResponse);
+      // Handle specific OAuth errors gracefully
+      if (errorResponse?.error === 'popup_closed_by_user') {
+        setError('Sign-in cancelled. Please complete authentication in the popup window.');
+      } else if (errorResponse?.error === 'access_denied') {
+        setError('Access was denied by Google.');
+      } else {
+        setError(`Google authentication failed (${errorResponse?.error_description || errorResponse?.error || 'Unknown error'}).`);
+      }
+    },
+    flow: 'implicit',
   });
 
   const loginMutation = useMutation({
