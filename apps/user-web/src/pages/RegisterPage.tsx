@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useGoogleLogin } from '@react-oauth/google';
 import { apiClient, ApiError } from '../api/client';
@@ -11,13 +11,31 @@ import { CountryPhoneInput } from '../components/ui/CountryPhoneInput';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   
+  const roleQuery = searchParams.get('role')?.toUpperCase();
+  const initialRole = (roleQuery === 'CARRIER' || roleQuery === 'BROKER' || roleQuery === 'SHIPPER') 
+    ? roleQuery 
+    : 'SHIPPER';
+  const initialEmail = searchParams.get('email') || '';
+
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', phone: '',
-    password: '', companyName: '', role: 'SHIPPER',
+    firstName: '', lastName: '', email: initialEmail, phone: '',
+    password: '', companyName: '', role: initialRole,
     dotNumber: '', mcNumber: ''
   });
+
+  useEffect(() => {
+    const roleParam = searchParams.get('role')?.toUpperCase();
+    if (roleParam === 'CARRIER' || roleParam === 'BROKER' || roleParam === 'SHIPPER') {
+      setFormData(prev => ({ ...prev, role: roleParam }));
+    }
+    const emailParam = searchParams.get('email');
+    if (emailParam) {
+      setFormData(prev => ({ ...prev, email: emailParam }));
+    }
+  }, [searchParams]);
   
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});

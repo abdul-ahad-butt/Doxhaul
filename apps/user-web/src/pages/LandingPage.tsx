@@ -38,6 +38,8 @@ import {
 
 // Code-split 3D WebGL engine to avoid downloading 600KB+ Three.js bundle on auth/dashboard routes
 const LogisticsGlobe3D = React.lazy(() => import('../components/3d/LogisticsGlobe3D'));
+import { usePricingModal } from '../context/PricingModalContext';
+import { Footer } from '../components/layout/Footer';
 
 const RevealCard = ({ children, delay }: { children: React.ReactNode; delay: number }) => {
   const ref = useScrollReveal<HTMLDivElement>();
@@ -49,6 +51,7 @@ const RevealCard = ({ children, delay }: { children: React.ReactNode; delay: num
 };
 
 const LandingPage = () => {
+  const { openPricing } = usePricingModal();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
   const [hoveredHub, setHoveredHub] = useState<HubData | null>(null);
@@ -78,6 +81,14 @@ const LandingPage = () => {
           <DoxhaulLogo variant="white" height={26} alt="Doxhaul Logo" />
         </Link>
         <div className="space-x-4 flex items-center relative z-20 pointer-events-auto">
+          <button
+            type="button"
+            id="nav-pricing-btn"
+            onClick={() => openPricing()}
+            className="text-slate-300 hover:text-cyan-300 font-medium text-sm transition-colors cursor-pointer"
+          >
+            Pricing
+          </button>
           <Link
             to="/login"
             id="nav-login-btn"
@@ -545,90 +556,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Transparent Pricing Section - Dark Theme */}
-      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto border-t border-slate-900">
-        <div className="text-center mb-16 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
-            <span>FAIR TRANSACTION MODEL</span>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-3">Zero Hidden Fees, Direct Escrow</h2>
-          <p className="text-base text-slate-400">
-            No extortionate factoring penalties or hidden spreads. You only pay when freight is safely moved and settled.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <RevealCard delay={0}>
-            <div className="bg-slate-950/80 p-8 rounded-2xl border border-slate-800 shadow-xl h-full flex flex-col transition-all duration-300 hover:-translate-y-2 hover:border-cyan-500/30">
-              <h3 className="text-2xl font-bold text-white mb-2">Carriers & Drivers</h3>
-              <div className="text-4xl font-black text-cyan-400 font-mono mb-6">
-                Free<span className="text-sm text-slate-500 font-normal"> / forever</span>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1 text-slate-300 text-sm">
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-                  Unlimited corridor load searches
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-                  Zero-latency instant RTP escrow payouts
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-                  No predatory factoring discounts
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
-                  Automated electronic BOL and POD filing
-                </li>
-              </ul>
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-[1.02] bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white h-11 px-4 text-sm w-full"
-              >
-                Create Carrier Account
-              </Link>
-            </div>
-          </RevealCard>
-
-          <RevealCard delay={100}>
-            <div className="bg-slate-900/90 p-8 rounded-2xl border border-cyan-500/40 shadow-2xl shadow-cyan-950/30 h-full flex flex-col transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-cyan-500 text-slate-950 text-xs font-black px-3.5 py-1 rounded-bl-xl uppercase tracking-wider">
-                ENTERPRISE
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Shippers & Brokers</h3>
-              <div className="text-4xl font-black text-white font-mono mb-6">
-                $35<span className="text-sm text-slate-400 font-normal"> / matched load</span>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1 text-slate-200 text-sm">
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
-                  Unlimited freight posting across all lanes
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
-                  100% pre-vetted CDL and active COI carriers
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
-                  Real-time GPS telematics & geofence notifications
-                </li>
-                <li className="flex items-center gap-3">
-                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
-                  Automated smart contract escrow protection
-                </li>
-              </ul>
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-[1.02] shadow-lg shadow-cyan-500/25 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 h-11 px-4 text-sm w-full"
-              >
-                Start Posting Loads
-              </Link>
-            </div>
-          </RevealCard>
-        </div>
-      </section>
-
       {/* FAQ Section - Dark Theme */}
       <section className="bg-slate-950 py-24 px-6 sm:px-12 border-t border-slate-900">
         <div className="max-w-3xl mx-auto">
@@ -712,96 +639,7 @@ const LandingPage = () => {
       </section>
 
       {/* Dark Footer */}
-      <footer className="bg-[#050811] border-t border-slate-900 text-white pt-16 pb-8 px-6 sm:px-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="inline-block mb-4 focus:outline-none">
-              <DoxhaulLogo variant="white" height={28} alt="Doxhaul Logo" />
-            </Link>
-            <p className="text-slate-400 text-xs leading-relaxed mb-6 max-w-xs">
-              Connecting the world's supply chain through verified 3D spatial routing, instant rate settlements, and complete operational transparency.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4 text-white text-sm">Product</h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  For Shippers
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  For Brokers
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  For Carriers
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Pricing
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4 text-white text-sm">Company</h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  About Us
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Careers
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Blog
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Contact
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-4 text-white text-sm">Legal & Compliance</h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Terms of Service
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Privacy Policy
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Security
-                </button>
-              </li>
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
-                  Compliance
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-xs">© {new Date().getFullYear()} Doxhaul Inc. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

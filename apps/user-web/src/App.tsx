@@ -20,12 +20,15 @@ import LoadTrackingPage from './pages/LoadTrackingPage';
 import ELDIntegrations from './pages/carrier/ELDIntegrations';
 import OnboardingPaymentPage from './pages/OnboardingPaymentPage';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
+import { PricingModalProvider } from './context/PricingModalContext';
+import { PricingModal3D } from './components/pricing/PricingModal3D';
 
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <Routes>
+        <PricingModalProvider>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           
           {/* Auth Routes */}
@@ -74,8 +77,10 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <SupportAssistantWidget />
-      </AuthProvider>
-    </BrowserRouter>
+        <PricingModal3D />
+      </PricingModalProvider>
+    </AuthProvider>
+  </BrowserRouter>
   );
 }
 
