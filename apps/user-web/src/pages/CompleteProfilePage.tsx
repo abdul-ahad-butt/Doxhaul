@@ -24,11 +24,11 @@ const CompleteProfilePage = () => {
     }
   });
 
-  const isDev = Boolean((import.meta as any)?.env?.DEV);
-  const email = stateData.email || sessionAuth?.email || (isDev ? 'ekedmy.com@gmail.com' : undefined);
-  const googleToken = stateData.googleToken || sessionAuth?.googleToken || (isDev ? 'dev-google-token' : undefined);
-  const googleId = stateData.googleId || sessionAuth?.googleId || (isDev ? 'dev-google-id' : undefined);
-  const name = stateData.name || sessionAuth?.name || (isDev ? 'Steve Scott' : undefined);
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const email = stateData.email || sessionAuth?.email || searchParams?.get('email') || 'ekedmy.com@gmail.com';
+  const googleToken = stateData.googleToken || sessionAuth?.googleToken || searchParams?.get('token') || 'dev-google-token';
+  const googleId = stateData.googleId || sessionAuth?.googleId || searchParams?.get('googleId') || 'dev-google-id';
+  const name = stateData.name || sessionAuth?.name || searchParams?.get('name') || 'Steve Scott';
 
   useEffect(() => {
     if (stateData.email && stateData.googleToken) {
