@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Truck, MapPin, CheckCircle, Navigation } from 'lucide-react';
+import { Truck, MapPin, CheckCircle, Navigation, Radio } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent } from '../components/ui/Card';
@@ -137,7 +138,15 @@ const TripsPage = () => {
                       </div>
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-6 space-y-2">
+                      <Link
+                        to={`/loads/${trip.load_id}/tracking`}
+                        className="w-full inline-flex items-center justify-center py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 font-bold text-xs border border-cyan-500/30 transition-all gap-1.5 shadow-sm"
+                      >
+                        <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                        <span>Live ELD Telematics & GPS Radar</span>
+                      </Link>
+
                       {(user?.role === 'CARRIER' || user?.role === 'ADMIN') && getNextActionLabel(trip.status) && (
                         <Button 
                           className="w-full shadow-sm"

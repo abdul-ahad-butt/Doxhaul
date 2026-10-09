@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   MapPin, 
   Calendar, 
@@ -8,7 +9,8 @@ import {
   Building2, 
   Tag, 
   Navigation,
-  ShieldCheck
+  ShieldCheck,
+  Radio
 } from 'lucide-react';
 import { StatusBadge } from '../ui/Badge';
 import { Card } from '../ui/Card';
@@ -183,19 +185,30 @@ export const LoadCard: React.FC<LoadCardProps> = ({
                 </button>
               </>
             ) : (
-              <button
-                id={`details-btn-${load.id}`}
-                name="viewDetails"
-                aria-label={`View Full Details for load ${load.reference_number || load.id}`}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onClick) onClick(load);
-                }}
-                className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all cursor-pointer text-center"
-              >
-                View Full Details
-              </button>
+              <div className="flex items-center gap-2 w-full">
+                <Link
+                  to={`/loads/${load.id}/tracking`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="py-2.5 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  title="View Live ELD Telematics & GPS Radar"
+                >
+                  <Radio className="w-3.5 h-3.5 animate-pulse text-cyan-400" />
+                  <span>Live Radar</span>
+                </Link>
+                <button
+                  id={`details-btn-${load.id}`}
+                  name="viewDetails"
+                  aria-label={`View Full Details for load ${load.reference_number || load.id}`}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onClick) onClick(load);
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all cursor-pointer text-center"
+                >
+                  View Full Details
+                </button>
+              </div>
             )}
           </div>
         </div>

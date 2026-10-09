@@ -115,7 +115,7 @@ export async function handleSubmitBid(c: any, explicitLoadId?: string) {
   await ensureBidsTable(c.env.DB);
 
   // Check load exists and is open for bidding
-  const load = await c.env.DB.prepare('SELECT id, owner_user_id, status, rate, reference_number FROM loads WHERE id = ?').bind(loadId).first<any>();
+  const load = (await c.env.DB.prepare('SELECT id, owner_user_id, status, rate, reference_number FROM loads WHERE id = ?').bind(loadId).first()) as any;
   if (!load) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
   }
@@ -182,7 +182,7 @@ export async function handleGetLoadBids(c: any, explicitLoadId?: string) {
 
   await ensureBidsTable(c.env.DB);
 
-  const load = await c.env.DB.prepare('SELECT id, owner_user_id, status, rate, reference_number FROM loads WHERE id = ?').bind(loadId).first<any>();
+  const load = (await c.env.DB.prepare('SELECT id, owner_user_id, status, rate, reference_number FROM loads WHERE id = ?').bind(loadId).first()) as any;
   if (!load) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
   }
@@ -231,7 +231,7 @@ export async function handleAcceptBid(c: any) {
 
   await ensureBidsTable(c.env.DB);
 
-  const bid = await c.env.DB.prepare(`
+  const bid = (await c.env.DB.prepare(`
     SELECT b.*, 
            COALESCE(b.bidder_id, b.carrier_id) as winning_bidder_id,
            l.owner_user_id, 
@@ -241,7 +241,7 @@ export async function handleAcceptBid(c: any) {
     FROM bids b
     JOIN loads l ON b.load_id = l.id
     WHERE b.id = ?
-  `).bind(bidId).first<any>();
+  `).bind(bidId).first()) as any;
 
   if (!bid) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Bid not found' } }, 404);
@@ -353,12 +353,12 @@ export async function handleDeclineBid(c: any) {
 
   await ensureBidsTable(c.env.DB);
 
-  const bid = await c.env.DB.prepare(`
+  const bid = (await c.env.DB.prepare(`
     SELECT b.*, l.owner_user_id 
     FROM bids b
     JOIN loads l ON b.load_id = l.id
     WHERE b.id = ?
-  `).bind(bidId).first<any>();
+  `).bind(bidId).first()) as any;
 
   if (!bid) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Bid not found' } }, 404);
@@ -385,12 +385,12 @@ export async function handleCounterBid(c: any) {
 
   await ensureBidsTable(c.env.DB);
 
-  const bid = await c.env.DB.prepare(`
+  const bid = (await c.env.DB.prepare(`
     SELECT b.*, l.owner_user_id 
     FROM bids b
     JOIN loads l ON b.load_id = l.id
     WHERE b.id = ?
-  `).bind(bidId).first<any>();
+  `).bind(bidId).first()) as any;
 
   if (!bid) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Bid not found' } }, 404);

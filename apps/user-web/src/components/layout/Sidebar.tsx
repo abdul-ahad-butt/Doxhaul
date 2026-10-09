@@ -13,6 +13,7 @@ import {
   FileText, 
   Users, 
   Wallet,
+  Radio,
   LogOut 
 } from 'lucide-react';
 
@@ -46,6 +47,7 @@ export const Sidebar = () => {
           { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
           { label: 'Load Board (Find Loads)', icon: Search, href: '/load-board' },
           { label: 'My Active Hauls', icon: Truck, href: '/active-hauls' },
+          { label: 'ELD Telematics Sync', icon: Radio, href: '/carrier/eld-integrations' },
           { label: 'Wallet & Payouts', icon: Wallet, href: '/wallet' },
           { label: 'Earnings & Payouts', icon: CreditCard, href: '/earnings' },
           { label: 'Documents & Compliance', icon: FileText, href: '/profile' },

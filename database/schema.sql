@@ -402,3 +402,52 @@ CREATE INDEX IF NOT EXISTS idx_transactions_load ON wallet_transactions(load_id)
 CREATE INDEX IF NOT EXISTS idx_transactions_type ON wallet_transactions(type);
 CREATE INDEX IF NOT EXISTS idx_transactions_status ON wallet_transactions(status);
 
+-- ============================================================
+-- 4. Carrier ELD Integrations & Live Telematics
+-- ============================================================
+CREATE TABLE IF NOT EXISTS carrier_eld_providers (
+    id TEXT PRIMARY KEY,
+    carrier_id TEXT NOT NULL REFERENCES users(id),
+    provider_name TEXT NOT NULL, -- 'samsara' | 'motive' | 'project44' | 'simulator'
+    api_key_encrypted TEXT,
+    external_fleet_id TEXT,
+    vehicle_unit_id TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_carrier_eld_carrier ON carrier_eld_providers(carrier_id);
+CREATE INDEX IF NOT EXISTS idx_carrier_eld_active ON carrier_eld_providers(is_active);
+
+CREATE TABLE IF NOT EXISTS load_telemetry (
+    id TEXT PRIMARY KEY,
+    load_id TEXT NOT NULL REFERENCES loads(id),
+    carrier_id TEXT NOT NULL REFERENCES users(id),
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    speed_mph REAL DEFAULT 0,
+    heading_degrees REAL DEFAULT 0,
+    temperature_fahrenheit REAL,
+    hos_status TEXT DEFAULT 'DRIVING',
+    hos_hours_remaining REAL DEFAULT 8.5,
+    provider_source TEXT DEFAULT 'simulator',
+    recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_telemetry_load ON load_telemetry(load_id, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_telemetry_carrier ON load_telemetry(carrier_id);
+
+CREATE TABLE IF NOT EXISTS load_geofence_events (
+    id TEXT PRIMARY KEY,
+    load_id TEXT NOT NULL REFERENCES loads(id),
+    event_type TEXT NOT NULL,
+    distance_meters REAL NOT NULL,
+    latitude REAL,
+    longitude REAL,
+    triggered_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_geofence_load ON load_geofence_events(load_id, triggered_at DESC);
+
+

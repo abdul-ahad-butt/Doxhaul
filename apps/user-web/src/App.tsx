@@ -16,6 +16,8 @@ import InvoicesPage from './pages/InvoicesPage';
 import CreateLoadPage from './pages/shipper/CreateLoadPage';
 import MyShipmentsPage from './pages/shipper/MyShipmentsPage';
 import WalletPage from './pages/WalletPage';
+import LoadTrackingPage from './pages/LoadTrackingPage';
+import ELDIntegrations from './pages/carrier/ELDIntegrations';
 import { SupportAssistantWidget } from './components/support/SupportAssistantWidget';
 
 function App() {
@@ -33,6 +35,11 @@ function App() {
             <Route path="/complete-profile" element={<CompleteProfilePage />} />
           </Route>
 
+          {/* Standalone Full-Screen Radar Tracking Route */}
+          <Route path="/loads/:id/tracking" element={<LoadTrackingPage />} />
+          <Route path="/tracking/:id" element={<LoadTrackingPage />} />
+          <Route path="/tracking" element={<LoadTrackingPage />} />
+
           {/* Protected Routes */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -47,6 +54,8 @@ function App() {
             <Route path="/loads" element={<LoadBoardPage />} />
             <Route path="/active-hauls" element={<TripsPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/carrier/eld-integrations" element={<ELDIntegrations />} />
+            <Route path="/eld-integrations" element={<ELDIntegrations />} />
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/earnings" element={<InvoicesPage />} />
