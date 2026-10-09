@@ -1,23 +1,45 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Truck, ShieldCheck, BarChart3, Clock, UserPlus, FileSearch, Banknote, Star, MapPin } from 'lucide-react';
+import {
+  Truck,
+  ShieldCheck,
+  BarChart3,
+  Clock,
+  UserPlus,
+  FileSearch,
+  Banknote,
+  Star,
+  MapPin,
+  Globe,
+  Package,
+  Zap,
+  Radio,
+  Search,
+  CheckCircle2,
+  Filter,
+  ArrowUpRight
+} from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
-import { useCountUp } from '../hooks/useCountUp';
 import { DoxhaulLogo } from '../components/common/DoxhaulLogo';
+import {
+  Stakeholder3DCards,
+  HubTelemetryWidget,
+  CanvasErrorBoundary,
+  GLOBAL_HUBS,
+  LOGISTICS_ROUTES,
+  HubData
+} from '../components/3d';
+import {
+  IndustryBottlenecksSection,
+  SettlementControlCenter,
+  MarketOpportunitySection,
+  IntegrationsTicker
+} from '../components/sections';
 
-const StatNumber = ({ end, label, prefix = '', suffix = '' }: { end: number, label: string, prefix?: string, suffix?: string }) => {
-  const { count, ref } = useCountUp(end);
-  return (
-    <div ref={ref as any} className="text-center p-6">
-      <div className="text-4xl md:text-5xl font-extrabold text-brand-amber mb-2">
-        {prefix}{count.toLocaleString()}{suffix}
-      </div>
-      <div className="text-slate-700 font-medium uppercase tracking-wider text-sm">{label}</div>
-    </div>
-  );
-};
+// Code-split 3D WebGL engine to avoid downloading 600KB+ Three.js bundle on auth/dashboard routes
+const LogisticsGlobe3D = React.lazy(() => import('../components/3d/LogisticsGlobe3D'));
 
-const RevealCard = ({ children, delay }: { children: React.ReactNode, delay: number }) => {
+const RevealCard = ({ children, delay }: { children: React.ReactNode; delay: number }) => {
   const ref = useScrollReveal<HTMLDivElement>();
   return (
     <div ref={ref} className="reveal-up h-full" style={{ transitionDelay: `${delay}ms` }}>
@@ -28,6 +50,10 @@ const RevealCard = ({ children, delay }: { children: React.ReactNode, delay: num
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeRoleFilter, setActiveRoleFilter] = useState<string>('all');
+  const [hoveredHub, setHoveredHub] = useState<HubData | null>(null);
+  const [selectedHub, setSelectedHub] = useState<HubData | null>(GLOBAL_HUBS[0]);
+  const [toolTipPosition, setToolTipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,9 +65,15 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${isScrolled ? 'bg-navy-950/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
+    <div className="min-h-screen bg-[#050811] text-white selection:bg-cyan-500 selection:text-slate-950 font-sans">
+      {/* Top Navigation */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-6 sm:px-12 flex justify-between items-center text-white ${
+          isScrolled
+            ? 'bg-[#050811]/90 backdrop-blur-md shadow-2xl border-b border-slate-800/80'
+            : 'bg-transparent'
+        }`}
+      >
         <Link to="/" className="flex items-center focus:outline-none">
           <DoxhaulLogo variant="white" height={26} alt="Doxhaul Logo" />
         </Link>
@@ -49,271 +81,462 @@ const LandingPage = () => {
           <Link
             to="/login"
             id="nav-login-btn"
-            className="text-white hover:text-navy-100 font-medium transition-colors cursor-pointer"
+            className="text-slate-300 hover:text-cyan-300 font-medium text-sm transition-colors cursor-pointer"
           >
             Log In
           </Link>
           <Link
             to="/register"
             id="nav-get-started-btn"
-            className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm cursor-pointer"
+            className="inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-lg hover:shadow-cyan-500/25 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white h-10 px-5 text-sm cursor-pointer"
           >
             Get Started
           </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="bg-navy-950 bg-gradient-to-br from-navy-950 via-navy-800 to-navy-950 animate-gradient-shift text-white pt-32 pb-20 px-6 sm:px-12 text-center relative overflow-hidden">
-        <div className="relative z-10">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
-            Move freight with confidence.
-          </h1>
-          <p className="text-xl text-slate-50 mb-10 max-w-3xl mx-auto">
-            The verified marketplace connecting trusted shippers, brokers, and carriers. Real-time tracking, seamless compliance, and total operational visibility.
+      {/* Interactive 3D Logistics Hero Section */}
+      <section className="relative min-h-[92vh] lg:min-h-screen flex flex-col justify-between bg-[#050811] text-white pt-28 pb-12 px-6 sm:px-12 overflow-hidden select-none">
+        {/* Background Radial Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-cyan-500/15 via-blue-600/5 to-transparent blur-[140px] pointer-events-none" />
+
+        {/* 3D WebGL Canvas Layer - Unobstructed 3D Globe with offset right on desktop */}
+        <div className="absolute inset-0 z-0 pointer-events-auto">
+          <CanvasErrorBoundary fallback={<div className="w-full h-full bg-[#050811] animate-pulse" />}>
+            <Suspense fallback={<div className="w-full h-full bg-[#050811] animate-pulse" />}>
+              <LogisticsGlobe3D
+                activeRoleFilter={activeRoleFilter}
+                selectedHub={selectedHub}
+                setSelectedHub={setSelectedHub}
+                hoveredHub={hoveredHub}
+                setHoveredHub={setHoveredHub}
+                setToolTipPosition={setToolTipPosition}
+              />
+            </Suspense>
+          </CanvasErrorBoundary>
+        </div>
+
+        {/* Smooth bottom gradient mask */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050811] to-transparent pointer-events-none z-10" />
+
+        {/* Hub Hover Tooltip Overlay */}
+        {hoveredHub && (
+          <div
+            className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-4 transition-all duration-150"
+            style={{ left: `${toolTipPosition.x}px`, top: `${toolTipPosition.y}px` }}
+          >
+            <div className="bg-slate-900/95 border border-cyan-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-2xl shadow-cyan-950/60 min-w-[220px]">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                  {hoveredHub.name}
+                </span>
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-full">
+                  {hoveredHub.country}
+                </span>
+              </div>
+              <div className="space-y-1.5 text-[11px] text-slate-300">
+                <div className="flex justify-between text-slate-400">
+                  <span>Throughput:</span>
+                  <span className="text-white font-mono font-medium">{hoveredHub.volume}</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Active Fleets:</span>
+                  <span className="text-emerald-400 font-mono font-medium">
+                    {hoveredHub.activeFleets.toLocaleString()} units
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Status:</span>
+                  <span className="text-cyan-400 font-medium">{hoveredHub.status}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop 2-Column Responsive Hero Grid */}
+        <div className="relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 my-auto pt-6 lg:pt-8">
+          {/* Left Column (55% width / col-span-7): Copy & Controls */}
+          <div className="lg:col-span-7 pointer-events-none">
+            {/* Status Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-cyan-500/30 backdrop-blur-md text-xs font-medium text-cyan-400 mb-6 shadow-xl pointer-events-auto">
+              <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>Autonomous Supply Chain Orchestration</span>
+            </div>
+
+            {/* Headline with clamped sizing to preserve viewport fold */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.12] mb-6">
+              Move Freight with Confidence Across{' '}
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                Global Corridors
+              </span>
+            </h1>
+
+            {/* Subtext */}
+            <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed mb-8 max-w-xl backdrop-blur-sm bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
+              The verified digital freight network connecting trusted shippers, brokers, and carriers with real-time 3D spatial routing, instant rate settlements, and complete operational transparency.
+            </p>
+
+            {/* Stakeholder Perspective Switcher */}
+            <div className="mb-8 pointer-events-auto">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Select Ecosystem Perspective:</span>
+              </p>
+              <div className="flex flex-wrap items-center gap-2.5">
+                {[
+                  { id: 'all', label: 'Global Corridor View', icon: Globe },
+                  { id: 'shipper', label: 'Shippers', icon: Package },
+                  { id: 'broker', label: 'Freight Brokers', icon: Zap },
+                  { id: 'carrier', label: 'Carriers & Fleets', icon: Truck },
+                ].map((role) => {
+                  const Icon = role.icon;
+                  const isActive = activeRoleFilter === role.id;
+                  return (
+                    <button
+                      key={role.id}
+                      onClick={() => setActiveRoleFilter(role.id)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 backdrop-blur-md border ${
+                        isActive
+                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/20 scale-[1.02]'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                      <span>{role.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Primary Action CTAs */}
+            <div className="flex flex-wrap items-center gap-4 pointer-events-auto">
+              <Link
+                to="/register"
+                id="hero-join-network-btn"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 text-slate-950 font-bold text-sm shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <Package className="w-4 h-4 text-slate-950" />
+                <span>Post Freight Load</span>
+              </Link>
+
+              <Link
+                to="/load-board"
+                id="hero-find-loads-btn"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 text-white font-semibold text-sm backdrop-blur-md transition-all hover:border-cyan-500/40"
+              >
+                <Search className="w-4 h-4 text-cyan-400" />
+                <span>Find Available Loads</span>
+              </Link>
+
+              <Link
+                to="/register"
+                id="hero-fleet-network-btn"
+                className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 text-slate-300 text-sm font-medium transition-all"
+              >
+                <Truck className="w-4 h-4 text-cyan-400" />
+                <span>Join Fleet Network</span>
+              </Link>
+
+              <Link
+                to="/login"
+                id="hero-sign-in-btn"
+                className="flex items-center gap-2 px-4 py-3.5 rounded-xl bg-transparent hover:bg-slate-800/40 text-slate-400 hover:text-cyan-300 text-sm font-medium transition-all"
+              >
+                <span>Sign In</span>
+                <ArrowUpRight className="w-4 h-4 text-cyan-400" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Column (45% width / col-span-5): Clean framing with docked Telemetry */}
+          <div className="lg:col-span-5 flex justify-end items-start pointer-events-none relative min-h-[340px] lg:min-h-[460px]">
+            {/* Docked Hub Telemetry Widget with glassmorphic backdrop */}
+            <div className="pointer-events-auto w-full max-w-sm ml-auto">
+              <HubTelemetryWidget
+                selectedHub={selectedHub}
+                routes={LOGISTICS_ROUTES}
+                className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-cyan-950/40"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Platform Live Statistics Bar */}
+        <div className="relative z-20 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-4 border-t border-slate-800/80 backdrop-blur-md bg-slate-950/50 rounded-2xl p-4">
+          {[
+            { label: 'Gross Volume Moved', value: '$4.2 Billion+', icon: BarChart3, change: '+24% YoY' },
+            { label: 'Avg Rate Match Time', value: '< 12ms', icon: Zap, change: 'Instant AI' },
+            { label: 'Active Freight Hubs', value: '180 Port Nodes', icon: Globe, change: 'Global Cover' },
+            { label: 'Dispatch Accuracy', value: '99.4% On-Time', icon: CheckCircle2, change: 'SLA Guaranteed' },
+          ].map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div key={idx} className="flex items-center gap-3.5 p-2">
+                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 shadow-inner">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base sm:text-lg font-bold font-mono text-white">{stat.value}</span>
+                    <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                      {stat.change}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium">{stat.label}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Dark-Mode Enterprise Integrations Ticker */}
+      <IntegrationsTicker />
+
+      {/* Pitch Deck Slide 2: Industry Bottlenecks Section */}
+      <IndustryBottlenecksSection />
+
+      {/* Pitch Deck Slide 3: Interactive Settlement Control Center Mockup */}
+      <SettlementControlCenter />
+
+      {/* Pitch Deck Slide 4: Market Opportunity Section */}
+      <MarketOpportunitySection />
+
+      {/* Interactive 3D Perspective Stakeholder Section */}
+      <div className="bg-[#050811] border-b border-slate-800/80">
+        <Stakeholder3DCards />
+      </div>
+
+      {/* How It Works - High-Tech Dark Cyber Theme */}
+      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto border-t border-slate-900">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
+            <span>OPERATIONAL WORKFLOW</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+            How Doxhaul Works
+          </h2>
+          <p className="text-base text-slate-400">
+            A frictionless three-stage cycle engineered to eliminate middleman delays and secure immediate settlement.
           </p>
-          <div className="flex justify-center space-x-4 relative z-20 pointer-events-auto">
-            <Link
-              to="/register"
-              id="hero-join-network-btn"
-              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-12 px-8 text-lg cursor-pointer"
-            >
-              Join the Network
-            </Link>
-            <Link
-              to="/login"
-              id="hero-sign-in-btn"
-              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 text-lg cursor-pointer"
-            >
-              Sign In
-            </Link>
-          </div>
         </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="bg-slate-50 border-b border-slate-200 py-12 px-6 sm:px-12">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-          <RevealCard delay={0}><StatNumber end={50} label="Freight Moved" prefix="$" suffix="M+" /></RevealCard>
-          <RevealCard delay={100}><StatNumber end={10000} label="Active Carriers" suffix="+" /></RevealCard>
-          <RevealCard delay={200}><StatNumber end={99} label="Uptime" suffix=".9%" /></RevealCard>
-        </div>
-      </section>
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          <div className="hidden md:block absolute top-1/2 left-16 right-16 h-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/40 to-cyan-500/20 -z-10 -translate-y-1/2" />
 
-      {/* Integrations Section */}
-      <section className="py-12 bg-white border-b border-slate-200 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 sm:px-12">
-          <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Seamlessly Integrates With Your Stack</p>
-          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">Samsara</div>
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">KeepTruckin</div>
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">QuickBooks</div>
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">Project44</div>
-            <div className="text-xl md:text-2xl font-black text-slate-800 tracking-tighter">TruckStop</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Roles Section */}
-      <section className="py-20 px-6 sm:px-12 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-navy-900 mb-12">Built for every side of logistics</h2>
-        <div className="grid md:grid-cols-3 gap-8">
           <RevealCard delay={0}>
-            <div className="bg-slate-50 p-8 rounded-xl border border-slate-200 h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:border-brand-blue/30 cursor-pointer group">
-              <div className="w-12 h-12 bg-brand-blue/10 text-brand-blue rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <PackageIcon className="w-6 h-6" />
+            <div className="bg-slate-950/80 p-8 rounded-2xl border border-slate-800/90 shadow-xl text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-cyan-500/40 group backdrop-blur-xl">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 text-slate-950 rounded-2xl flex items-center justify-center mx-auto mb-6 text-lg font-black shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
+                1
               </div>
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Shippers</h3>
-              <p className="text-slate-700 mb-6">Post your freight directly to a network of fully verified carriers. Monitor your shipments in real-time and control costs.</p>
-            </div>
-          </RevealCard>
-          
-          <RevealCard delay={100}>
-            <div className="bg-slate-50 p-8 rounded-xl border border-slate-200 h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:border-brand-blue/30 cursor-pointer group">
-              <div className="w-12 h-12 bg-brand-purple/10 text-brand-purple rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <BriefcaseIcon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Brokers</h3>
-              <p className="text-slate-700 mb-6">Expand your capacity with trusted carriers. Manage your loads, track compliance, and automate status updates in one portal.</p>
-            </div>
-          </RevealCard>
-
-          <RevealCard delay={200}>
-            <div className="bg-slate-50 p-8 rounded-xl border border-slate-200 h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:border-brand-blue/30 cursor-pointer group">
-              <div className="w-12 h-12 bg-brand-green/10 text-brand-green rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Truck className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Carriers</h3>
-              <p className="text-slate-700 mb-6">Find high-quality freight from verified partners. Keep your trucks moving with instant booking and seamless status reporting.</p>
-            </div>
-          </RevealCard>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-navy-900 mb-16">How Doxhaul Works</h2>
-        <div className="grid md:grid-cols-3 gap-12 relative">
-          <div className="hidden md:block absolute top-1/3 left-0 right-0 h-0.5 bg-slate-200 -z-10 -translate-y-1/2" />
-          
-          <RevealCard delay={0}>
-            <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-brand-blue/30 group">
-              <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md group-hover:scale-110 transition-transform duration-300 group-hover:bg-brand-blueHover">1</div>
-              <UserPlus className="w-8 h-8 text-brand-blue mx-auto mb-4 group-hover:-rotate-12 transition-transform duration-300" />
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Create an Account</h3>
-              <p className="text-slate-700">Sign up and verify your business credentials. We vet all users to keep our network secure.</p>
+              <UserPlus className="w-7 h-7 text-cyan-400 mx-auto mb-4 group-hover:-rotate-12 transition-transform duration-300" />
+              <h3 className="text-xl font-bold text-white mb-3">Instant KYC & Compliance</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Connect your MC/DOT, upload insurance certificates, and let automated optical audits verify your credentials in seconds.
+              </p>
             </div>
           </RevealCard>
 
           <RevealCard delay={100}>
-            <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-brand-blue/30 group">
-              <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md group-hover:scale-110 transition-transform duration-300 group-hover:bg-brand-blueHover">2</div>
-              <FileSearch className="w-8 h-8 text-brand-blue mx-auto mb-4 group-hover:rotate-12 transition-transform duration-300" />
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Post or Find Loads</h3>
-              <p className="text-slate-700">Shippers and brokers post freight. Carriers search and instantly book loads that match their capacity.</p>
+            <div className="bg-slate-950/80 p-8 rounded-2xl border border-slate-800/90 shadow-xl text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-cyan-500/40 group backdrop-blur-xl">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 text-slate-950 rounded-2xl flex items-center justify-center mx-auto mb-6 text-lg font-black shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
+                2
+              </div>
+              <FileSearch className="w-7 h-7 text-cyan-400 mx-auto mb-4 group-hover:rotate-12 transition-transform duration-300" />
+              <h3 className="text-xl font-bold text-white mb-3">AI Corridor Matching</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Shippers lock spot rates into programmable escrow; vetted carriers instantly book transparent hauls with zero double-brokering risk.
+              </p>
             </div>
           </RevealCard>
 
           <RevealCard delay={200}>
-            <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-brand-blue/30 group">
-              <div className="w-16 h-16 bg-brand-blue text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-md group-hover:scale-110 transition-transform duration-300 group-hover:bg-brand-blueHover">3</div>
-              <Banknote className="w-8 h-8 text-brand-blue mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="text-xl font-bold text-navy-900 mb-3">Deliver & Get Paid</h3>
-              <p className="text-slate-700">Complete the trip with real-time tracking, upload the POD, and receive fast, reliable payments.</p>
+            <div className="bg-slate-950/80 p-8 rounded-2xl border border-slate-800/90 shadow-xl text-center h-full relative transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-cyan-500/40 group backdrop-blur-xl">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 text-slate-950 rounded-2xl flex items-center justify-center mx-auto mb-6 text-lg font-black shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
+                3
+              </div>
+              <Banknote className="w-7 h-7 text-cyan-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
+              <h3 className="text-xl font-bold text-white mb-3">Real-Time POD & Payout</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Upload your delivery receipt at destination. AI validates the consignee signature and triggers immediate RTP escrow disbursement.
+              </p>
             </div>
           </RevealCard>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 px-6 sm:px-12 bg-navy-950 text-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* Platform Features Grid */}
+      <section className="py-20 px-6 sm:px-12 bg-slate-950 border-t border-slate-900 text-white">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <RevealCard delay={0}>
-            <div className="text-center group cursor-default">
-              <ShieldCheck className="w-12 h-12 mx-auto text-brand-blue mb-4 group-hover:scale-110 group-hover:text-white transition-all duration-300" />
-              <h4 className="text-lg font-bold mb-2">Verified Businesses</h4>
-              <p className="text-navy-300 text-sm group-hover:text-navy-200 transition-colors">Every participant is vetted through our rigorous compliance checks.</p>
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 transition-all text-center group cursor-default">
+              <ShieldCheck className="w-10 h-10 mx-auto text-cyan-400 mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h4 className="text-base font-bold mb-2 text-white">Verified Identity & CDL</h4>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Every carrier and driver is authenticated with live FMCSA databases and fraud prevention guards.
+              </p>
             </div>
           </RevealCard>
+
           <RevealCard delay={100}>
-            <div className="text-center group cursor-default">
-              <BarChart3 className="w-12 h-12 mx-auto text-brand-blue mb-4 group-hover:scale-110 group-hover:text-white transition-all duration-300" />
-              <h4 className="text-lg font-bold mb-2">Smart Load Matching</h4>
-              <p className="text-navy-300 text-sm group-hover:text-navy-200 transition-colors">Find exactly the equipment you need, right when you need it.</p>
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 transition-all text-center group cursor-default">
+              <BarChart3 className="w-10 h-10 mx-auto text-cyan-400 mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h4 className="text-base font-bold mb-2 text-white">Algorithmic Rate Parity</h4>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Fair market pricing calculated from spatial lane demand, eliminating hidden 25% brokerage markups.
+              </p>
             </div>
           </RevealCard>
+
           <RevealCard delay={200}>
-            <div className="text-center group cursor-default">
-              <ShieldCheck className="w-12 h-12 mx-auto text-brand-blue mb-4 group-hover:scale-110 group-hover:text-white transition-all duration-300" />
-              <h4 className="text-lg font-bold mb-2">Secure Compliance</h4>
-              <p className="text-navy-300 text-sm group-hover:text-navy-200 transition-colors">Store DOT, MC, and insurance docs securely in the cloud.</p>
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 transition-all text-center group cursor-default">
+              <ShieldCheck className="w-10 h-10 mx-auto text-cyan-400 mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h4 className="text-base font-bold mb-2 text-white">Automated Smart Escrow</h4>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Funds are reserved upfront and released automatically upon delivery without 30-day factoring lags.
+              </p>
             </div>
           </RevealCard>
+
           <RevealCard delay={300}>
-            <div className="text-center group cursor-default">
-              <Clock className="w-12 h-12 mx-auto text-brand-blue mb-4 group-hover:scale-110 group-hover:text-white transition-all duration-300" />
-              <h4 className="text-lg font-bold mb-2">Trip Visibility</h4>
-              <p className="text-navy-300 text-sm group-hover:text-navy-200 transition-colors">Real-time status updates from pickup to successful delivery.</p>
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 transition-all text-center group cursor-default">
+              <Clock className="w-10 h-10 mx-auto text-cyan-400 mb-4 group-hover:scale-110 transition-all duration-300" />
+              <h4 className="text-base font-bold mb-2 text-white">High-Frequency Telemetry</h4>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Real-time ELD integration gives shippers minute-by-minute ETA precision across every active corridor.
+              </p>
             </div>
           </RevealCard>
         </div>
       </section>
 
-      {/* Live Load Board Preview */}
-      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto">
+      {/* Live Load Board Preview - Dark Cyber Theme */}
+      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto border-t border-slate-900">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-navy-900 mb-4">Live Load Board</h2>
-          <p className="text-lg text-slate-700">Thousands of new loads posted daily. Here's a glimpse of what's available right now.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
+            <span>REAL-TIME SPOT MARKET</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-3">Live Load Board Feed</h2>
+          <p className="text-base text-slate-400">
+            Thousands of verified loads posted daily across North American freight lanes.
+          </p>
         </div>
-        
-        <div className="relative rounded-xl border border-slate-200 shadow-sm bg-white overflow-hidden">
+
+        <div className="relative rounded-2xl border border-slate-800 shadow-2xl bg-slate-950/90 overflow-hidden backdrop-blur-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-sm font-semibold text-slate-700">
+                <tr className="bg-slate-900/90 border-b border-slate-800 text-xs font-mono uppercase text-slate-400">
                   <th className="p-4">Origin &rarr; Destination</th>
                   <th className="p-4">Equipment</th>
                   <th className="p-4">Pickup Date</th>
-                  <th className="p-4 text-right">Rate</th>
+                  <th className="p-4 text-right">Escrow Rate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-medium text-navy-900 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400" /> Dallas, TX &rarr; Chicago, IL
+              <tbody className="divide-y divide-slate-850">
+                <tr className="hover:bg-slate-900/50 transition-colors">
+                  <td className="p-4 font-medium text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-cyan-400" /> Dallas, TX &rarr; Chicago, IL
                   </td>
-                  <td className="p-4 text-slate-700">Reefer (53')</td>
-                  <td className="p-4 text-slate-700">Today</td>
-                  <td className="p-4 text-right font-bold text-brand-green">$2,450</td>
+                  <td className="p-4 text-slate-300 text-sm">Reefer (53')</td>
+                  <td className="p-4 text-slate-400 text-sm">Today</td>
+                  <td className="p-4 text-right font-bold font-mono text-emerald-400">$2,450</td>
                 </tr>
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-medium text-navy-900 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400" /> Atlanta, GA &rarr; Miami, FL
+                <tr className="hover:bg-slate-900/50 transition-colors">
+                  <td className="p-4 font-medium text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-cyan-400" /> Atlanta, GA &rarr; Miami, FL
                   </td>
-                  <td className="p-4 text-slate-700">Dry Van</td>
-                  <td className="p-4 text-slate-700">Tomorrow</td>
-                  <td className="p-4 text-right font-bold text-brand-green">$1,800</td>
+                  <td className="p-4 text-slate-300 text-sm">Dry Van</td>
+                  <td className="p-4 text-slate-400 text-sm">Tomorrow</td>
+                  <td className="p-4 text-right font-bold font-mono text-emerald-400">$1,800</td>
                 </tr>
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-medium text-navy-900 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400" /> Los Angeles, CA &rarr; Phoenix, AZ
+                <tr className="hover:bg-slate-900/50 transition-colors">
+                  <td className="p-4 font-medium text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-cyan-400" /> Los Angeles, CA &rarr; Phoenix, AZ
                   </td>
-                  <td className="p-4 text-slate-700">Flatbed</td>
-                  <td className="p-4 text-slate-700">Oct 12</td>
-                  <td className="p-4 text-right font-bold text-brand-green">$1,200</td>
+                  <td className="p-4 text-slate-300 text-sm">Flatbed</td>
+                  <td className="p-4 text-slate-400 text-sm">Oct 12</td>
+                  <td className="p-4 text-right font-bold font-mono text-emerald-400">$1,200</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          
-          {/* Blurred Overlay */}
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center top-1/3">
-            <div className="bg-white p-6 rounded-lg shadow-lg border border-slate-200 text-center max-w-md mx-4">
-              <h3 className="text-xl font-bold text-navy-900 mb-3">See 10,000+ Active Loads</h3>
-              <p className="text-slate-700 mb-6">Create a free account to view full load details, broker information, and book instantly.</p>
+
+          {/* Blurred Overlay with Cyber Auth Card */}
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-[3px] flex items-center justify-center top-1/4">
+            <div className="bg-slate-900/95 p-6 rounded-2xl shadow-2xl border border-slate-800 text-center max-w-md mx-4">
+              <h3 className="text-xl font-bold text-white mb-2">Access 10,000+ Active Freight Hauls</h3>
+              <p className="text-slate-300 text-sm mb-6">
+                Create a verified free account to view detailed shipper profiles, broker ratings, and book instant loads.
+              </p>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm w-full"
+                className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-[1.02] shadow-lg shadow-cyan-500/25 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 h-10 px-5 text-sm w-full"
               >
-                Create Free Account
+                Create Free Carrier Account
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-slate-50 py-24 px-6 sm:px-12 border-t border-slate-200">
+      {/* Testimonials - Dark Theme */}
+      <section className="bg-slate-950 py-24 px-6 sm:px-12 border-t border-slate-900">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-navy-900 mb-12">Trusted by the Industry</h2>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
+              <span>CUSTOMER VALIDATION</span>
+            </div>
+            <h2 className="text-3xl font-bold text-white">Trusted by Fleets & Shippers</h2>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-8">
             <RevealCard delay={0}>
-              <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group">
-                <div className="flex gap-1 text-brand-amber mb-4 group-hover:scale-105 origin-left transition-transform duration-300">
-                  <Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" />
+              <div className="bg-slate-900/70 p-8 rounded-2xl border border-slate-800 shadow-xl h-full transition-all duration-300 hover:-translate-y-2 hover:border-cyan-500/40 group">
+                <div className="flex gap-1 text-amber-400 mb-4 group-hover:scale-105 origin-left transition-transform duration-300">
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
                 </div>
-                <p className="text-lg text-navy-900 font-medium mb-6 italic">"Doxhaul has completely transformed how we source capacity. The vetted carrier network gives us peace of mind, and the real-time tracking saves us hours of phone calls every day."</p>
+                <p className="text-base text-slate-300 font-medium mb-6 leading-relaxed italic">
+                  "Doxhaul has completely transformed how we source carrier capacity. The instant smart escrow and automated POD verification have eliminated hundreds of dispute hours every single month."
+                </p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-brand-blue/10 text-brand-blue rounded-full flex items-center justify-center font-bold text-lg">SJ</div>
+                  <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-full flex items-center justify-center font-bold text-base">
+                    SJ
+                  </div>
                   <div>
-                    <div className="font-bold text-navy-900">Sarah Jenkins</div>
-                    <div className="text-sm text-slate-700">Logistics Manager, Apex Freight</div>
+                    <div className="font-bold text-white">Sarah Jenkins</div>
+                    <div className="text-xs text-slate-400">VP of Logistics, Apex Freight Distribution</div>
                   </div>
                 </div>
               </div>
             </RevealCard>
-            
+
             <RevealCard delay={100}>
-              <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group">
-                <div className="flex gap-1 text-brand-amber mb-4 group-hover:scale-105 origin-left transition-transform duration-300">
-                  <Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" />
+              <div className="bg-slate-900/70 p-8 rounded-2xl border border-slate-800 shadow-xl h-full transition-all duration-300 hover:-translate-y-2 hover:border-cyan-500/40 group">
+                <div className="flex gap-1 text-amber-400 mb-4 group-hover:scale-105 origin-left transition-transform duration-300">
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
+                  <Star className="w-5 h-5 fill-current" />
                 </div>
-                <p className="text-lg text-navy-900 font-medium mb-6 italic">"As an owner-operator, finding good paying loads fast is everything. The Doxhaul app is so easy to use, and I get paid on time, every time. Best load board I've used."</p>
+                <p className="text-base text-slate-300 font-medium mb-6 leading-relaxed italic">
+                  "As an owner-operator with 4 trucks, surviving on 60-day broker invoices with 5% factoring fees was killing us. With Doxhaul, we deliver the load, upload the POD, and the payout hits our bank instantly."
+                </p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center font-bold text-lg">MR</div>
+                  <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center font-bold text-base">
+                    MR
+                  </div>
                   <div>
-                    <div className="font-bold text-navy-900">Mike Rodriguez</div>
-                    <div className="text-sm text-slate-700">Owner-Operator, Rodriguez Transport</div>
+                    <div className="font-bold text-white">Mike Rodriguez</div>
+                    <div className="text-xs text-slate-400">Fleet Owner, Rodriguez Transport Logistics</div>
                   </div>
                 </div>
               </div>
@@ -322,27 +545,46 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto border-t border-slate-200">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-navy-900 mb-4">Transparent, Pay-as-you-go Pricing</h2>
-          <p className="text-lg text-slate-700 max-w-2xl mx-auto">No hidden fees, no complex tiers. You only pay when you successfully move freight on our platform.</p>
+      {/* Transparent Pricing Section - Dark Theme */}
+      <section className="py-24 px-6 sm:px-12 max-w-7xl mx-auto border-t border-slate-900">
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
+            <span>FAIR TRANSACTION MODEL</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-3">Zero Hidden Fees, Direct Escrow</h2>
+          <p className="text-base text-slate-400">
+            No extortionate factoring penalties or hidden spreads. You only pay when freight is safely moved and settled.
+          </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <RevealCard delay={0}>
-            <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm h-full flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-brand-blue/30">
-              <h3 className="text-2xl font-bold text-navy-900 mb-2">Carriers</h3>
-              <div className="text-4xl font-extrabold text-brand-blue mb-6">Free<span className="text-lg text-slate-500 font-normal"> / forever</span></div>
-              <ul className="space-y-4 mb-8 flex-1 text-slate-700">
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Unlimited load searches</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Instant booking capabilities</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Next-day quickpay access</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-green w-5 h-5 flex-shrink-0" /> Document management</li>
+            <div className="bg-slate-950/80 p-8 rounded-2xl border border-slate-800 shadow-xl h-full flex flex-col transition-all duration-300 hover:-translate-y-2 hover:border-cyan-500/30">
+              <h3 className="text-2xl font-bold text-white mb-2">Carriers & Drivers</h3>
+              <div className="text-4xl font-black text-cyan-400 font-mono mb-6">
+                Free<span className="text-sm text-slate-500 font-normal"> / forever</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1 text-slate-300 text-sm">
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
+                  Unlimited corridor load searches
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
+                  Zero-latency instant RTP escrow payouts
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
+                  No predatory factoring discounts
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-emerald-400 w-5 h-5 flex-shrink-0" />
+                  Automated electronic BOL and POD filing
+                </li>
               </ul>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-navy-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-200 h-10 px-4 py-2 text-sm w-full"
+                className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-[1.02] bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white h-11 px-4 text-sm w-full"
               >
                 Create Carrier Account
               </Link>
@@ -350,19 +592,35 @@ const LandingPage = () => {
           </RevealCard>
 
           <RevealCard delay={100}>
-            <div className="bg-navy-950 text-white p-8 rounded-xl border border-navy-800 shadow-lg h-full flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-brand-blue/20 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-brand-blue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-              <h3 className="text-2xl font-bold mb-2">Shippers & Brokers</h3>
-              <div className="text-4xl font-extrabold text-brand-blue mb-6">$35<span className="text-lg text-navy-300 font-normal"> / matched load</span></div>
-              <ul className="space-y-4 mb-8 flex-1 text-navy-100">
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Unlimited load postings</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Access to verified carrier network</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Real-time GPS tracking</li>
-                <li className="flex items-center gap-3"><ShieldCheck className="text-brand-blue w-5 h-5 flex-shrink-0" /> Automated compliance checks</li>
+            <div className="bg-slate-900/90 p-8 rounded-2xl border border-cyan-500/40 shadow-2xl shadow-cyan-950/30 h-full flex flex-col transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-cyan-500 text-slate-950 text-xs font-black px-3.5 py-1 rounded-bl-xl uppercase tracking-wider">
+                ENTERPRISE
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Shippers & Brokers</h3>
+              <div className="text-4xl font-black text-white font-mono mb-6">
+                $35<span className="text-sm text-slate-400 font-normal"> / matched load</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1 text-slate-200 text-sm">
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
+                  Unlimited freight posting across all lanes
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
+                  100% pre-vetted CDL and active COI carriers
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
+                  Real-time GPS telematics & geofence notifications
+                </li>
+                <li className="flex items-center gap-3">
+                  <ShieldCheck className="text-cyan-400 w-5 h-5 flex-shrink-0" />
+                  Automated smart contract escrow protection
+                </li>
               </ul>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-brand-blue text-white hover:bg-brand-blueHover focus:ring-brand-blue h-10 px-4 py-2 text-sm w-full"
+                className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-[1.02] shadow-lg shadow-cyan-500/25 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 h-11 px-4 text-sm w-full"
               >
                 Start Posting Loads
               </Link>
@@ -371,46 +629,50 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="bg-slate-50 py-24 px-6 sm:px-12 border-t border-slate-200">
+      {/* FAQ Section - Dark Theme */}
+      <section className="bg-slate-950 py-24 px-6 sm:px-12 border-t border-slate-900">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-navy-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-lg text-slate-700">Everything you need to know about the Doxhaul platform.</p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-3">
+              <span>KNOWLEDGE BASE</span>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
+            <p className="text-base text-slate-400">Everything you need to know about the Doxhaul platform.</p>
           </div>
+
           <div className="space-y-4">
             <RevealCard delay={0}>
-              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
-                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
+              <details className="group bg-slate-900/70 rounded-2xl border border-slate-800 transition-all duration-200 open:border-cyan-500/40 open:bg-slate-900/90">
+                <summary className="flex justify-between items-center font-bold text-white p-6 cursor-pointer list-none">
                   <span>How quickly can I get onboarded and verified?</span>
-                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
+                  <span className="transition-transform group-open:rotate-180 text-cyan-400 font-bold">&darr;</span>
                 </summary>
-                <div className="px-6 pb-6 text-slate-700">
-                  Most accounts are verified within 1-2 hours during business hours. Once you submit your MC/DOT number, Certificate of Insurance, and W-9, our automated system validates with FMCSA immediately.
+                <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed">
+                  Most carrier accounts are validated within minutes. Our automated system connects directly to FMCSA, checking your DOT/MC safety history, verifying Certificate of Insurance (COI) limits, and validating W-9 records instantaneously.
                 </div>
               </details>
             </RevealCard>
 
             <RevealCard delay={100}>
-              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
-                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
-                  <span>How does Carrier QuickPay work?</span>
-                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
+              <details className="group bg-slate-900/70 rounded-2xl border border-slate-800 transition-all duration-200 open:border-cyan-500/40 open:bg-slate-900/90">
+                <summary className="flex justify-between items-center font-bold text-white p-6 cursor-pointer list-none">
+                  <span>How does Doxhaul Smart Escrow prevent payment delays?</span>
+                  <span className="transition-transform group-open:rotate-180 text-cyan-400 font-bold">&darr;</span>
                 </summary>
-                <div className="px-6 pb-6 text-slate-700">
-                  Upon uploading a signed Proof of Delivery (POD) and rate confirmation, carriers can select standard 30-day pay or 1-day QuickPay for a small 2% fee. Funds are deposited directly to your bank account.
+                <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed">
+                  Shippers deposit freight charges into a programmatic escrow account when the rate confirmation is locked. Once the carrier arrives at the delivery hub and uploads the Proof of Delivery (POD), our AI OCR engine matches signatures and automatically disburses the funds directly to the carrier's bank account via RTP or FedNow.
                 </div>
               </details>
             </RevealCard>
 
             <RevealCard delay={200}>
-              <details className="group bg-white rounded-xl border border-slate-200 transition-all duration-200 shadow-sm open:shadow-md">
-                <summary className="flex justify-between items-center font-bold text-navy-900 p-6 cursor-pointer list-none">
+              <details className="group bg-slate-900/70 rounded-2xl border border-slate-800 transition-all duration-200 open:border-cyan-500/40 open:bg-slate-900/90">
+                <summary className="flex justify-between items-center font-bold text-white p-6 cursor-pointer list-none">
                   <span>Do you support ELD tracking integrations?</span>
-                  <span className="transition group-open:rotate-180 text-brand-blue font-bold">&darr;</span>
+                  <span className="transition-transform group-open:rotate-180 text-cyan-400 font-bold">&darr;</span>
                 </summary>
-                <div className="px-6 pb-6 text-slate-700">
-                  Yes! We integrate with major ELD providers (like Samsara and KeepTruckin) and also offer a lightweight mobile driver app that provides location updates without draining the driver's battery.
+                <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed">
+                  Yes! We integrate with major telematics and ELD providers including Samsara, KeepTruckin, and Project44, as well as providing lightweight mobile geofence updates to ensure 100% route transparency without draining battery.
                 </div>
               </details>
             </RevealCard>
@@ -418,22 +680,30 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="bg-brand-blue relative overflow-hidden text-white py-24 px-6 sm:px-12 text-center">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Final Cyber CTA */}
+      <section className="bg-gradient-to-b from-[#050811] via-slate-950 to-[#050811] relative overflow-hidden text-white py-24 px-6 sm:px-12 text-center border-t border-slate-900">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[160px] pointer-events-none" />
+
         <div className="relative z-10 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Ready to streamline your logistics?</h2>
-          <p className="text-xl text-white/80 mb-10">Join thousands of shippers, brokers, and carriers moving freight efficiently on the Doxhaul network today.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono uppercase tracking-wider mb-6">
+            <span>GET STARTED TODAY</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
+            Ready to Move Freight at the Speed of Code?
+          </h2>
+          <p className="text-base sm:text-lg text-slate-300 mb-10 max-w-2xl mx-auto">
+            Join thousands of shippers, brokers, and carriers moving freight efficiently across global corridors on the Doxhaul network.
+          </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center rounded-md font-bold transition-all duration-150 ease-out hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white text-brand-blue hover:bg-white/90 h-12 px-8 py-4 text-lg w-full sm:w-auto"
+              className="inline-flex items-center justify-center rounded-xl font-bold transition-all duration-150 ease-out hover:scale-105 shadow-xl shadow-cyan-500/25 bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 text-slate-950 h-12 px-8 text-base w-full sm:w-auto"
             >
               Get Started for Free
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 ease-out hover:scale-[1.03] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-transparent text-white border border-white/30 hover:bg-white/10 focus:ring-white h-12 px-8 py-4 text-lg w-full sm:w-auto"
+              className="inline-flex items-center justify-center rounded-xl font-medium transition-all duration-150 ease-out hover:scale-[1.02] bg-slate-900/80 hover:bg-slate-800 text-white border border-slate-700 h-12 px-8 text-base w-full sm:w-auto"
             >
               Sign In to Dashboard
             </Link>
@@ -441,57 +711,99 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-navy-950 text-white pt-16 pb-8 px-6 sm:px-12">
+      {/* Dark Footer */}
+      <footer className="bg-[#050811] border-t border-slate-900 text-white pt-16 pb-8 px-6 sm:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="inline-block mb-4 focus:outline-none">
               <DoxhaulLogo variant="white" height={28} alt="Doxhaul Logo" />
             </Link>
-            <p className="text-slate-50/70 text-sm mb-6 max-w-xs">Connecting the world's supply chain through a verified, transparent, and efficient digital marketplace.</p>
+            <p className="text-slate-400 text-xs leading-relaxed mb-6 max-w-xs">
+              Connecting the world's supply chain through verified 3D spatial routing, instant rate settlements, and complete operational transparency.
+            </p>
           </div>
           <div>
-            <h4 className="font-bold mb-4 text-white">Product</h4>
-            <ul className="space-y-2 text-sm text-slate-50/70">
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">For Shippers</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">For Brokers</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">For Carriers</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Pricing</button></li>
+            <h4 className="font-bold mb-4 text-white text-sm">Product</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  For Shippers
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  For Brokers
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  For Carriers
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Pricing
+                </button>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-4 text-white">Company</h4>
-            <ul className="space-y-2 text-sm text-slate-50/70">
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">About Us</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Careers</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Blog</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Contact</button></li>
+            <h4 className="font-bold mb-4 text-white text-sm">Company</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  About Us
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Careers
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Blog
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Contact
+                </button>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-4 text-white">Legal</h4>
-            <ul className="space-y-2 text-sm text-slate-50/70">
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Terms of Service</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Privacy Policy</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Security</button></li>
-              <li><button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="hover:text-white transition-colors">Compliance</button></li>
+            <h4 className="font-bold mb-4 text-white text-sm">Legal & Compliance</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Terms of Service
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Security
+                </button>
+              </li>
+              <li>
+                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-cyan-400 transition-colors">
+                  Compliance
+                </button>
+              </li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto border-t border-navy-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-50/50 text-sm">© {new Date().getFullYear()} Doxhaul Inc. All rights reserved.</p>
+        <div className="max-w-7xl mx-auto border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-slate-500 text-xs">© {new Date().getFullYear()} Doxhaul Inc. All rights reserved.</p>
         </div>
       </footer>
     </div>
   );
 };
-
-const PackageIcon = (props: any) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-);
-
-const BriefcaseIcon = (props: any) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
-);
 
 export default LandingPage;
