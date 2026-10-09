@@ -14,6 +14,7 @@ import adminRoutes from './routes/admin';
 import ticketsRoutes from './routes/tickets';
 import dashboardRoutes from './routes/dashboard';
 import aiRoutes from './routes/ai';
+import supportRoutes from './routes/support';
 import walletRoutes from './routes/wallet';
 import webhookRoutes from './routes/webhooks';
 import telematicsRoutes from './routes/telematics';
@@ -26,6 +27,7 @@ const app = new Hono<{ Bindings: Env }>();
 // Middleware
 app.use('*', logger());
 app.use('*', async (c, next) => {
+  c.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   await next();
   c.res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 });
@@ -59,7 +61,7 @@ app.route('/api/bids', bidsRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/tickets', ticketsRoutes);
 app.route('/api/dashboard', dashboardRoutes);
-app.route('/api/support', aiRoutes);
+app.route('/api/support', supportRoutes);
 app.route('/api/ai', aiRoutes);
 app.route('/api/wallet', walletRoutes);
 app.route('/api/webhooks', webhookRoutes);

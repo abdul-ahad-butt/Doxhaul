@@ -14,7 +14,10 @@ import {
   Check, 
   Sparkles,
   TrendingUp,
-  Vault
+  Vault,
+  Truck,
+  Radio,
+  Bot
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 
@@ -47,6 +50,14 @@ export const IntegrationsSettingsPage: React.FC = () => {
     persona_environment: 'sandbox' as 'sandbox' | 'production',
     persona_api_key: '',
     persona_template_id: '',
+    gemini_api_key: '',
+    gemini_chat_guard_enabled: true,
+    gemini_ocr_verification_enabled: true,
+    samsara_api_token: '',
+    motive_api_key: '',
+    project44_client_id: '',
+    project44_client_secret: '',
+    telematics_active_provider: 'samsara' as 'samsara' | 'motive' | 'project44' | 'simulator',
   });
 
   const [paddleEnv, setPaddleEnv] = useState<'sandbox' | 'production'>('sandbox');
@@ -57,6 +68,10 @@ export const IntegrationsSettingsPage: React.FC = () => {
   const [showPaddleToken, setShowPaddleToken] = useState(false);
   const [showPaddleWebhook, setShowPaddleWebhook] = useState(false);
   const [showPersonaKey, setShowPersonaKey] = useState(false);
+  const [showSamsaraToken, setShowSamsaraToken] = useState(false);
+  const [showMotiveKey, setShowMotiveKey] = useState(false);
+  const [showProject44Secret, setShowProject44Secret] = useState(false);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
 
   // Testing status
   const [testingPaddle, setTestingPaddle] = useState(false);
@@ -64,6 +79,18 @@ export const IntegrationsSettingsPage: React.FC = () => {
 
   const [testingPersona, setTestingPersona] = useState(false);
   const [personaTestResult, setPersonaTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const [testingSamsara, setTestingSamsara] = useState(false);
+  const [samsaraTestResult, setSamsaraTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const [testingMotive, setTestingMotive] = useState(false);
+  const [motiveTestResult, setMotiveTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const [testingProject44, setTestingProject44] = useState(false);
+  const [project44TestResult, setProject44TestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const [testingGemini, setTestingGemini] = useState(false);
+  const [geminiTestResult, setGeminiTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const [copiedWebhook, setCopiedWebhook] = useState(false);
 
@@ -98,6 +125,14 @@ export const IntegrationsSettingsPage: React.FC = () => {
           persona_environment: perEnv,
           persona_api_key: settingsRes.persona_api_key || '',
           persona_template_id: settingsRes.persona_template_id || '',
+          gemini_api_key: settingsRes.gemini_api_key || '',
+          gemini_chat_guard_enabled: settingsRes.gemini_chat_guard_enabled !== false,
+          gemini_ocr_verification_enabled: settingsRes.gemini_ocr_verification_enabled !== false,
+          samsara_api_token: settingsRes.samsara_api_token || '',
+          motive_api_key: settingsRes.motive_api_key || '',
+          project44_client_id: settingsRes.project44_client_id || '',
+          project44_client_secret: settingsRes.project44_client_secret || '',
+          telematics_active_provider: settingsRes.telematics_active_provider || 'samsara',
         });
       }
 
@@ -221,6 +256,79 @@ export const IntegrationsSettingsPage: React.FC = () => {
       });
     } finally {
       setTestingPersona(false);
+    }
+  };
+
+  const handleTestSamsara = async () => {
+    setTestingSamsara(true);
+    setSamsaraTestResult(null);
+    try {
+      const res = await apiClient.post<any>('/admin/integrations/test/samsara', {
+        samsara_api_token: settings.samsara_api_token,
+      });
+      setSamsaraTestResult(res?.data || res);
+    } catch (err: any) {
+      setSamsaraTestResult({
+        success: false,
+        message: err.message || 'Samsara connection failed',
+      });
+    } finally {
+      setTestingSamsara(false);
+    }
+  };
+
+  const handleTestMotive = async () => {
+    setTestingMotive(true);
+    setMotiveTestResult(null);
+    try {
+      const res = await apiClient.post<any>('/admin/integrations/test/motive', {
+        motive_api_key: settings.motive_api_key,
+      });
+      setMotiveTestResult(res?.data || res);
+    } catch (err: any) {
+      setMotiveTestResult({
+        success: false,
+        message: err.message || 'Motive connection failed',
+      });
+    } finally {
+      setTestingMotive(false);
+    }
+  };
+
+  const handleTestProject44 = async () => {
+    setTestingProject44(true);
+    setProject44TestResult(null);
+    try {
+      const res = await apiClient.post<any>('/admin/integrations/test/project44', {
+        project44_client_id: settings.project44_client_id,
+        project44_client_secret: settings.project44_client_secret,
+      });
+      setProject44TestResult(res?.data || res);
+    } catch (err: any) {
+      setProject44TestResult({
+        success: false,
+        message: err.message || 'Project44 connection failed',
+      });
+    } finally {
+      setTestingProject44(false);
+    }
+  };
+
+  const handleTestGemini = async () => {
+    setTestingGemini(true);
+    setGeminiTestResult(null);
+    try {
+      const res = await apiClient.post<any>('/admin/integrations/test/gemini', {
+        gemini_api_key: settings.gemini_api_key,
+      });
+      setGeminiTestResult(res?.data || res);
+    } catch (err: any) {
+      setGeminiTestResult({
+        success: false,
+        message: err.message || 'Gemini AI connection failed',
+      });
+    } finally {
+      setTestingGemini(false);
     }
   };
 
@@ -813,6 +921,391 @@ export const IntegrationsSettingsPage: React.FC = () => {
                 Copy
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section D: Fleet Telematics & ELD Gateways */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+              <Truck className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Section D: Fleet Telematics & ELD Gateways</h2>
+              <p className="text-sm text-slate-500">
+                Connect live commercial carrier ELD gateways for real-time truck GPS coordinates, speed, and destination geofencing.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500">Active Provider:</span>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase font-mono">
+              {settings.telematics_active_provider}
+            </span>
+          </div>
+        </div>
+
+        {/* Active Provider Selector */}
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            Primary Telematics Gateway Provider
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { id: 'samsara', label: 'Samsara Cloud' },
+              { id: 'motive', label: 'KeepTruckin (Motive)' },
+              { id: 'project44', label: 'Project44 Movement' },
+              { id: 'simulator', label: 'Doxhaul GPS Simulator' },
+            ].map(p => (
+              <label 
+                key={p.id}
+                className={`flex items-center justify-center p-3 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                  settings.telematics_active_provider === p.id
+                    ? 'border-brand-blue bg-blue-50/60 text-brand-blue shadow-2xs'
+                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="telematics_active_provider"
+                  value={p.id}
+                  checked={settings.telematics_active_provider === p.id}
+                  onChange={() => setSettings(s => ({ ...s, telematics_active_provider: p.id as any }))}
+                  className="sr-only"
+                />
+                {p.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* 1. Samsara Card */}
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 font-black text-xs">
+                SAM
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Samsara Telematics Gateway</h3>
+                <p className="text-xs text-slate-500">Live GPS polling via api.samsara.com/fleet/vehicles</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                settings.samsara_api_token
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}>
+                {settings.samsara_api_token ? 'Configured (Live)' : 'Unconfigured'}
+              </span>
+
+              <button
+                type="button"
+                onClick={handleTestSamsara}
+                disabled={testingSamsara || !settings.samsara_api_token}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                {testingSamsara ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Radio className="w-3.5 h-3.5 text-blue-600" />}
+                [Test Samsara API]
+              </button>
+            </div>
+          </div>
+
+          {samsaraTestResult && (
+            <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+              samsaraTestResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              {samsaraTestResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
+              <p className="font-medium">{samsaraTestResult.message}</p>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Samsara Bearer API Token
+            </label>
+            <div className="relative">
+              <input
+                type={showSamsaraToken ? 'text' : 'password'}
+                placeholder="sk-samsara-••••••••••••••••"
+                value={settings.samsara_api_token}
+                onChange={(e) => setSettings(s => ({ ...s, samsara_api_token: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm text-slate-800 placeholder-slate-400 font-mono pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowSamsaraToken(!showSamsaraToken)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showSamsaraToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. KeepTruckin / Motive Card */}
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 border border-orange-100 flex items-center justify-center font-black text-xs">
+                MOT
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">KeepTruckin (Motive) Fleet Gateway</h3>
+                <p className="text-xs text-slate-500">ELD vehicle telemetry via api.keeptruckin.com</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                settings.motive_api_key
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}>
+                {settings.motive_api_key ? 'Connected' : 'Unconfigured'}
+              </span>
+
+              <button
+                type="button"
+                onClick={handleTestMotive}
+                disabled={testingMotive || !settings.motive_api_key}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                {testingMotive ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Radio className="w-3.5 h-3.5 text-orange-600" />}
+                [Test Motive API]
+              </button>
+            </div>
+          </div>
+
+          {motiveTestResult && (
+            <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+              motiveTestResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              {motiveTestResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
+              <p className="font-medium">{motiveTestResult.message}</p>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Motive API Key / Access Token
+            </label>
+            <div className="relative">
+              <input
+                type={showMotiveKey ? 'text' : 'password'}
+                placeholder="motive_api_key_••••••••"
+                value={settings.motive_api_key}
+                onChange={(e) => setSettings(s => ({ ...s, motive_api_key: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-600/20 focus:border-orange-600 text-sm text-slate-800 placeholder-slate-400 font-mono pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowMotiveKey(!showMotiveKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showMotiveKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Project44 Card */}
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center font-black text-xs">
+                P44
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Project44 Movement API</h3>
+                <p className="text-xs text-slate-500">Multi-modal tracking & carrier network connectivity</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                settings.project44_client_id
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}>
+                {settings.project44_client_id ? 'Configured' : 'Unconfigured'}
+              </span>
+
+              <button
+                type="button"
+                onClick={handleTestProject44}
+                disabled={testingProject44 || !settings.project44_client_id}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                {testingProject44 ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Radio className="w-3.5 h-3.5 text-cyan-600" />}
+                [Test Project44 API]
+              </button>
+            </div>
+          </div>
+
+          {project44TestResult && (
+            <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+              project44TestResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              {project44TestResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
+              <p className="font-medium">{project44TestResult.message}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Client ID
+              </label>
+              <input
+                type="text"
+                placeholder="p44_client_id_..."
+                value={settings.project44_client_id}
+                onChange={(e) => setSettings(s => ({ ...s, project44_client_id: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 text-sm text-slate-800 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Client Secret
+              </label>
+              <div className="relative">
+                <input
+                  type={showProject44Secret ? 'text' : 'password'}
+                  placeholder="p44_secret_••••••••"
+                  value={settings.project44_client_secret}
+                  onChange={(e) => setSettings(s => ({ ...s, project44_client_secret: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 text-sm text-slate-800 font-mono pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowProject44Secret(!showProject44Secret)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showProject44Secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section E: Google Gemini AI Engine */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
+              <Bot className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Section E: Google Gemini AI Engine</h2>
+              <p className="text-sm text-slate-500">
+                Orchestrates real-time Chat Anti-Circumvention monitoring and automated e-BOL/POD optical signature auditing.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+              settings.gemini_api_key
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : 'bg-amber-50 text-amber-800 border-amber-200'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${settings.gemini_api_key ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              {settings.gemini_api_key ? 'Active • Vision & Chat Guard Online' : 'Key Required'}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleTestGemini}
+              disabled={testingGemini || !settings.gemini_api_key}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer"
+            >
+              {testingGemini ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-purple-600" />}
+              [Test Gemini AI Connection]
+            </button>
+          </div>
+        </div>
+
+        {geminiTestResult && (
+          <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 ${
+            geminiTestResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}>
+            {geminiTestResult.success ? <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
+            <div>
+              <p className="font-semibold">{geminiTestResult.success ? 'Gemini AI Engine Online' : 'Gemini AI Connection Failed'}</p>
+              <p className="text-xs mt-0.5">{geminiTestResult.message}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Gemini API Key */}
+          <div className="col-span-full">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+              Google Gemini API Secret Key
+            </label>
+            <div className="relative">
+              <input
+                type={showGeminiKey ? 'text' : 'password'}
+                placeholder="AIzaSy••••••••••••••••••••••••••••"
+                value={settings.gemini_api_key}
+                onChange={(e) => setSettings(s => ({ ...s, gemini_api_key: e.target.value }))}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 text-sm text-slate-800 placeholder-slate-400 font-mono pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowGeminiKey(!showGeminiKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showGeminiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Powered by Google Gemini 1.5 Flash Vision for sub-second multimodal document verification and anti-circumvention scans.
+            </p>
+          </div>
+
+          {/* Feature Toggles */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Enable Real-Time Chat Anti-Circumvention</h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Automatically blocks phone numbers, emails, and off-platform payment talk in pre-award bidding channels.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.gemini_chat_guard_enabled}
+                onChange={(e) => setSettings(s => ({ ...s, gemini_chat_guard_enabled: e.target.checked }))}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Enable Automated POD & BOL Verification</h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Audits uploaded delivery receipts for legible consignee signatures and carrier-broker legal separation.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.gemini_ocr_verification_enabled}
+                onChange={(e) => setSettings(s => ({ ...s, gemini_ocr_verification_enabled: e.target.checked }))}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { Env } from '../types/env';
-import { authMiddleware, JwtPayload } from '../middleware/auth';
+import { authMiddleware, optionalAuthMiddleware, JwtPayload } from '../middleware/auth';
+import { SettingsService } from '../services/settings';
 import {
   ensureTelematicsTables,
   calculateHaversineDistanceMeters,
@@ -9,11 +10,16 @@ import {
   checkGeofenceTrigger,
   parseSamsaraWebhook,
   parseMotiveWebhook,
+  testSamsaraConnection,
+  testMotiveConnection,
+  testProject44Connection,
   TelemetryPing
 } from '../services/telematics';
 import { z } from 'zod';
 
 const router = new Hono<{ Bindings: Env; Variables: { user?: JwtPayload } }>();
+
+router.use('*', optionalAuthMiddleware);
 
 // Validation Schemas
 const pingSchema = z.object({
@@ -183,13 +189,31 @@ router.get('/:loadId/live', async (c) => {
 
   // Fetch load metadata
   const load = (await c.env.DB.prepare(`
-    SELECT id, reference_number, title, origin_city, origin_state, destination_city, destination_state,
+    SELECT id, reference_number, title, owner_user_id, origin_city, origin_state, destination_city, destination_state,
            pickup_date, delivery_date, rate, equipment_type, status, assigned_carrier_id
     FROM loads WHERE id = ?
   `).bind(loadId).first()) as any;
 
   if (!load) {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Load not found' } }, 404);
+  }
+
+  // Scoped ELD Telemetry: strictly restricted to load owner, assigned carrier, or admin
+  const user = c.get('user');
+  if (user) {
+    const isShipper = load.owner_user_id === user.id;
+    const isCarrier = load.assigned_carrier_id === user.id;
+    const isAdmin = user.role === 'ADMIN';
+
+    if (!isShipper && !isCarrier && !isAdmin) {
+      return c.json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Scoped ELD telemetry access denied. Truck GPS telemetry is strictly restricted to contracted load parties.'
+        }
+      }, 403);
+    }
   }
 
   const originCoords = resolveLocationCoordinates(load.origin_city, load.origin_state);

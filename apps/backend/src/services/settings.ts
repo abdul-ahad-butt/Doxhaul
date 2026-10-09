@@ -12,6 +12,14 @@ export interface PlatformSettings {
   persona_environment: 'sandbox' | 'production';
   persona_api_key: string;
   persona_template_id: string;
+  gemini_api_key: string;
+  gemini_chat_guard_enabled: boolean;
+  gemini_ocr_verification_enabled: boolean;
+  samsara_api_token: string;
+  motive_api_key: string;
+  project44_client_id: string;
+  project44_client_secret: string;
+  telematics_active_provider: 'samsara' | 'motive' | 'project44' | 'simulator';
 }
 
 export interface FinancialPolicies {
@@ -35,6 +43,14 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
   persona_environment: 'sandbox',
   persona_api_key: '',
   persona_template_id: '',
+  gemini_api_key: '',
+  gemini_chat_guard_enabled: true,
+  gemini_ocr_verification_enabled: true,
+  samsara_api_token: '',
+  motive_api_key: '',
+  project44_client_id: '',
+  project44_client_secret: '',
+  telematics_active_provider: 'samsara',
 };
 
 export class SettingsService {
@@ -70,6 +86,16 @@ export class SettingsService {
         persona_environment: (settingsMap['persona_environment'] === 'production' ? 'production' : 'sandbox'),
         persona_api_key: settingsMap['persona_api_key'] || DEFAULT_PLATFORM_SETTINGS.persona_api_key,
         persona_template_id: settingsMap['persona_template_id'] || DEFAULT_PLATFORM_SETTINGS.persona_template_id,
+        gemini_api_key: settingsMap['gemini_api_key'] || DEFAULT_PLATFORM_SETTINGS.gemini_api_key,
+        gemini_chat_guard_enabled: settingsMap['gemini_chat_guard_enabled'] !== '0',
+        gemini_ocr_verification_enabled: settingsMap['gemini_ocr_verification_enabled'] !== '0',
+        samsara_api_token: settingsMap['samsara_api_token'] || DEFAULT_PLATFORM_SETTINGS.samsara_api_token,
+        motive_api_key: settingsMap['motive_api_key'] || DEFAULT_PLATFORM_SETTINGS.motive_api_key,
+        project44_client_id: settingsMap['project44_client_id'] || DEFAULT_PLATFORM_SETTINGS.project44_client_id,
+        project44_client_secret: settingsMap['project44_client_secret'] || DEFAULT_PLATFORM_SETTINGS.project44_client_secret,
+        telematics_active_provider: (['samsara', 'motive', 'project44', 'simulator'].includes(settingsMap['telematics_active_provider']) 
+          ? settingsMap['telematics_active_provider'] as any 
+          : DEFAULT_PLATFORM_SETTINGS.telematics_active_provider),
       };
     } catch (error) {
       console.warn('Could not read platform_settings table, using defaults:', error);

@@ -27,6 +27,7 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
 }) => {
   const { user, profile } = useAuth();
   const [bidAmount, setBidAmount] = useState<string>('');
+  const [vehicleUnitId, setVehicleUnitId] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
   React.useEffect(() => {
     if (load) {
       setBidAmount(load.rate ? String(load.rate) : '');
+      setVehicleUnitId('');
       setNotes('');
       setSuccessMessage(null);
       setErrorMessage(null);
@@ -80,6 +82,7 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
     try {
       await apiClient.post(`/loads/${load.id}/bids`, {
         amount: parsedBid,
+        vehicle_unit_id: vehicleUnitId.trim() || undefined,
         notes: notes.trim() || undefined
       });
 
@@ -205,6 +208,22 @@ export const PlaceBidModal: React.FC<PlaceBidModalProps> = ({
             <p className="text-[11px] text-slate-500 mt-1">
               Shipper posted target is <span className="font-semibold text-slate-700">${postedRate.toLocaleString()}</span>. You can submit an exact match or negotiate a higher counter-offer.
             </p>
+          </div>
+
+          <div>
+            <label htmlFor="vehicle-unit-id" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 cursor-pointer">
+              Truck Unit # / ELD Telematics Vehicle ID (Optional)
+            </label>
+            <input
+              id="vehicle-unit-id"
+              name="vehicleUnitId"
+              aria-label="Truck Unit # / ELD Telematics Vehicle ID"
+              type="text"
+              value={vehicleUnitId}
+              onChange={(e) => setVehicleUnitId(e.target.value)}
+              placeholder="e.g. TRUCK-4092 / VIN-9842"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-blue text-xs font-mono font-bold text-slate-900 placeholder:font-normal placeholder-slate-400"
+            />
           </div>
 
           <div>

@@ -1,8 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      'three/addons/misc/Timer.js': path.resolve(__dirname, '../../node_modules/three/src/core/Timer.js'),
+      'three/addons/misc/Timer': path.resolve(__dirname, '../../node_modules/three/src/core/Timer.js'),
+    },
+  },
   server: {
     port: 3000,
     headers: {

@@ -113,7 +113,7 @@ export const SupportAssistantWidget = () => {
         role: user?.role || 'CARRIER'
       });
 
-      const aiReply = res?.reply || "I've logged your question. Our compliance and dispatch team will assist shortly. You can also submit a direct ticket from Tab 2!";
+      const aiReply = (res as any)?.data?.reply || res?.reply || "I've logged your question. Our compliance and dispatch team will assist shortly. You can also submit a direct ticket from Tab 2!";
       
       setChatMessages(prev => [
         ...prev,

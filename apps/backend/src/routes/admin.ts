@@ -5,6 +5,8 @@ import { StorageService } from '../services/storage';
 import { SettingsService, PlatformSettings } from '../services/settings';
 import { PaddleService } from '../services/paddle';
 import { PersonaService } from '../services/persona';
+import { GeminiService } from '../services/geminiService';
+import { testSamsaraConnection, testMotiveConnection, testProject44Connection } from '../services/telematics';
 import ticketsRoutes from './tickets';
 
 const router = new Hono<{ Bindings: Env, Variables: { user: JwtPayload } }>();
@@ -216,24 +218,61 @@ router.get('/verifications', async (c) => {
       u.role, 
       u.status, 
       u.verification_status, 
+      u.is_verified,
+      u.verified_at,
       COALESCE(p.first_name, '') as first_name, 
       COALESCE(p.last_name, '') as last_name, 
       COALESCE(NULLIF(p.company_name, ''), u.email) as company_name, 
+      p.phone,
+      p.dot_number,
+      p.mc_number,
       p.verification_status as profile_verification_status, 
       COALESCE(p.updated_at, u.updated_at) as updated_at,
-      (SELECT COUNT(*) FROM documents d WHERE d.user_id = u.id AND d.status = 'PENDING') as pending_docs_count
+      (SELECT COUNT(*) FROM documents d WHERE d.user_id = u.id AND d.status = 'PENDING') as pending_docs_count,
+      (
+        SELECT json_group_array(json_object(
+          'id', d.id,
+          'document_type', d.document_type,
+          'original_filename', d.original_filename,
+          'ai_verified', d.ai_verified,
+          'ai_confidence', d.ai_confidence,
+          'ai_summary', d.ai_summary,
+          'status', d.status
+        ))
+        FROM documents d
+        WHERE d.user_id = u.id
+      ) as documents_json
     FROM users u
     LEFT JOIN profiles p ON u.id = p.user_id
     WHERE (
       u.verification_status IN ('PENDING_VERIFICATION', 'PENDING')
       OR p.verification_status IN ('PENDING')
       OR u.status = 'PENDING_VERIFICATION'
+      OR u.is_verified = 0
       OR EXISTS (SELECT 1 FROM documents d WHERE d.user_id = u.id AND d.status = 'PENDING')
     )
     ORDER BY u.created_at DESC
   `).all();
 
-  return c.json({ success: true, data: verifications.results });
+  const formatted = (verifications.results || []).map((v: any) => {
+    let docs = [];
+    try {
+      if (v.documents_json) docs = JSON.parse(v.documents_json);
+    } catch (e) {}
+
+    const driverName = `${v.first_name || ''} ${v.last_name || ''}`.trim();
+    const displayTitle = driverName && v.company_name && v.company_name !== v.email
+      ? `${driverName} - ${v.company_name}`
+      : (v.company_name || driverName || v.email);
+
+    return {
+      ...v,
+      driver_display_name: displayTitle,
+      documents: docs
+    };
+  });
+
+  return c.json({ success: true, data: formatted });
 });
 
 router.get('/verifications/:id', async (c) => {
@@ -272,7 +311,7 @@ async function handleApprove(c: any) {
 
   const userStmt = c.env.DB.prepare(`
     UPDATE users 
-    SET verification_status = 'APPROVED', status = 'ACTIVE', rejection_reason = NULL, updated_at = datetime('now') 
+    SET verification_status = 'APPROVED', status = 'ACTIVE', is_verified = 1, verified_at = datetime('now'), rejection_reason = NULL, updated_at = datetime('now') 
     WHERE id = ?
   `).bind(userId);
 
@@ -531,6 +570,126 @@ router.post('/settings/test-persona', async (c) => {
     success: result.success,
     data: result
   }, result.success ? 200 : 400);
+});
+
+// Test Samsara Telematics Connection
+const handleTestSamsara = async (c: any) => {
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+  const token = body.samsara_api_token || body.token || settings.samsara_api_token;
+  const result = await testSamsaraConnection(token);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+};
+router.post('/integrations/test/samsara', handleTestSamsara);
+router.post('/settings/test-samsara', handleTestSamsara);
+
+// Test Motive (KeepTruckin) Connection
+const handleTestMotive = async (c: any) => {
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+  const apiKey = body.motive_api_key || body.apiKey || settings.motive_api_key;
+  const result = await testMotiveConnection(apiKey);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+};
+router.post('/integrations/test/motive', handleTestMotive);
+router.post('/settings/test-motive', handleTestMotive);
+
+// Test Project44 Movement API Connection
+const handleTestProject44 = async (c: any) => {
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+  const clientId = body.project44_client_id || body.clientId || settings.project44_client_id;
+  const clientSecret = body.project44_client_secret || body.clientSecret || settings.project44_client_secret;
+  const result = await testProject44Connection(clientId, clientSecret);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+};
+router.post('/integrations/test/project44', handleTestProject44);
+router.post('/settings/test-project44', handleTestProject44);
+
+// Test Google Gemini AI Engine Connection
+const handleTestGemini = async (c: any) => {
+  const settings = await SettingsService.getPlatformSettings(c.env.DB);
+  const body = await c.req.json().catch(() => ({}));
+  const apiKey = body.gemini_api_key || body.apiKey || settings.gemini_api_key;
+  const result = await GeminiService.testConnection(apiKey);
+  return c.json({
+    success: result.success,
+    data: result
+  }, result.success ? 200 : 400);
+};
+router.post('/integrations/test/gemini', handleTestGemini);
+router.post('/settings/test-gemini', handleTestGemini);
+
+// Grant Verified Tick Mark badge to user
+const handleGrantUserVerifyBadge = async (c: any) => {
+  const userId = c.req.param('id');
+  const adminUser = c.get('user');
+
+  await c.env.DB.batch([
+    c.env.DB.prepare(`
+      UPDATE users 
+      SET is_verified = 1, verified_at = datetime('now'), verification_status = 'APPROVED', status = 'ACTIVE', updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(userId),
+    c.env.DB.prepare(`
+      UPDATE profiles 
+      SET verification_status = 'VERIFIED', updated_at = datetime('now')
+      WHERE user_id = ?
+    `).bind(userId),
+    c.env.DB.prepare(`
+      INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id, metadata)
+      VALUES (?, ?, 'ADMIN', 'VERIFIED_BADGE_GRANTED', 'USER', ?, '{"is_verified": 1}')
+    `).bind(crypto.randomUUID().replace(/-/g, ''), adminUser.id, userId)
+  ]);
+
+  return c.json({
+    success: true,
+    data: {
+      userId,
+      is_verified: 1,
+      message: 'Verified Green Checkmark Badge granted to user.'
+    }
+  });
+};
+router.post('/users/:id/verify', handleGrantUserVerifyBadge);
+router.post('/verifications/:id/grant-badge', handleGrantUserVerifyBadge);
+
+// Load documents queue (BOL & POD audits)
+router.get('/verifications/load-documents', async (c) => {
+  try {
+    const docs = await c.env.DB.prepare(`
+      SELECT 
+        ld.*, 
+        l.reference_number, 
+        l.title as load_title,
+        l.origin_city, l.origin_state, l.destination_city, l.destination_state,
+        u.email as uploader_email,
+        p.company_name as uploader_company,
+        p.first_name, p.last_name
+      FROM load_documents ld
+      LEFT JOIN loads l ON ld.load_id = l.id
+      LEFT JOIN users u ON ld.uploader_id = u.id
+      LEFT JOIN profiles p ON ld.uploader_id = p.user_id
+      ORDER BY ld.uploaded_at DESC
+      LIMIT 50
+    `).all();
+
+    return c.json({
+      success: true,
+      data: docs.results || []
+    });
+  } catch (err: any) {
+    return c.json({ success: true, data: [] });
+  }
 });
 
 // Financial Ledger & Escrow Platform Overview

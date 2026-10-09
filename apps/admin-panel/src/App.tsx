@@ -9,6 +9,7 @@ import { UsersDirectoryPage } from './pages/UsersDirectoryPage';
 import { SupportTicketsPage } from './pages/SupportTicketsPage';
 import { PlatformLoadsPage } from './pages/PlatformLoadsPage';
 import { IntegrationsSettingsPage } from './pages/IntegrationsSettingsPage';
+import { VerificationsQueuePage } from './pages/VerificationsQueue';
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
           {/* Protected Routes (Admin) */}
           <Route element={<AppLayout />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/verifications" element={<AdminDashboardPage />} />
+            <Route path="/admin/verifications" element={<VerificationsQueuePage />} />
             <Route path="/admin/loads" element={<PlatformLoadsPage />} />
             <Route path="/admin/users" element={<UsersDirectoryPage />} />
             <Route path="/admin/tickets" element={<SupportTicketsPage />} />

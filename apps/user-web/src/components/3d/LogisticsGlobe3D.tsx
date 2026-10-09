@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react';
 import * as THREE from 'three';
+import { Timer } from 'three/addons/misc/Timer.js';
 import { HubData, LogisticsRoute } from './HubTelemetryWidget';
 import { GLOBAL_HUBS, LOGISTICS_ROUTES, latLongToVector3 } from './globeData';
 
@@ -457,13 +458,14 @@ export const LogisticsGlobe3D: React.FC<LogisticsGlobe3DProps> = memo(({
     };
     window.addEventListener('resize', handleResize);
 
-    // 10. Master Animation Loop
+    // 10. Master Animation Loop (Modern Timer API)
     let animationFrameId: number;
-    const clock = new THREE.Clock();
+    const timer = new Timer();
 
-    const animate = () => {
+    const animate = (timestamp: number) => {
       animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      timer.update(timestamp);
+      const elapsedTime = timer.getElapsed();
 
       // Continuous Slow Auto-Rotation
       if (autoRotateRef.current) {
@@ -491,11 +493,12 @@ export const LogisticsGlobe3D: React.FC<LogisticsGlobe3DProps> = memo(({
       renderer.render(scene, camera);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     // 11. Rigorous GPU Memory & WebGL Context Teardown
     return () => {
       cancelAnimationFrame(animationFrameId);
+      timer.dispose();
       if (autoRotateTimerRef.current) clearTimeout(autoRotateTimerRef.current);
 
       currentMount.removeEventListener('mousemove', handlePointerMove);

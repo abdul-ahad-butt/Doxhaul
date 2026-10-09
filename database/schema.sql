@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS users (
   terms_accepted_at DATETIME,
   onboarding_payment_status TEXT NOT NULL DEFAULT 'ACTIVE', -- 'PENDING_PAYMENT' | 'ACTIVE' | 'WAIVED'
   onboarding_fee_paid REAL NOT NULL DEFAULT 0,
+  is_verified INTEGER DEFAULT 0, -- 1 = Green Checkmark Badge
+  verified_at DATETIME,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -163,6 +165,8 @@ CREATE TABLE IF NOT EXISTS bids (
     notes TEXT,
     status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'COUNTERED')),
     counter_amount REAL,
+    vehicle_unit_id TEXT,
+    accepted_at DATETIME,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (load_id) REFERENCES loads(id) ON DELETE CASCADE,
@@ -354,7 +358,15 @@ INSERT OR IGNORE INTO platform_settings (key, value, description) VALUES
 ('broker_onboarding_fee', '50.00', 'Broker registration and compliance fee in USD'),
 ('persona_environment', 'sandbox', 'Persona environment: sandbox or production'),
 ('persona_api_key', '', 'Persona API Secret Key'),
-('persona_template_id', '', 'Persona KYC Inquiry Template ID');
+('persona_template_id', '', 'Persona KYC Inquiry Template ID'),
+('gemini_api_key', '', 'Google Gemini API key for AI Chat Guard and Vision OCR'),
+('gemini_chat_guard_enabled', '1', 'Flag to enable Gemini AI anti-circumvention chat monitor (1=enabled, 0=disabled)'),
+('gemini_ocr_verification_enabled', '1', 'Flag to enable automated Gemini Vision POD & BOL audit (1=enabled, 0=disabled)'),
+('samsara_api_token', '', 'Samsara API Bearer Token for live fleet GPS polling'),
+('motive_api_key', '', 'KeepTruckin / Motive API Key for vehicle telematics'),
+('project44_client_id', '', 'Project44 Movement API Client ID'),
+('project44_client_secret', '', 'Project44 Movement API Client Secret'),
+('telematics_active_provider', 'samsara', 'Active telematics gateway: samsara | motive | project44 | simulator');
 
 CREATE TRIGGER IF NOT EXISTS update_platform_settings_updated_at
   AFTER UPDATE ON platform_settings FOR EACH ROW
@@ -455,4 +467,24 @@ CREATE TABLE IF NOT EXISTS load_geofence_events (
 
 CREATE INDEX IF NOT EXISTS idx_geofence_load ON load_geofence_events(load_id, triggered_at DESC);
 
+-- ============================================================
+-- 5. Document Verification Audits (BOL & POD)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS load_documents (
+    id TEXT PRIMARY KEY,
+    load_id TEXT NOT NULL REFERENCES loads(id) ON DELETE CASCADE,
+    uploader_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    document_type TEXT NOT NULL, -- 'BOL' | 'POD' | 'COI' | 'CDL'
+    file_url TEXT NOT NULL,
+    ai_status TEXT DEFAULT 'PENDING', -- 'PENDING' | 'VERIFIED' | 'FLAGGED' | 'REJECTED'
+    ai_extracted_carrier TEXT,
+    ai_extracted_shipper TEXT,
+    ai_extracted_consignee_sig INTEGER DEFAULT 0,
+    ai_signature_confidence REAL,
+    ai_notes TEXT,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE INDEX IF NOT EXISTS idx_load_docs_load_id ON load_documents(load_id);
+CREATE INDEX IF NOT EXISTS idx_load_docs_uploader_id ON load_documents(uploader_id);
+CREATE INDEX IF NOT EXISTS idx_load_docs_ai_status ON load_documents(ai_status);
